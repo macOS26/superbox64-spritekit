@@ -1,109 +1,161 @@
-# SuperBox64 SpriteKit
+# superbox64-spritekit
 
-An open source Swift reimplementation of Apple's SpriteKit framework, compiled to WebAssembly via WASI Preview 1. Drop `import SpriteKit` into an existing macOS/iOS SpriteKit game and it runs in any modern browser, wrapped in a native WebView on Windows, Linux, and Android, with zero changes to the game source.
+A Swift reimplementation of Apple's SpriteKit that compiles to WebAssembly via WASI Preview 1. A macOS or iOS SpriteKit game adds this package, keeps every `import SpriteKit` unchanged, and runs in any modern browser with no source edits.
 
-No Emscripten. No loading screens. No watermarks. No branding you did not design.
+No Emscripten. No loading screens. No watermarks.
 
-**Live demo:** [boss-man.us/play](https://boss-man.us/play) — Boss-Man, a full arcade game running on this engine.
+**Live demo:** [boss-man.us/play](https://boss-man.us/play)
 
-**Reference game:** [github.com/macOS26/Boss-Man](https://github.com/macOS26/Boss-Man)
-
----
-
-## What It Provides
-
-### SpriteKit (drop-in replacement)
-
-| Class / Type | Notes |
-|---|---|
-| `SKScene` | Full scene lifecycle: `didMove(to:)`, `update(_:)`, `didFinishUpdate()`, `willMove(from:)` |
-| `SKNode` | Full node tree: `addChild`, `removeFromParent`, `children`, `parent`, `name`, `zPosition`, `alpha`, `isHidden`, `xScale/yScale`, `zRotation`, `position`, `run(_:)` |
-| `SKSpriteNode` | Texture, color, colorBlendFactor, anchorPoint, size, blending modes |
-| `SKLabelNode` | fontName, fontSize, fontColor, text, horizontalAlignmentMode, verticalAlignmentMode, preferredMaxLayoutWidth |
-| `SKShapeNode` | fillColor, strokeColor, lineWidth, path (CGPath), circular shorthand `.init(circleOfRadius:)`, rect `.init(rect:)` |
-| `SKEmitterNode` | Particle emitter with position/velocity/lifetime/color range |
-| `SKCameraNode` | Camera with position, scale, xScale/yScale |
-| `SKCropNode` | Mask-based cropping via maskNode |
-| `SKEffectNode` | Filter/blend offscreen layer |
-| `SKAudioNode` | Positional audio node |
-| `SKAction` | `moveBy`, `moveTo`, `scaleTo`, `scaleBy`, `fadeIn`, `fadeOut`, `fadeAlphaTo`, `rotate`, `sequence`, `group`, `repeatForever`, `wait`, `run`, `setTexture`, `colorize`, `customAction` |
-| `SKTexture` | Image textures, color textures, `textureRect`, `size` |
-| `SKView` | Canvas-backed view, `presentScene`, `texture(from:)`, `ignoresSiblingOrder` |
-| `SKTransition` | `fade`, `crossFade`, `doorsOpenHorizontal`, `push`, `reveal`, `moveIn` |
-| `SKPhysicsBody` | `dynamic`, `categoryBitMask`, `contactTestBitMask`, `collisionBitMask`, `velocity`, `applyImpulse`, `isDynamic`, `affectedByGravity` |
-| `SKPhysicsWorld` | `gravity`, `contactDelegate`, `enumerateBodies(inRect:)` |
-| `SKPhysicsContact` | `bodyA`, `bodyB`, `contactPoint`, `collisionImpulse` |
-| `SKConstraint` | Position and orientation constraints |
-| `SKKeyframeSequence` | Keyframe-driven value interpolation |
-| `SKWarpGeometry` | Mesh warp deformation |
-| `SKColor` | Full RGBA color type, `.systemRed/Blue/Yellow/...` matching macOS light-mode palette |
-| `CGPoint / CGSize / CGRect / CGVector` | Full geometry types |
-| `CGPath / CGMutablePath` | Path construction (addLine, addArc, addCurve, closeSubpath) |
-| `CGAffineTransform` | Matrix transforms |
-
-### Platform Shims (drop-in, zero `#if` in game code)
-
-| Module | What it shims |
-|---|---|
-| `AppKit` | `NSColor`, `NSFont`, `NSImage`, `NSEvent`, `NSWindow`, `NSScreen`, `NSApplication`, `NSViewController` |
-| `UIKit` | `UIColor`, `UIFont`, `UIImage`, `UIViewController`, `UIScreen`, `UIDevice`, `UIApplication` |
-| `Cocoa` | Re-exports AppKit + Foundation essentials |
-| `GameKit` | `GKLocalPlayer`, `GKLeaderboard`, `GKScore`, `GKAchievement`, `GKGameCenterViewController` |
-| `GameplayKit` | `GKRandomDistribution`, `GKShuffledDistribution`, `GKGaussianDistribution`, `GKRandomSource`, `GKMersenneTwisterRandomSource` |
-| `GameController` | `GCController`, `GCExtendedGamepad`, `GCControllerDirectionPad`, `GCControllerButtonInput` |
-| `AVFoundation` | `AVAudioPlayer`, `AVSpeechSynthesizer`, `AVSpeechUtterance` |
-| `AudioToolbox` | `AudioServicesPlaySystemSound` |
-| `Combine` | `PassthroughSubject`, `CurrentValueSubject`, `AnyCancellable` |
-| `SwiftUI` | `Color`, `View` stubs for games that import but do not use SwiftUI |
-
-### Physics (Box2D 2.4.1)
-
-Physics is provided by Box2D 2.4.1 via `Box2DBridge` (the "Box" in SuperBox64). Bodies, fixtures, joints, contacts, and raycasts map directly to `SKPhysicsBody` / `SKPhysicsWorld`.
-
-### KitABI
-
-The C ABI that sits between the Swift game and the JavaScript runtime (`runtime.js`). Every drawing, audio, input, and asset call crosses this boundary. Games never call KitABI directly — it is consumed by the SpriteKit layer.
+**Runtime:** [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit) — the JavaScript runtime that loads and drives the WASM binary
 
 ---
 
-## How It Works
+## Quick Start
 
-The package vends a module literally named `SpriteKit`. When you build for WASM:
-
-```swift
-// This import binds to SuperBox64 SpriteKit, not Apple's, with zero source changes
-import SpriteKit
-```
-
-On macOS/iOS, `import SpriteKit` resolves to Apple's framework as normal. On WASM, it resolves to this package. The same Swift source compiles both ways.
-
-The WASM binary is a WASI Preview 1 reactor exporting `_initialize`, `boot()`, and `frame(dtMs)`. The JavaScript runtime (`superbox64-wasmkit`) drives the game loop via `requestAnimationFrame`, implements graphics on Canvas2D, audio on Web Audio, input on DOM events + Web Gamepad API, and persistence on localStorage.
-
----
-
-## Adding to a Game
+### 1. Add the package
 
 ```swift
 // Package.swift
-.package(url: "https://github.com/macOS26/superbox64-spritekit", branch: "main"),
-
-// Target dependencies
-.product(name: "SpriteKit", package: "superbox64-spritekit"),
-.product(name: "AppKit",    package: "superbox64-spritekit"),
-// ...add whichever shims the game imports
+dependencies: [
+    .package(url: "https://github.com/macOS26/superbox64-spritekit", branch: "main"),
+],
+targets: [
+    .executableTarget(
+        name: "MyGame",
+        dependencies: [
+            .product(name: "SpriteKit",   package: "superbox64-spritekit"),
+            .product(name: "AppKit",      package: "superbox64-spritekit"),
+            .product(name: "GameKit",     package: "superbox64-spritekit"),
+            .product(name: "AVFoundation",package: "superbox64-spritekit"),
+        ],
+        swiftSettings: [.defaultIsolation(MainActor.self)],
+        linkerSettings: [.unsafeFlags([
+            "-Xclang-linker", "-mexec-model=reactor",
+            "-Xlinker", "--export=boot",
+            "-Xlinker", "--export=frame",
+            "-Xlinker", "--export-if-defined=_initialize",
+            "-Xlinker", "--allow-undefined",
+        ])]
+    ),
+]
 ```
+
+### 2. Write the entry points
+
+```swift
+// main.swift
+import SpriteKit
+
+@_cdecl("boot")
+nonisolated func boot() {
+    MainActor.assumeIsolated {
+        let view = SKView(frame: CGRect(x: 0, y: 0, width: 1184, height: 666))
+        view.presentScene(GameScene(size: CGSize(width: 1184, height: 666)))
+    }
+}
+
+@_cdecl("frame")
+nonisolated func frame(_ dtMs: Double) {
+    MainActor.assumeIsolated {
+        SKView.current?.update(dtMs / 1000.0)
+    }
+}
+```
+
+### 3. Write the scene — same as macOS
+
+```swift
+// GameScene.swift
+import SpriteKit
+
+final class GameScene: SKScene {
+
+    override func didMove(to view: SKView) {
+        backgroundColor = .black
+
+        let label = SKLabelNode(text: "Hello from WASM")
+        label.fontName = "MarkerFelt-Wide"
+        label.fontSize = 48
+        label.fontColor = .white
+        label.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        addChild(label)
+
+        label.run(.repeatForever(.sequence([
+            .fadeOut(withDuration: 1.0),
+            .fadeIn(withDuration: 1.0),
+        ])))
+    }
+
+    override func update(_ currentTime: TimeInterval) {
+    }
+}
+```
+
+### 4. Build
+
+```bash
+xcrun --toolchain swift swift build \
+    --swift-sdk swift-6.3.2-RELEASE_wasm \
+    -c release
+```
+
+The output is a WASM reactor at `.build/wasm32-unknown-wasip1/release/MyGame.wasm`. Serve it with [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit).
+
+---
+
+## What Is Included
+
+### SpriteKit
+
+| Type | Coverage |
+|---|---|
+| `SKScene` | `didMove(to:)`, `update(_:)`, `didFinishUpdate()`, `willMove(from:)`, `presentScene`, `camera`, `physicsWorld` |
+| `SKNode` | Full tree: `addChild`, `removeFromParent`, `children`, `parent`, `name`, `zPosition`, `alpha`, `isHidden`, `xScale/yScale`, `zRotation`, `position`, `run(_:)`, `action(forKey:)` |
+| `SKSpriteNode` | Texture, color, colorBlendFactor, anchorPoint, size, blending modes |
+| `SKLabelNode` | fontName, fontSize, fontColor, horizontalAlignmentMode, verticalAlignmentMode, preferredMaxLayoutWidth |
+| `SKShapeNode` | fillColor, strokeColor, lineWidth, path, `.init(circleOfRadius:)`, `.init(rect:)` |
+| `SKEmitterNode` | Particle emitter (position, velocity, lifetime, color range) |
+| `SKCameraNode` | Position, scale, xScale/yScale |
+| `SKCropNode` | maskNode-based cropping |
+| `SKAction` | `moveBy/To`, `scaleTo/By`, `fadeIn/Out`, `fadeAlphaTo`, `rotate`, `sequence`, `group`, `repeatForever`, `wait`, `run`, `setTexture`, `colorize`, `customAction` |
+| `SKTexture` | Image textures, color textures, `textureRect`, `size` |
+| `SKView` | Canvas-backed, `presentScene`, `texture(from:)`, `ignoresSiblingOrder` |
+| `SKTransition` | `fade`, `crossFade`, `doorsOpenHorizontal`, `push`, `reveal`, `moveIn` |
+| `SKPhysicsBody` | `dynamic`, bit masks, `velocity`, `applyImpulse`, `isDynamic`, `affectedByGravity` |
+| `SKPhysicsWorld` | `gravity`, `contactDelegate`, `enumerateBodies(inRect:)` |
+| `CGPath / CGMutablePath` | `addLine`, `addArc`, `addCurve`, `closeSubpath` |
+| `CGAffineTransform` | Full matrix transform |
+
+### Platform Shims
+
+Add the modules your game imports. On macOS they resolve to Apple's frameworks. On WASM they resolve to these shims.
+
+| Module | Provides |
+|---|---|
+| `AppKit` | `NSColor`, `NSFont`, `NSImage`, `NSEvent`, `NSWindow`, `NSScreen`, `NSApplication` |
+| `UIKit` | `UIColor`, `UIFont`, `UIImage`, `UIViewController`, `UIScreen`, `UIDevice` |
+| `GameKit` | `GKLocalPlayer`, `GKLeaderboard`, `GKScore`, `GKAchievement` |
+| `GameplayKit` | `GKRandomDistribution`, `GKShuffledDistribution`, `GKMersenneTwisterRandomSource` |
+| `GameController` | `GCController`, `GCExtendedGamepad`, `GCControllerDirectionPad` |
+| `AVFoundation` | `AVAudioPlayer`, `AVSpeechSynthesizer`, `AVSpeechUtterance` |
+| `AudioToolbox` | `AudioServicesPlaySystemSound` |
+| `Combine` | `PassthroughSubject`, `CurrentValueSubject`, `AnyCancellable` |
+| `SwiftUI` | `Color`, `View` stubs |
+
+### Physics (Box2D 2.4.1)
+
+`Box2DBridge` ships with the package. `SKPhysicsBody` and `SKPhysicsWorld` map directly to Box2D bodies, fixtures, joints, and contacts.
 
 ---
 
 ## Requirements
 
 - Swift 6.3.2+ toolchain from swift.org
-- `swift-6.3.2-RELEASE_wasm` SDK (from swift.org)
-- `xcrun --toolchain swift swift build --swift-sdk swift-6.3.2-RELEASE_wasm -c release`
+- `swift-6.3.2-RELEASE_wasm` SDK installed via `swift sdk install`
 
 ---
 
 ## Related
 
-- [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit) — the JavaScript runtime that loads and runs the WASM binary
-- [Boss-Man](https://github.com/macOS26/Boss-Man) — the arcade game built with this engine, shipping on 6 platforms from one Swift source
+- [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit) — JavaScript runtime, host page, and C++ SFML shim
+- [Boss-Man](https://github.com/macOS26/Boss-Man) — full arcade game built with this engine, shipping on 6 platforms from one Swift source
