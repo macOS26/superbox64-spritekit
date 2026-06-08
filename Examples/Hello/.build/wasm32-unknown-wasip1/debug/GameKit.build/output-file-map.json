@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/debug/GameKit.build/primary.swiftdeps"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameKit/GameKit.swift": {
+    "dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/debug/GameKit.build/GameKit.d",
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/debug/GameKit.build/GameKit.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/debug/GameKit.build/GameKit~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/debug/GameKit.build/GameKit.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/debug/GameKit.build/GameKit.dia"
+  }
+}

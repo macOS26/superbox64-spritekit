@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Combine.build/primary.swiftdeps"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Combine/Combine.swift": {
+    "dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Combine.build/Combine.d",
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Combine.build/Combine.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Combine.build/Combine~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Combine.build/Combine.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Combine.build/Combine.dia"
+  }
+}

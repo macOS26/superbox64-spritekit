@@ -1,0 +1,4 @@
+module Box2DBridge {
+    umbrella "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Box2DBridge/include"
+    export *
+}

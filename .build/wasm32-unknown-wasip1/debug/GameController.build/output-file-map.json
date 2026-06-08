@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/primary.swiftdeps"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameController/GameController.swift": {
+    "dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/GameController.d",
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/GameController.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/GameController~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/GameController.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/GameController.dia"
+  }
+}

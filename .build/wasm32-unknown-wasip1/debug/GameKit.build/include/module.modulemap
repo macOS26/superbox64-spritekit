@@ -1,0 +1,3 @@
+module GameKit {
+    header "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/include/GameKit-Swift.h"
+}

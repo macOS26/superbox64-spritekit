@@ -1,0 +1,163 @@
+{
+  "": {
+    "dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SpriteKit.d",
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SpriteKit.o",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/primary.swiftdeps"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGGeometry.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGGeometry.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGGeometry~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGGeometry.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGGeometry.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGPath.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGPath.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGPath~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGPath.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/CGPath.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/Internal.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/Internal.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/Internal~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/Internal.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/Internal.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/MiniJSON.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/MiniJSON.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/MiniJSON~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/MiniJSON.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/MiniJSON.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SK3DNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SK3DNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SK3DNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SK3DNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SK3DNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAction.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAction.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAction~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAction.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAction.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAudioNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAudioNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAudioNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAudioNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKAudioNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKCameraNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKCameraNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKCameraNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKCameraNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKCameraNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKColor.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKColor.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKColor~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKColor.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKColor.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKContainers.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKContainers.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKContainers~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKContainers.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKContainers.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKEmitterNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKEmitterNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKEmitterNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKEmitterNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKEmitterNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKExtras.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKExtras.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKExtras~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKExtras.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKExtras.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKInput.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKInput.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKInput~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKInput.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKInput.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKKeyframeSequence.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKKeyframeSequence.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKKeyframeSequence~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKKeyframeSequence.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKKeyframeSequence.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKLabelNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKLabelNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKLabelNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKLabelNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKLabelNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKPhysics.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKPhysics.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKPhysics~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKPhysics.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKPhysics.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKScene.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKScene.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKScene~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKScene.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKScene.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSceneLoader.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSceneLoader.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSceneLoader~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSceneLoader.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSceneLoader.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKShapeNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKShapeNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKShapeNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKShapeNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKShapeNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSpriteNode.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSpriteNode.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSpriteNode~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSpriteNode.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKSpriteNode.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKStubs.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKStubs.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKStubs~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKStubs.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKStubs.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTexture.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTexture.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTexture~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTexture.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTexture.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTransition.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTransition.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTransition~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTransition.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKTransition.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKView.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKView.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKView~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKView.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKView.dia"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKWarpGeometry.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKWarpGeometry.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKWarpGeometry~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKWarpGeometry.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/SpriteKit.build/SKWarpGeometry.dia"
+  }
+}

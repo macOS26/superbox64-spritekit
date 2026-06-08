@@ -1,0 +1,3 @@
+module Cocoa {
+    header "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/index-build/arm64-apple-macosx/debug/Cocoa.build/include/Cocoa-Swift.h"
+}

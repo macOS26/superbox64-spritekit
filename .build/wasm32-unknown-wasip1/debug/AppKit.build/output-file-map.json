@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/primary.swiftdeps"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AppKit/AppKit.swift": {
+    "dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/AppKit.d",
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/AppKit.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/AppKit~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/AppKit.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/AppKit.dia"
+  }
+}

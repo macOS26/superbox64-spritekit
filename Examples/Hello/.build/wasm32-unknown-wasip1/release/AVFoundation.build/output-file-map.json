@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/AVFoundation.build/AVFoundation.d",
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/AVFoundation.build/AVFoundation.o",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/AVFoundation.build/primary.swiftdeps"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AVFoundation/AVFoundation.swift": {
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/AVFoundation.build/AVFoundation.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/AVFoundation.build/AVFoundation~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/AVFoundation.build/AVFoundation.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Examples/Hello/.build/wasm32-unknown-wasip1/release/AVFoundation.build/AVFoundation.dia"
+  }
+}

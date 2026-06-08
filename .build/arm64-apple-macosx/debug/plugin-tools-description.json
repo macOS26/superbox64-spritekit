@@ -1,0 +1,2403 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.AVFoundation-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AVFoundation/AVFoundation.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/KitABI.build/shim.c.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "AVFoundation",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AVFoundation.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/AVFoundation.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/include/AVFoundation-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/AVFoundation.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AVFoundation.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AVFoundation/AVFoundation.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.AppKit-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AppKit/AppKit.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "AppKit",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AppKit.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/AppKit.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/include/AppKit-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/AppKit.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AppKit.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AppKit/AppKit.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.AudioToolbox-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AudioToolbox/AudioToolbox.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "AudioToolbox",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AudioToolbox.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/AudioToolbox.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/include/AudioToolbox-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/AudioToolbox.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AudioToolbox.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AudioToolbox/AudioToolbox.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.Cocoa-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Cocoa/Cocoa.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AppKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "Cocoa",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/Cocoa.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/Cocoa.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/include/Cocoa-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/Cocoa.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/Cocoa.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Cocoa/Cocoa.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.Combine-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Combine/Combine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "Combine",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/Combine.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/Combine.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/include/Combine-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/Combine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/Combine.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Combine/Combine.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.GameController-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameController/GameController.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/KitABI.build/shim.c.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "GameController",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/GameController.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/GameController.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/include/GameController-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/GameController.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/GameController.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameController/GameController.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.GameKit-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameKit/GameKit.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/UIKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/KitABI.build/shim.c.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "GameKit",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/GameKit.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/GameKit.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/include/GameKit-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/GameKit.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/GameKit.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameKit/GameKit.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.GameplayKit-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameplayKit/GameplayKit.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/KitABI.build/shim.c.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "GameplayKit",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/GameplayKit.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/GameplayKit.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/include/GameplayKit-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/GameplayKit.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/GameplayKit.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameplayKit/GameplayKit.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.SpriteKit-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGGeometry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGPath.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/Internal.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/MiniJSON.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SK3DNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAudioNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKCameraNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKColor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKContainers.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKEmitterNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKExtras.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKInput.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKKeyframeSequence.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKLabelNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKPhysics.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKScene.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSceneLoader.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKShapeNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSpriteNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKStubs.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTexture.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTransition.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKWarpGeometry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/KitABI.build/shim.c.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "SpriteKit",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/CGGeometry.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/CGPath.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/Internal.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/MiniJSON.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SK3DNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKAction.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKAudioNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKCameraNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKColor.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKContainers.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKEmitterNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKExtras.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKInput.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKKeyframeSequence.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKLabelNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKPhysics.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKScene.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKSceneLoader.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKShapeNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKSpriteNode.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKStubs.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKTexture.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKTransition.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKView.swift.o",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKWarpGeometry.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/include/SpriteKit-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/CGGeometry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/CGPath.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/Internal.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/MiniJSON.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SK3DNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKAudioNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKCameraNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKColor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKContainers.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKEmitterNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKExtras.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKInput.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKKeyframeSequence.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKLabelNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKPhysics.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKScene.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKSceneLoader.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKShapeNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKSpriteNode.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKStubs.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKTexture.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKTransition.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/SKWarpGeometry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGGeometry.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGPath.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/Internal.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/MiniJSON.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SK3DNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAction.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAudioNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKCameraNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKColor.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKContainers.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKEmitterNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKExtras.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKInput.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKKeyframeSequence.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKLabelNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKPhysics.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKScene.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSceneLoader.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKShapeNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSpriteNode.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKStubs.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTexture.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTransition.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKView.swift",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKWarpGeometry.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.SwiftUI-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SwiftUI/SwiftUI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/Combine.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "SwiftUI",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SwiftUI.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/SwiftUI.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/include/SwiftUI-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/SwiftUI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SwiftUI.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SwiftUI/SwiftUI.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.UIKit-wasm32-unknown-wasip1-debug.module" : {
+      "executable" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/sources",
+      "importPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/UIKit/UIKit.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/SpriteKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/AppKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/KitABI.build/shim.c.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "UIKit",
+      "moduleOutputPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/UIKit.swiftmodule",
+      "objects" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/UIKit.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "wasm32-unknown-wasip1",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+        "-module-cache-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+        "-resource-dir",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/include/UIKit-Swift.h",
+        "-swift-version",
+        "6",
+        "-default-isolation",
+        "MainActor",
+        "-plugin-path",
+        "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-static-stdlib",
+        "-tools-directory",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+        "-sdk",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-g",
+        "-Xcc",
+        "--sysroot",
+        "-Xcc",
+        "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "spritekit"
+      ],
+      "outputFileMapPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/UIKit.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules/UIKit.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/UIKit/UIKit.swift"
+      ],
+      "tempsPath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "AVFoundation" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AVFoundation",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AVFoundation/AVFoundation.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/include/AVFoundation-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "AppKit" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AppKit",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AppKit/AppKit.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/include/AppKit-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "AudioToolbox" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AudioToolbox",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AudioToolbox/AudioToolbox.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/include/AudioToolbox-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "Cocoa" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "Cocoa",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Cocoa/Cocoa.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/include/Cocoa-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "Combine" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "Combine",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Combine/Combine.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/include/Combine-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "GameController" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "GameController",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameController/GameController.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/include/GameController-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "GameKit" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "GameKit",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameKit/GameKit.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/include/GameKit-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "GameplayKit" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "GameplayKit",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameplayKit/GameplayKit.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/include/GameplayKit-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "SpriteKit" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "SpriteKit",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGGeometry.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGPath.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/Internal.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/MiniJSON.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SK3DNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAction.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAudioNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKCameraNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKColor.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKContainers.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKEmitterNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKExtras.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKInput.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKKeyframeSequence.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKLabelNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKPhysics.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKScene.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSceneLoader.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKShapeNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSpriteNode.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKStubs.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTexture.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTransition.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKView.swift",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKWarpGeometry.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/include/SpriteKit-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "SwiftUI" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "SwiftUI",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SwiftUI/SwiftUI.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/include/SwiftUI-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ],
+    "UIKit" : [
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "UIKit",
+      "-package-name",
+      "spritekit",
+      "-c",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/UIKit/UIKit.swift",
+      "-I",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Modules",
+      "-target",
+      "wasm32-unknown-wasip1",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/KitABI/include",
+      "-module-cache-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/ModuleCache",
+      "-resource-dir",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/lib/swift_static",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/include/UIKit-Swift.h",
+      "-swift-version",
+      "6",
+      "-default-isolation",
+      "MainActor",
+      "-plugin-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-static-stdlib",
+      "-tools-directory",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/swift.xctoolchain/usr/bin",
+      "-sdk",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-g",
+      "-Xcc",
+      "--sysroot",
+      "-Xcc",
+      "/Users/toddbruss/Library/org.swift.swiftpm/swift-sdks/swift-6.3.2-RELEASE_wasm.artifactbundle/swift-6.3.2-RELEASE_wasm/wasm32-unknown-wasip1/WASI.sdk",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "spritekit",
+      "-driver-use-frontend-path",
+      "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "AVFoundation" : [
+      "SpriteKit",
+      "KitABI"
+    ],
+    "AppKit" : [
+      "SpriteKit",
+      "KitABI"
+    ],
+    "AudioToolbox" : [
+
+    ],
+    "Box2DBridge" : [
+
+    ],
+    "Cocoa" : [
+      "AppKit",
+      "SpriteKit",
+      "KitABI"
+    ],
+    "Combine" : [
+
+    ],
+    "GameController" : [
+      "SpriteKit",
+      "KitABI"
+    ],
+    "GameKit" : [
+      "UIKit",
+      "AppKit",
+      "SpriteKit",
+      "KitABI"
+    ],
+    "GameplayKit" : [
+      "SpriteKit",
+      "KitABI"
+    ],
+    "KitABI" : [
+
+    ],
+    "SpriteKit" : [
+      "KitABI"
+    ],
+    "SwiftUI" : [
+      "SpriteKit",
+      "KitABI",
+      "Combine"
+    ],
+    "UIKit" : [
+      "AppKit",
+      "SpriteKit",
+      "KitABI"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AVFoundation/AVFoundation.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AppKit/AppKit.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AppKit.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/AudioToolbox/AudioToolbox.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AudioToolbox.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Cocoa/Cocoa.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Cocoa.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Combine/Combine.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameController/GameController.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameController.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameKit/GameKit.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameKit.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/GameplayKit/GameplayKit.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/GameplayKit.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGGeometry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/CGPath.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/Internal.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/MiniJSON.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SK3DNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKAudioNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKCameraNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKColor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKContainers.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKEmitterNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKExtras.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKInput.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKKeyframeSequence.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKLabelNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKPhysics.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKScene.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSceneLoader.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKShapeNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKSpriteNode.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKStubs.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTexture.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKTransition.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SpriteKit/SKWarpGeometry.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SpriteKit.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/SwiftUI/SwiftUI.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/SwiftUI.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/UIKit/UIKit.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/UIKit.build/sources"
+    },
+    "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/toddbruss/Library/Developer/Toolchains/swift-6.3.2-RELEASE.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/swift-version--7DB49EB47A4F2B16.txt"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "object" : {
+    "artifacts" : [
+
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "spritekit",
+          "kind" : "fileSystem",
+          "location" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit",
+          "name" : "SuperBox64SpriteKit"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit"
+        },
+        "subpath" : "spritekit"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

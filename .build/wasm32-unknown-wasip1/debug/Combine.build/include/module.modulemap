@@ -1,0 +1,3 @@
+module Combine {
+    header "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/Combine.build/include/Combine-Swift.h"
+}

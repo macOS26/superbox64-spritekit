@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Cocoa.build/primary.swiftdeps"
+  },
+  "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/Sources/Cocoa/Cocoa.swift": {
+    "dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Cocoa.build/Cocoa.d",
+    "object": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Cocoa.build/Cocoa.swift.o",
+    "swiftmodule": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Cocoa.build/Cocoa~partial.swiftmodule",
+    "swift-dependencies": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Cocoa.build/Cocoa.swiftdeps",
+    "diagnostics": "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/index-build/arm64-apple-macosx/debug/Cocoa.build/Cocoa.dia"
+  }
+}
