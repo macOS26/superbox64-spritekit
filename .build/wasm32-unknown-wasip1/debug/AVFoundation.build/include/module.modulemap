@@ -1,3 +1,0 @@
-module AVFoundation {
-    header "/Users/toddbruss/Documents/GitHub/BossMan/wasm-web-kit/spritekit/.build/wasm32-unknown-wasip1/debug/AVFoundation.build/include/AVFoundation-Swift.h"
-}
