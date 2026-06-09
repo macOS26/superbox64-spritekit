@@ -133,16 +133,24 @@ public final class SKEmitterNode: SKNode {
 
             // Alpha, scale, rotation.
             let agePct = p.life > 0 ? p.age / p.life : 1
+            #if hasFeature(Embedded)
+            particles[i].alpha = max(0, p.alpha + particleAlphaSpeed * d)   // keyframe sequences are .sks-only (unused on Embedded)
+            #else
             if let s = particleAlphaSequence?.sample(atTime: Double(agePct)) as? CGFloat {
                 particles[i].alpha = s
             } else {
                 particles[i].alpha = max(0, p.alpha + particleAlphaSpeed * d)
             }
+            #endif
+            #if hasFeature(Embedded)
+            particles[i].scale = max(0, p.scale + particleScaleSpeed * d)
+            #else
             if let s = particleScaleSequence?.sample(atTime: Double(agePct)) as? CGFloat {
                 particles[i].scale = s
             } else {
                 particles[i].scale = max(0, p.scale + particleScaleSpeed * d)
             }
+            #endif
             particles[i].rotation += p.rotSpeed * d
 
             // Per-channel color drift.
@@ -151,15 +159,19 @@ public final class SKEmitterNode: SKNode {
             particles[i].b = clamp01(p.b + particleColorBlueSpeed  * d)
             particles[i].a = clamp01(p.a + particleColorAlphaSpeed * d)
             particles[i].blendFactor = clamp01(p.blendFactor + particleColorBlendFactorSpeed * d)
+            #if !hasFeature(Embedded)
             if let c = particleColorSequence?.sample(atTime: Double(agePct)) as? SKColor {
                 particles[i].r = c.r
                 particles[i].g = c.g
                 particles[i].b = c.b
                 particles[i].a = c.a
             }
+            #endif
+            #if !hasFeature(Embedded)
             if let bf = particleColorBlendFactorSequence?.sample(atTime: Double(agePct)) as? CGFloat {
                 particles[i].blendFactor = bf
             }
+            #endif
             i -= 1
         }
         // spawn

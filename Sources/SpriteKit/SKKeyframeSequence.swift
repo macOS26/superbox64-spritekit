@@ -22,10 +22,12 @@ public final class SKKeyframeSequence {
         values.reserveCapacity(capacity)
         times.reserveCapacity(capacity)
     }
+    #if !hasFeature(Embedded)   // [Any]/[NSNumberLike] existentials; sequence editor is unused on Embedded
     public init(keyframeValues vs: [Any], times ts: [NSNumberLike]) {
         self.values = vs
         self.times = ts.map { $0.doubleValue }
     }
+    #endif
     public var count: Int { values.count }
 
     public func addKeyframeValue(_ value: Any, time: Double) {
@@ -57,6 +59,7 @@ public final class SKKeyframeSequence {
     // Sample at arbitrary time. Numeric types are lerped; non-numeric types
     // return the nearest keyframe. Use the typed extensions below for
     // CGFloat / SKColor / CGVector sampling.
+    #if !hasFeature(Embedded)
     public func sample(atTime t: Double) -> Any? {
         guard !values.isEmpty else { return nil }
         if t <= times[0] { return values[0] }
@@ -85,6 +88,7 @@ public final class SKKeyframeSequence {
         }
         return p < 0.5 ? a : b
     }
+    #endif
 }
 
 // Apple uses [NSNumber] for the times array. Without Foundation, accept
