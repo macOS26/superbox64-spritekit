@@ -32,6 +32,13 @@ open class SKScene: SKNode {
     open func didApplyConstraints() {}         // before didFinishUpdate
     open func didFinishUpdate() {}
 
+    // Per-finger multi-touch delivered by the runtime. Open no-op defaults so
+    // SKView can call them directly on any scene (no `as? SKTouchResponder`
+    // runtime cast — which Embedded Swift can't resolve). Scenes override.
+    open func touchBegan(finger: Int, at p: CGPoint) {}
+    open func touchMoved(finger: Int, at p: CGPoint) {}
+    open func touchEnded(finger: Int, at p: CGPoint) {}
+
     // SKView's debug render path looks for `convertPoint(fromView:)` and the
     // inverse so games can map mouse coordinates from view space.
     open func convertPoint(fromView p: CGPoint) -> CGPoint { p }
