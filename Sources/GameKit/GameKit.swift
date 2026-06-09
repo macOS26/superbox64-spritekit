@@ -151,3 +151,6 @@ public extension Notification.Name {
 }
 #endif
 
+public extension GKLeaderboard {
+    typealias Entry = GKLeaderboardEntry
+}
