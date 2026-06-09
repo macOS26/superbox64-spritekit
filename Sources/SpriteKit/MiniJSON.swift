@@ -1,25 +1,39 @@
 import KitABI
 
 // MiniJSON: a tiny recursive-descent JSON parser, just for the .sks → JSON
-// loader. We avoid Foundation's JSONSerialization because the WASI Foundation
-// is large and we only need the trivially-typed result (Dict / Array /
-// String / Double / Bool / nil).
+// loader and the game's level data. We avoid Foundation's JSONSerialization
+// because the WASI Foundation is large and we only need the trivially-typed
+// result.
 //
-// Returns Any (one of [String: Any], [Any], String, Double, Bool, or NSNull).
-// Returns nil on parse failure.
-public func parseJSON(_ input: String) -> Any? {
+// Returns a typed `JSONValue` (no Foundation, no `Any`), so it compiles under
+// Embedded Swift. Returns nil on parse failure.
+public enum JSONValue {
+    case object([String: JSONValue])
+    case array([JSONValue])
+    case string(String)
+    case number(Double)
+    case bool(Bool)
+    case null
+}
+
+public extension JSONValue {
+    var stringValue: String?  { if case .string(let s) = self { return s }; return nil }
+    var doubleValue: Double?  { if case .number(let n) = self { return n }; return nil }
+    var intValue:    Int?     { if case .number(let n) = self { return Int(n) }; return nil }
+    var boolValue:   Bool?    { if case .bool(let b)   = self { return b }; return nil }
+    var arrayValue:  [JSONValue]?          { if case .array(let a)  = self { return a }; return nil }
+    var objectValue: [String: JSONValue]?  { if case .object(let o) = self { return o }; return nil }
+    var isNull: Bool { if case .null = self { return true }; return false }
+    subscript(_ key: String) -> JSONValue? { objectValue?[key] }
+}
+
+public func parseJSON(_ input: String) -> JSONValue? {
     var parser = JSONParser(chars: Array(input.unicodeScalars))
     parser.skipWhitespace()
     let value = parser.parseValue()
     parser.skipWhitespace()
     if !parser.atEnd { return nil }
     return value
-}
-
-// JSON's `null` is mapped to a sentinel since Any can't hold real `nil`.
-public final class MiniJSONNull: @unchecked Sendable {
-    public static let null = MiniJSONNull()
-    private init() {}
 }
 
 private struct JSONParser {
@@ -34,25 +48,25 @@ private struct JSONParser {
         }
     }
 
-    mutating func parseValue() -> Any? {
+    mutating func parseValue() -> JSONValue? {
         skipWhitespace()
         guard pos < chars.count else { return nil }
         let c = chars[pos]
         if c == "{" { return parseObject() }
         if c == "[" { return parseArray() }
-        if c == "\"" { return parseString() }
-        if c == "t" || c == "f" { return parseBool() }
+        if c == "\"" { return parseString().map { .string($0) } }
+        if c == "t" || c == "f" { return parseBool().map { .bool($0) } }
         if c == "n" { return parseNull() }
-        return parseNumber()
+        return parseNumber().map { .number($0) }
     }
 
-    mutating func parseObject() -> [String: Any]? {
+    mutating func parseObject() -> JSONValue? {
         pos += 1   // consume '{'
-        var out: [String: Any] = [:]
+        var out: [String: JSONValue] = [:]
         skipWhitespace()
         if pos < chars.count, chars[pos] == "}" {
             pos += 1
-            return out
+            return .object(out)
         }
         while pos < chars.count {
             skipWhitespace()
@@ -69,20 +83,20 @@ private struct JSONParser {
             }
             if pos < chars.count, chars[pos] == "}" {
                 pos += 1
-                return out
+                return .object(out)
             }
             return nil
         }
         return nil
     }
 
-    mutating func parseArray() -> [Any]? {
+    mutating func parseArray() -> JSONValue? {
         pos += 1
-        var out: [Any] = []
+        var out: [JSONValue] = []
         skipWhitespace()
         if pos < chars.count, chars[pos] == "]" {
             pos += 1
-            return out
+            return .array(out)
         }
         while pos < chars.count {
             guard let v = parseValue() else { return nil }
@@ -94,7 +108,7 @@ private struct JSONParser {
             }
             if pos < chars.count, chars[pos] == "]" {
                 pos += 1
-                return out
+                return .array(out)
             }
             return nil
         }
@@ -152,11 +166,11 @@ private struct JSONParser {
         if matches("false") { return false }
         return nil
     }
-    mutating func parseNull() -> Any? {
-        if matches("null") { return MiniJSONNull.null }
+    mutating func parseNull() -> JSONValue? {
+        if matches("null") { return .null }
         return nil
     }
-    mutating func parseNumber() -> Any? {
+    mutating func parseNumber() -> Double? {
         let start = pos
         if pos < chars.count, chars[pos] == "-" { pos += 1 }
         while pos < chars.count {
@@ -167,8 +181,7 @@ private struct JSONParser {
         }
         if pos == start { return nil }
         let str = String(String.UnicodeScalarView(chars[start..<pos]))
-        if let d = Double(str) { return d }
-        return nil
+        return Double(str)
     }
 
     mutating func matches(_ literal: String) -> Bool {
@@ -185,5 +198,3 @@ private struct JSONParser {
         return -1
     }
 }
-
-

@@ -285,13 +285,9 @@ public final class SKTextureAtlas {
 public final class CIFilter {
     public let name: String
     public var inputRadius: CGFloat = 0
-    public init?(name: String, parameters: [String: Any]? = nil) {
+    public init?(name: String, parameters: [String: Double]? = nil) {
         self.name = name
-        if let v = parameters?["inputRadius"] {
-            if let r = v as? CGFloat     { inputRadius = r }
-            else if let r = v as? Double { inputRadius = CGFloat(r) }
-            else if let r = v as? Int    { inputRadius = CGFloat(r) }
-        }
+        if let r = parameters?["inputRadius"] { inputRadius = CGFloat(r) }
     }
 }
 

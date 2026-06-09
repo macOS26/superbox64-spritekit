@@ -10,7 +10,7 @@ import KitABI
 //
 // At runtime SKScene(fileNamed:) / SKReferenceNode(fileNamed:) /
 // SKEmitterNode(fileNamed:) look for that JSON via the kit's asset_text ABI,
-// then rebuild the node tree by walking the dictionary.
+// then rebuild the node tree by walking the parsed JSONValue.
 //
 // JSON schema (subset of SpriteKit's node attributes):
 //   {
@@ -66,12 +66,12 @@ public enum SKSceneLoader {
     }
 
     // ---- File loader ----------------------------------------------------------
-    private static func loadJSON(named name: String) -> [String: Any]? {
+    private static func loadJSON(named name: String) -> JSONValue? {
         // Try a few common spellings. The CLI emits "<basename>.json" so the
         // most common case is direct.
         for candidate in [name, "\(name).json", "\(name).sks.json"] {
             if let bytes = readAssetText(candidate),
-               let obj = parseJSON(bytes) as? [String: Any] {
+               let obj = parseJSON(bytes), obj.objectValue != nil {
                 return obj
             }
         }
@@ -101,8 +101,8 @@ public enum SKSceneLoader {
     }
 
     // ---- Construction --------------------------------------------------------
-    private static func build(from json: [String: Any]) -> SKNode? {
-        let kind = (json["kind"] as? String) ?? "SKNode"
+    private static func build(from json: JSONValue) -> SKNode? {
+        let kind = json["kind"]?.stringValue ?? "SKNode"
         let node: SKNode
         switch kind {
         case "SKScene":
@@ -115,26 +115,26 @@ public enum SKSceneLoader {
             let size = readSize(json["size"]) ?? CGSize(width: 32, height: 32)
             let color = readColor(json["color"]) ?? .white
             let sprite = SKSpriteNode(color: color, size: size)
-            if let texName = json["texture"] as? String {
+            if let texName = json["texture"]?.stringValue {
                 sprite.texture = SKTexture(imageNamed: texName)
             }
             if let ap = readPoint(json["anchorPoint"]) { sprite.anchorPoint = ap }
             if let cbf = readCGFloat(json["colorBlendFactor"]) { sprite.colorBlendFactor = cbf }
             node = sprite
         case "SKLabelNode":
-            let text = (json["text"] as? String) ?? ""
+            let text = json["text"]?.stringValue ?? ""
             let label = SKLabelNode(text: text)
             if let s = readCGFloat(json["fontSize"]) { label.fontSize = s }
-            if let f = json["fontName"] as? String { label.fontName = f }
+            if let f = json["fontName"]?.stringValue { label.fontName = f }
             if let c = readColor(json["fontColor"]) { label.fontColor = c }
-            if let h = json["horizontalAlignment"] as? String {
+            if let h = json["horizontalAlignment"]?.stringValue {
                 switch h {
                     case "left": label.horizontalAlignmentMode = .left
                     case "right": label.horizontalAlignmentMode = .right
                     default: label.horizontalAlignmentMode = .center
                 }
             }
-            if let v = json["verticalAlignment"] as? String {
+            if let v = json["verticalAlignment"]?.stringValue {
                 switch v {
                     case "top": label.verticalAlignmentMode = .top
                     case "bottom": label.verticalAlignmentMode = .bottom
@@ -161,7 +161,7 @@ public enum SKSceneLoader {
             applyEmitterProps(json, to: emitter)
             node = emitter
         case "SKReferenceNode":
-            if let inner = json["fileNamed"] as? String,
+            if let inner = json["fileNamed"]?.stringValue,
                let ref = loadNode(fileNamed: inner) {
                 node = ref
             } else {
@@ -173,9 +173,9 @@ public enum SKSceneLoader {
             node = SKNode()
         }
         applyCommonProps(json, to: node)
-        if let kids = json["children"] as? [Any] {
+        if let kids = json["children"]?.arrayValue {
             for child in kids {
-                if let cdict = child as? [String: Any], let cnode = build(from: cdict) {
+                if child.objectValue != nil, let cnode = build(from: child) {
                     node.addChild(cnode)
                 }
             }
@@ -184,19 +184,19 @@ public enum SKSceneLoader {
     }
 
     // ---- Property helpers ----------------------------------------------------
-    private static func applyCommonProps(_ json: [String: Any], to node: SKNode) {
+    private static func applyCommonProps(_ json: JSONValue, to node: SKNode) {
         if let p = readPoint(json["position"])  { node.position  = p }
         if let z = readCGFloat(json["zPosition"]) { node.zPosition = z }
         if let r = readCGFloat(json["zRotation"]) { node.zRotation = r }
         if let s = readCGFloat(json["xScale"])    { node.xScale = s }
         if let s = readCGFloat(json["yScale"])    { node.yScale = s }
         if let a = readCGFloat(json["alpha"])     { node.alpha = a }
-        if let n = json["name"] as? String        { node.name = n }
-        if let h = json["isHidden"] as? Bool      { node.isHidden = h }
+        if let n = json["name"]?.stringValue       { node.name = n }
+        if let h = json["isHidden"]?.boolValue     { node.isHidden = h }
     }
-    private static func applyEmitterProps(_ json: [String: Any], to e: SKEmitterNode) {
+    private static func applyEmitterProps(_ json: JSONValue, to e: SKEmitterNode) {
         if let v = readCGFloat(json["particleBirthRate"])     { e.particleBirthRate = v }
-        if let v = json["numParticlesToEmit"] as? Int          { e.numParticlesToEmit = v }
+        if let v = json["numParticlesToEmit"]?.intValue        { e.numParticlesToEmit = v }
         if let v = readCGFloat(json["particleLifetime"])       { e.particleLifetime = v }
         if let v = readCGFloat(json["particleLifetimeRange"])  { e.particleLifetimeRange = v }
         if let v = readCGFloat(json["particleSpeed"])          { e.particleSpeed = v }
@@ -219,31 +219,29 @@ public enum SKSceneLoader {
         if let v = readCGFloat(json["particleColorBlendFactorRange"]) { e.particleColorBlendFactorRange = v }
         if let v = readCGFloat(json["particleColorBlendFactorSpeed"]) { e.particleColorBlendFactorSpeed = v }
         if let s = readSize(json["particleSize"])              { e.particleSize = s }
-        if let texName = json["particleTexture"] as? String {
+        if let texName = json["particleTexture"]?.stringValue {
             e.particleTexture = SKTexture(imageNamed: texName)
         }
     }
 
-    private static func readSize(_ any: Any?) -> CGSize? {
-        guard let arr = any as? [Any], arr.count >= 2,
+    private static func readSize(_ v: JSONValue?) -> CGSize? {
+        guard let arr = v?.arrayValue, arr.count >= 2,
               let w = readCGFloat(arr[0]), let h = readCGFloat(arr[1]) else { return nil }
         return CGSize(width: w, height: h)
     }
-    private static func readPoint(_ any: Any?) -> CGPoint? {
-        guard let arr = any as? [Any], arr.count >= 2,
+    private static func readPoint(_ v: JSONValue?) -> CGPoint? {
+        guard let arr = v?.arrayValue, arr.count >= 2,
               let x = readCGFloat(arr[0]), let y = readCGFloat(arr[1]) else { return nil }
         return CGPoint(x: x, y: y)
     }
-    private static func readColor(_ any: Any?) -> SKColor? {
-        guard let arr = any as? [Any], arr.count >= 3,
+    private static func readColor(_ v: JSONValue?) -> SKColor? {
+        guard let arr = v?.arrayValue, arr.count >= 3,
               let r = readCGFloat(arr[0]), let g = readCGFloat(arr[1]), let b = readCGFloat(arr[2]) else { return nil }
         let a = arr.count >= 4 ? (readCGFloat(arr[3]) ?? 1) : 1
         return SKColor(red: r, green: g, blue: b, alpha: a)
     }
-    private static func readCGFloat(_ any: Any?) -> CGFloat? {
-        if let d = any as? Double { return CGFloat(d) }
-        if let i = any as? Int    { return CGFloat(i) }
-        if let f = any as? Float  { return CGFloat(f) }
+    private static func readCGFloat(_ v: JSONValue?) -> CGFloat? {
+        if let d = v?.doubleValue { return CGFloat(d) }
         return nil
     }
 }
