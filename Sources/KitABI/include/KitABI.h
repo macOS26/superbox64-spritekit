@@ -183,6 +183,7 @@ WABI int  mouse_y(void);
 WABI int  evt_poll(int* type, int* a, int* b, int* c, int* d);
 WABI int  win_width(void);
 WABI int  win_height(void);
+WABI void win_set_title(const char* s, int len);
 WABI void win_request_fullscreen(void);
 WABI void win_exit_fullscreen(void);
 
