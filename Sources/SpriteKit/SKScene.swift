@@ -8,8 +8,13 @@ open class SKScene: SKNode {
     public var anchorPoint = CGPoint.zero
     public var scaleMode: SKSceneScaleMode = .aspectFit
     public let physicsWorld = SKPhysicsWorld()
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var view: SKView?
+    public unowned(unsafe) var camera: SKCameraNode?      // active camera; nil = default top-down
+    #else
     public weak var view: SKView?
     public weak var camera: SKCameraNode?      // active camera; nil = default top-down
+    #endif
 
     public init(size: CGSize) {
         self.size = size

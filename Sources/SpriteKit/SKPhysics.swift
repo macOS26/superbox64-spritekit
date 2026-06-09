@@ -48,7 +48,11 @@ public final class SKPhysicsBody {
     public var resting: Bool = false                   // no-op
     public var area: CGFloat { 0 }                     // computed by shape; cheap to leave at 0
 
+    #if hasFeature(Embedded)
+    public internal(set) unowned(unsafe) var node: SKNode?
+    #else
     public internal(set) weak var node: SKNode?
+    #endif
     var bodyId: Int32 = -1
     var velocityDirty = false
 
@@ -356,7 +360,11 @@ public final class SKPhysicsJointDistance: SKPhysicsJoint {
 public final class SKPhysicsWorld {
     public var gravity = CGVector(dx: 0, dy: -9.8)
     public var speed: CGFloat = 1            // not yet honored by the Box2D step
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var contactDelegate: SKPhysicsContactDelegate?
+    #else
     public weak var contactDelegate: SKPhysicsContactDelegate?
+    #endif
     nonisolated(unsafe) static var registry: [Int32: SKPhysicsBody] = [:]
     private var started = false
     private var joints: [SKPhysicsJoint] = []

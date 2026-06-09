@@ -74,7 +74,11 @@ public final class SKEmitterNode: SKNode {
     public var particleRenderOrder: SKParticleRenderOrder = .oldestLast
     public var particleSize = CGSize(width: 4, height: 4)
     public var shader: SKShader?
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var targetNode: SKNode?              // recorded; particles still render under self
+    #else
     public weak var targetNode: SKNode?              // recorded; particles still render under self
+    #endif
     public var fieldBitMask: UInt32 = 0xFFFFFFFF
     public var particleAction: SKAction?             // run on each particle as it spawns (no-op for now)
 

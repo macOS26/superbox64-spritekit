@@ -11,7 +11,11 @@ open class SKNode {
     public var alpha: CGFloat = 1
     public var isHidden = false
     public var name: String?
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var parent: SKNode?
+    #else
     public weak var parent: SKNode?
+    #endif
     public private(set) var children: [SKNode] = []
 
     public var userData: [String: Any]? = nil

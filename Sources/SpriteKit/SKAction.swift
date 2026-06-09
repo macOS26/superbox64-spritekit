@@ -240,9 +240,15 @@ public final class SKAction {
     // Non-conforming targets are silently ignored (action still fires once,
     // matching Apple's "selector doesn't exist" behavior of doing nothing).
     public static func perform(_ selector: String, onTarget target: AnyObject) -> SKAction {
+        #if hasFeature(Embedded)
+        SKAction.customAction(withDuration: 0) { [unowned(unsafe) target] _, _ in
+            (target as? SKActionTarget)?.perform(selector)
+        }
+        #else
         SKAction.customAction(withDuration: 0) { [weak target] _, _ in
             (target as? SKActionTarget)?.perform(selector)
         }
+        #endif
     }
 }
 
