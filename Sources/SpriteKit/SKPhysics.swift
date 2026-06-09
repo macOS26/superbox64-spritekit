@@ -1,7 +1,9 @@
 import KitABI
+import CBox2D
 
-// Physics on the Box2D shim (cb_*; defined in libcbox2d.a). SpriteKit points are
-// used directly as Box2D coordinates (y-up, same as the scene). Dynamic bodies
+// Physics on Box2D v3 (the C API, called directly via the B2 backend in
+// B2World.swift). SpriteKit points are used directly as Box2D coordinates
+// (y-up, same as the scene). Dynamic bodies
 // are driven by the simulation and sync back to their SKNode each step; bodies
 // the game drives by velocity push that velocity in before stepping.
 public protocol SKPhysicsContactDelegate: AnyObject {
@@ -163,7 +165,7 @@ public final class SKPhysicsBody {
     func createInWorld() {
         guard bodyId < 0, let n = node else { return }
         let x = Float(n.position.x), y = Float(n.position.y)
-        let cat = UInt16(truncatingIfNeeded: categoryBitMask)
+        let cat = categoryBitMask
         // Apple SpriteKit has two independent filters: collisionBitMask gates
         // physical bounce, contactTestBitMask gates the didBegin callback (OR'd
         // either way). Box2D has a single category/mask filter (two-way AND)
@@ -172,54 +174,53 @@ public final class SKPhysicsBody {
         // be invisible to Box2D contact detection. Feed Box2D the UNION so the
         // pair is generated for either purpose, then mark contact-only bodies
         // (no collision intent) as sensors so they generate the event with no
-        // impulse. The post-step poll re-applies Apple's contactTest OR.
-        let mask = UInt16(truncatingIfNeeded: collisionBitMask | contactTestBitMask)
-        let dyn: Int32 = isDynamic ? 1 : 0
-        let sensor: Int32 = (isSensor || collisionBitMask == 0) ? 1 : 0
+        // impulse. The post-step drain re-applies Apple's contactTest OR.
+        let mask = collisionBitMask | contactTestBitMask
+        let dyn = isDynamic
+        let sensor = isSensor || collisionBitMask == 0
         switch shape {
-        case let .rect(w, h): bodyId = cb_add_box(x, y, Float(w/2), Float(h/2), dyn, cat, mask, sensor)
-        case let .circle(r):  bodyId = cb_add_circle(x, y, Float(r), dyn, cat, mask, sensor)
+        case let .rect(w, h): bodyId = B2.addBox(x, y, Float(w/2), Float(h/2), dyn, cat, mask, sensor)
+        case let .circle(r):  bodyId = B2.addCircle(x, y, Float(r), dyn, cat, mask, sensor)
         case let .edgeLoop(rc):
             // Closed-loop chain of the rect's four corners (static).
             let pts: [CGPoint] = [
                 CGPoint(x: rc.minX, y: rc.minY), CGPoint(x: rc.maxX, y: rc.minY),
                 CGPoint(x: rc.maxX, y: rc.maxY), CGPoint(x: rc.minX, y: rc.maxY),
             ]
-            bodyId = withFlatXY(pts) { ptr, n in cb_add_chain(ptr, n, 1, cat, mask) }
+            bodyId = B2.addChain(flatXY(pts), closed: true, cat, mask)
         case let .polygon(pts):
-            // Real convex polygon (up to b2_maxPolygonVertices); Box2D enforces
-            // convexity and vertex count. Falls back to AABB on degenerate inputs.
+            // Real convex polygon (Box2D enforces convexity and caps the vertex
+            // count). Falls back to AABB on degenerate inputs.
             if pts.count >= 3 {
-                bodyId = withFlatXY(pts) { ptr, n in cb_add_polygon(x, y, ptr, n, dyn, cat, mask, sensor) }
-            } else {
+                bodyId = B2.addPolygon(x, y, flatXY(pts), dyn, cat, mask, sensor)
+            }
+            if bodyId < 0 {
                 let r = boundingBox(of: pts)
-                bodyId = cb_add_box(x + Float(r.midX), y + Float(r.midY),
-                                    Float(r.width/2), Float(r.height/2), dyn, cat, mask, sensor)
+                bodyId = B2.addBox(x + Float(r.midX), y + Float(r.midY),
+                                   Float(r.width/2), Float(r.height/2), dyn, cat, mask, sensor)
             }
         case let .edgeFromTo(a, b):
-            bodyId = cb_add_edge(Float(a.x), Float(a.y), Float(b.x), Float(b.y), cat, mask)
+            bodyId = B2.addEdge(Float(a.x), Float(a.y), Float(b.x), Float(b.y), cat, mask)
         case let .edgeChain(pts):
-            bodyId = withFlatXY(pts) { ptr, n in cb_add_chain(ptr, n, 0, cat, mask) }
+            bodyId = B2.addChain(flatXY(pts), closed: false, cat, mask)
         case let .texture(size):
-            bodyId = cb_add_box(x, y, Float(size.width/2), Float(size.height/2), dyn, cat, mask, sensor)
+            bodyId = B2.addBox(x, y, Float(size.width/2), Float(size.height/2), dyn, cat, mask, sensor)
         }
         SKPhysicsWorld.registry[bodyId] = self
     }
 }
 
-// Flatten a [CGPoint] into a contiguous [Float] pair-buffer and hand a pointer
-// + count to the closure. Used for cb_add_polygon / cb_add_chain.
+// Flatten a [CGPoint] into a contiguous [Float] xy pair-buffer for the Box2D
+// polygon/chain constructors.
 @inline(__always)
-private func withFlatXY<R>(_ pts: [CGPoint], _ body: (UnsafePointer<Float>, Int32) -> R) -> R {
+private func flatXY(_ pts: [CGPoint]) -> [Float] {
     var flat = [Float]()
     flat.reserveCapacity(pts.count * 2)
     for p in pts {
         flat.append(Float(p.x))
         flat.append(Float(p.y))
     }
-    return flat.withUnsafeBufferPointer { buf in
-        body(buf.baseAddress!, Int32(pts.count))
-    }
+    return flat
 }
 
 // Quick AABB over an arbitrary point list — used for polygon/edge body fallback.
@@ -268,10 +269,10 @@ public final class SKPhysicsJointPin: SKPhysicsJoint {
     }
     override func createInWorld() {
         if jointId >= 0 || bodyA.bodyId < 0 || bodyB.bodyId < 0 { return }
-        jointId = cb_add_joint_pin(bodyA.bodyId, bodyB.bodyId, Float(anchor.x), Float(anchor.y),
-                                   shouldEnableLimits ? 1 : 0,
-                                   Float(lowerAngleLimit), Float(upperAngleLimit),
-                                   Float(frictionTorque), Float(rotationSpeed))
+        jointId = B2.addJointPin(bodyA.bodyId, bodyB.bodyId, Float(anchor.x), Float(anchor.y),
+                                 enableLimits: shouldEnableLimits,
+                                 Float(lowerAngleLimit), Float(upperAngleLimit),
+                                 Float(frictionTorque), Float(rotationSpeed))
     }
 }
 public final class SKPhysicsJointSpring: SKPhysicsJoint {
@@ -286,10 +287,10 @@ public final class SKPhysicsJointSpring: SKPhysicsJoint {
     }
     override func createInWorld() {
         if jointId >= 0 || bodyA.bodyId < 0 || bodyB.bodyId < 0 { return }
-        jointId = cb_add_joint_spring(bodyA.bodyId, bodyB.bodyId,
-                                      Float(anchorA.x), Float(anchorA.y),
-                                      Float(anchorB.x), Float(anchorB.y),
-                                      Float(frequency), Float(damping))
+        jointId = B2.addJointSpring(bodyA.bodyId, bodyB.bodyId,
+                                    Float(anchorA.x), Float(anchorA.y),
+                                    Float(anchorB.x), Float(anchorB.y),
+                                    Float(frequency), Float(damping))
     }
 }
 public final class SKPhysicsJointFixed: SKPhysicsJoint {
@@ -301,7 +302,7 @@ public final class SKPhysicsJointFixed: SKPhysicsJoint {
     }
     override func createInWorld() {
         if jointId >= 0 || bodyA.bodyId < 0 || bodyB.bodyId < 0 { return }
-        jointId = cb_add_joint_fixed(bodyA.bodyId, bodyB.bodyId, Float(anchor.x), Float(anchor.y))
+        jointId = B2.addJointFixed(bodyA.bodyId, bodyB.bodyId, Float(anchor.x), Float(anchor.y))
     }
 }
 public final class SKPhysicsJointSliding: SKPhysicsJoint {
@@ -317,11 +318,11 @@ public final class SKPhysicsJointSliding: SKPhysicsJoint {
     }
     override func createInWorld() {
         if jointId >= 0 || bodyA.bodyId < 0 || bodyB.bodyId < 0 { return }
-        jointId = cb_add_joint_sliding(bodyA.bodyId, bodyB.bodyId,
-                                       Float(anchor.x), Float(anchor.y),
-                                       Float(axis.dx), Float(axis.dy),
-                                       shouldEnableLimits ? 1 : 0,
-                                       Float(lowerDistanceLimit), Float(upperDistanceLimit))
+        jointId = B2.addJointSliding(bodyA.bodyId, bodyB.bodyId,
+                                     Float(anchor.x), Float(anchor.y),
+                                     Float(axis.dx), Float(axis.dy),
+                                     enableLimits: shouldEnableLimits,
+                                     Float(lowerDistanceLimit), Float(upperDistanceLimit))
     }
 }
 public final class SKPhysicsJointLimit: SKPhysicsJoint {
@@ -335,10 +336,10 @@ public final class SKPhysicsJointLimit: SKPhysicsJoint {
     }
     override func createInWorld() {
         if jointId >= 0 || bodyA.bodyId < 0 || bodyB.bodyId < 0 { return }
-        jointId = cb_add_joint_limit(bodyA.bodyId, bodyB.bodyId,
-                                     Float(anchorA.x), Float(anchorA.y),
-                                     Float(anchorB.x), Float(anchorB.y),
-                                     Float(maxLength))
+        jointId = B2.addJointLimit(bodyA.bodyId, bodyB.bodyId,
+                                   Float(anchorA.x), Float(anchorA.y),
+                                   Float(anchorB.x), Float(anchorB.y),
+                                   Float(maxLength))
     }
 }
 public final class SKPhysicsJointDistance: SKPhysicsJoint {
@@ -351,9 +352,9 @@ public final class SKPhysicsJointDistance: SKPhysicsJoint {
     }
     override func createInWorld() {
         if jointId >= 0 || bodyA.bodyId < 0 || bodyB.bodyId < 0 { return }
-        jointId = cb_add_joint_distance(bodyA.bodyId, bodyB.bodyId,
-                                        Float(anchorA.x), Float(anchorA.y),
-                                        Float(anchorB.x), Float(anchorB.y))
+        jointId = B2.addJointDistance(bodyA.bodyId, bodyB.bodyId,
+                                      Float(anchorA.x), Float(anchorA.y),
+                                      Float(anchorB.x), Float(anchorB.y))
     }
 }
 
@@ -387,9 +388,8 @@ public final class SKPhysicsWorld {
         let t: Float = 1.5
         for (id, b) in SKPhysicsWorld.registry {
             guard b.node?.scene != nil else { continue }
-            var x: Float = 0, y: Float = 0
-            cb_get_position(id, &x, &y)
-            let angle = cb_get_angle(id)
+            let (x, y) = B2.getPosition(id)
+            let angle = B2.getAngle(id)
             switch b.shape {
             case let .circle(r):
                 gfx_stroke_circle(x, y, Float(r), t, rgba)
@@ -458,14 +458,14 @@ public final class SKPhysicsWorld {
     }
     public func remove(_ joint: SKPhysicsJoint) {
         if joint.jointId >= 0 {
-            cb_remove_joint(joint.jointId)
+            B2.removeJoint(joint.jointId)
             joint.jointId = -1
         }
         joints.removeAll { $0 === joint }
     }
     public func removeAllJoints() {
         for j in joints where j.jointId >= 0 {
-            cb_remove_joint(j.jointId)
+            B2.removeJoint(j.jointId)
             j.jointId = -1
         }
         joints.removeAll()
@@ -541,7 +541,7 @@ public final class SKPhysicsWorld {
 
     func begin(_ scene: SKScene) {
         SKPhysicsWorld.registry.removeAll()
-        cb_reset(Float(gravity.dx), Float(gravity.dy))
+        B2.reset(Float(gravity.dx), Float(gravity.dy))
         started = true
         createBodies(scene)
     }
@@ -557,7 +557,7 @@ public final class SKPhysicsWorld {
     // Walk the scene once collecting active field nodes, then for every
     // dynamic body whose fieldBitMask overlaps the field's categoryBitMask,
     // sample the force the field would apply at the body's position and call
-    // cb_apply_force. Field models honored: linearGravity, radialGravity,
+    // B2.applyForce. Field models honored: linearGravity, radialGravity,
     // vortex, drag, spring, magnetic (treated as radialGravity with sign),
     // noise/turbulence/electric/customField left as no-ops.
     private func applyFields(_ scene: SKNode, dt: TimeInterval) {
@@ -604,7 +604,7 @@ public final class SKPhysicsWorld {
                 case .noise, .turbulence, .electric, .velocityField, .customField:
                     continue
                 }
-                cb_apply_force(body.bodyId, Float(fx), Float(fy))
+                B2.applyForce(body.bodyId, Float(fx), Float(fy))
             }
         }
         _ = dt   // currently unused; kept for future per-frame ramping
@@ -621,9 +621,9 @@ public final class SKPhysicsWorld {
         }
         createBodies(scene)                                   // pick up nodes added since last step
         createPendingJoints()                                 // joints added before their bodies
-        applyFields(scene, dt: dt)                            // SKFieldNode → cb_apply_force
+        applyFields(scene, dt: dt)                            // SKFieldNode → B2.applyForce
         for (_, b) in SKPhysicsWorld.registry where b.velocityDirty {
-            cb_set_velocity(b.bodyId, Float(b.velocity.dx), Float(b.velocity.dy))
+            B2.setVelocity(b.bodyId, Float(b.velocity.dx), Float(b.velocity.dy))
             b.velocityDirty = false
         }
         // Push every body's Box2D transform FROM its SKNode each frame
@@ -644,34 +644,32 @@ public final class SKPhysicsWorld {
                 orphaned.append(id)
                 continue
             }
-            cb_set_transform(id, Float(n.position.x), Float(n.position.y),
-                             Float(n.zRotation))
+            B2.setTransform(id, Float(n.position.x), Float(n.position.y),
+                            Float(n.zRotation))
         }
         // A registry body whose weak SKNode has left the scene is an orphan:
         // Box2D keeps it colliding and the showsPhysics overlay keeps stroking
         // it. Apple destroys a node's body when it leaves the scene; mirror that
         // for any node removed by a path that bypassed teardownPhysics.
         for id in orphaned {
-            cb_remove_body(id)
+            B2.removeBody(id)
             SKPhysicsWorld.registry.removeValue(forKey: id)
         }
-        cb_step(Float(dt))
+        B2.step(Float(dt))
         // Read positions back for true dynamic bodies (so simulated
         // motion — gravity, contacts with non-zero collisionBitMask —
         // is visible). For game-driven bodies the read-back will equal
         // what we just pushed in.
         for (id, b) in SKPhysicsWorld.registry {
             guard b.isDynamic, let n = b.node else { continue }
-            var x: Float = 0, y: Float = 0
-            cb_get_position(id, &x, &y)
+            let (x, y) = B2.getPosition(id)
             n.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
-            if b.allowsRotation { n.zRotation = CGFloat(cb_get_angle(id)) }
+            if b.allowsRotation { n.zRotation = CGFloat(B2.getAngle(id)) }
         }
-        var ca: Int32 = 0, cbb: Int32 = 0, ba: Int32 = 0, bb: Int32 = 0
-        while cb_poll_contact(&ca, &cbb, &ba, &bb) != 0 {
-            guard let A = SKPhysicsWorld.registry[ba], let B = SKPhysicsWorld.registry[bb] else { continue }
-            let hit = (UInt32(truncatingIfNeeded: ca) & B.contactTestBitMask) != 0
-                   || (UInt32(truncatingIfNeeded: cbb) & A.contactTestBitMask) != 0
+        for c in B2.drainBeginContacts() {
+            guard let A = SKPhysicsWorld.registry[c.bodyA], let B = SKPhysicsWorld.registry[c.bodyB] else { continue }
+            let hit = (c.catA & B.contactTestBitMask) != 0
+                   || (c.catB & A.contactTestBitMask) != 0
             if hit { contactDelegate?.didBegin(SKPhysicsContact(A, B)) }
         }
     }

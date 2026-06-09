@@ -25,37 +25,27 @@ let package = Package(
         .library(name: "GameController", targets: ["GameController"]),
         .library(name: "AVFoundation",   targets: ["AVFoundation"]),
         .library(name: "AudioToolbox",   targets: ["AudioToolbox"]),
-        .library(name: "Box2DBridge",    targets: ["Box2DBridge"]),
+        .library(name: "CBox2D",         targets: ["CBox2D"]),
         .library(name: "Combine",        targets: ["Combine"]),
         .library(name: "SwiftUI",        targets: ["SwiftUI"]),
     ],
     targets: [
-        // Box2D 2.4.1 wrapped in a tiny C ABI (cb_add_box / cb_step / etc.) so
-        // SwiftPM builds and links libcbox2d for every consumer — no more
-        // hand-rolled .a in each game's repo. Header search paths cover the
-        // three private subdirs Box2D's .cpp files cross-reference.
+        // Box2D v3 (pure C, vendored from erincatto/box2d v3.1.1). Swift imports
+        // the C API directly — no C++ bridge, no libc++ in the link. Each
+        // function/data lands in its own section so the linker's gc-sections
+        // keeps only the physics a game actually calls (unused joints, casts,
+        // movers and the rest of the API drop out of the wasm).
         .target(
-            name: "Box2DBridge",
-            path: "Sources/Box2DBridge",
-            exclude: [],
-            sources: ["box2d-src", "cbox2d.cpp"],
+            name: "CBox2D",
+            path: "Sources/CBox2D",
+            sources: ["src"],
             publicHeadersPath: "include",
-            cxxSettings: [
-                .headerSearchPath("box2d-src"),
-                .headerSearchPath("box2d-src/dynamics"),
-                .headerSearchPath("box2d-src/collision"),
-                .headerSearchPath("box2d-src/common"),
-                .headerSearchPath("box2d-src/rope"),
-                // Strip C++ exceptions so we don't leak __cxa_throw /
-                // __cxa_allocate_exception into the wasm import list. The
-                // runtime doesn't host a C++ unwinder and Box2D's hot paths
-                // don't actually throw — exceptions only sneak in through
-                // std::vector::push_back's bad_alloc edge case.
-                .unsafeFlags(["-fno-exceptions"]),
+            cSettings: [
+                .unsafeFlags(["-ffunction-sections", "-fdata-sections"]),
             ]
         ),
         .target(name: "KitABI"),
-        .target(name: "SpriteKit",      dependencies: ["KitABI"],
+        .target(name: "SpriteKit",      dependencies: ["KitABI", "CBox2D"],
                 swiftSettings: [.defaultIsolation(MainActor.self)]),
         .target(name: "AppKit",         dependencies: ["SpriteKit"],
                 swiftSettings: [.swiftLanguageMode(.v6), .defaultIsolation(MainActor.self)]),

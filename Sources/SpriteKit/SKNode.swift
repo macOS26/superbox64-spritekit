@@ -26,7 +26,7 @@ open class SKNode {
             // the previous Box2D body so it stops colliding and stops being
             // drawn by the showsPhysics overlay (the orphaned-fish bug).
             if oldValue !== physicsBody, let old = oldValue, old.bodyId >= 0 {
-                cb_remove_body(old.bodyId)
+                B2.removeBody(old.bodyId)
                 SKPhysicsWorld.registry.removeValue(forKey: old.bodyId)
                 old.bodyId = -1
             }
@@ -74,7 +74,7 @@ open class SKNode {
     @usableFromInline
     func teardownPhysics() {
         if let b = physicsBody, b.bodyId >= 0 {
-            cb_remove_body(b.bodyId)
+            B2.removeBody(b.bodyId)
             SKPhysicsWorld.registry.removeValue(forKey: b.bodyId)
             b.bodyId = -1
         }
