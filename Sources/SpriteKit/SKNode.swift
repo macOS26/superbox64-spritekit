@@ -71,6 +71,7 @@ open class SKNode {
     // registry entry for this node and every descendant, so a removed node's
     // body stops colliding and stops being drawn by the showsPhysics overlay.
     // bodyId is reset to -1 so the body is recreated if the node is re-added.
+    @usableFromInline
     func teardownPhysics() {
         if let b = physicsBody, b.bodyId >= 0 {
             cb_remove_body(b.bodyId)

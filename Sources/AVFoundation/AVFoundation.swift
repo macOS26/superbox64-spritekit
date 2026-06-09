@@ -249,11 +249,11 @@ public final class AVAudioEngine {
             n.nodeId = -1
         }
     }
-    public func connect(_ src: AnyObject, to dst: AnyObject, format: Any?) {
+    public func connect(_ src: AnyObject, to dst: AnyObject, format: AVAudioFormat?) {
         guard let s = src as? AVAudioNode, let d = dst as? AVAudioNode else { return }
         eng_connect(s.nodeId, d.nodeId)
     }
-    public func connect(_ src: AnyObject, to dst: AnyObject, fromBus: Int, toBus: Int, format: Any?) {
+    public func connect(_ src: AnyObject, to dst: AnyObject, fromBus: Int, toBus: Int, format: AVAudioFormat?) {
         connect(src, to: dst, format: format)
     }
     public func disconnectNodeInput(_ node: AnyObject) {}

@@ -38,6 +38,9 @@ public final class UserDefaults {
     public func set(_ value: Int, forKey key: String)    { LocalStore.setString(String(value), forKey: key) }
     public func set(_ value: Double, forKey key: String) { LocalStore.setString(String(value), forKey: key) }
     public func set(_ value: Float, forKey key: String)  { LocalStore.setString(String(value), forKey: key) }
+    // Typed String overload: the generic set(Any?) below is #if'd out on Embedded
+    // (no Any), so this keeps the common Persistence.setString path working there.
+    public func set(_ value: String, forKey key: String) { LocalStore.setString(value, forKey: key) }
     #if !hasFeature(Embedded)
     public func set(_ value: Any?, forKey key: String) {
         switch value {
