@@ -159,3 +159,9 @@ Add the modules your game imports. On macOS they resolve to Apple's frameworks. 
 
 - [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit) — JavaScript runtime, host page, and C++ SFML shim
 - [Boss-Man](https://github.com/macOS26/Boss-Man) — full arcade game built with this engine, shipping on 6 platforms from one Swift source
+
+---
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Apache 2.0 grants an explicit patent license and terminates it on patent litigation, protecting contributors and users from patent ambush. Bundles Box2D 2.4.1 (MIT, Erin Catto).
