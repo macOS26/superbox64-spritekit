@@ -94,6 +94,15 @@ public final class GKEntity {
         components.append(c)
         c.didAddToEntity()
     }
+    public func removeComponent(_ c: GKComponent) {
+        guard let i = components.firstIndex(where: { $0 === c }) else { return }
+        c.willRemoveFromEntity()
+        components.remove(at: i)
+    }
+    #if !hasFeature(Embedded)
+    // Metatype-keyed lookup (GKComponent.Type / type(of:) / `is T`) can't exist in
+    // Embedded Swift — metatypes are unavailable and the call site passes `.self`.
+    // Embedded games address components by reference (removeComponent(_:)) instead.
     public func removeComponent(ofType t: GKComponent.Type) {
         for (i, c) in components.enumerated() where type(of: c) == t {
             c.willRemoveFromEntity()
@@ -102,6 +111,7 @@ public final class GKEntity {
         }
     }
     public func component<T: GKComponent>(ofType t: T.Type) -> T? { components.first { $0 is T } as? T }
+    #endif
     public func update(deltaTime seconds: TimeInterval) { for c in components { c.update(deltaTime: seconds) } }
 }
 
@@ -109,7 +119,9 @@ public final class GKComponentSystem<T: GKComponent> {
     public init(componentClass: T.Type) {}
     public var components: [T] = []
     public func addComponent(_ c: T) { components.append(c) }
+    #if !hasFeature(Embedded)   // depends on metatype component(ofType:)
     public func addComponent(foundIn entity: GKEntity) { if let c = entity.component(ofType: T.self) { components.append(c) } }
+    #endif
     public func removeComponent(_ c: T) { components.removeAll { $0 === c } }
     public func update(deltaTime: TimeInterval) { for c in components { c.update(deltaTime: deltaTime) } }
 }

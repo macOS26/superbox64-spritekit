@@ -14,7 +14,7 @@ public protocol Cancellable: AnyObject {
 public final class AnyCancellable: Cancellable {
     private var onCancel: (() -> Void)?
     public init(_ onCancel: @escaping () -> Void) { self.onCancel = onCancel }
-    public init<C: Cancellable>(_ other: C) { self.onCancel = { other.cancel() } }
+    public init(_ other: any Cancellable) { self.onCancel = { other.cancel() } }
     public func cancel() {
         onCancel?()
         onCancel = nil
