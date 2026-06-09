@@ -41,6 +41,7 @@ let package = Package(
             sources: ["src"],
             publicHeadersPath: "include",
             cSettings: [
+                .define("NDEBUG"),
                 .unsafeFlags(["-ffunction-sections", "-fdata-sections"]),
             ]
         ),
