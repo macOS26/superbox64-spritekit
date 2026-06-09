@@ -225,7 +225,7 @@ public final class SKConstraint {
 // =============================================================================
 public final class SKReferenceNode: SKNode {
     public let fileName: String?
-    public let url: SKAudioURL?
+    public let url: String?
     public override init() {
         fileName = nil
         url = nil
@@ -236,11 +236,13 @@ public final class SKReferenceNode: SKNode {
         url = nil
         super.init()
     }
+    #if !hasFeature(Embedded)
     public init(url: SKAudioURL) {
         fileName = nil
-        self.url = url
+        self.url = url.lastPathComponent
         super.init()
     }
+    #endif
     public func didLoad() {}
     public func resolve() {}
 }
@@ -649,7 +651,7 @@ public final class SKTileMapNode: SKNode {
 // rides along with parent scrolling / scene transitions.
 public final class SKVideoNode: SKNode {
     public let videoName: String?
-    public let videoURL: SKAudioURL?
+    public let videoURL: String?
     public var size = CGSize.zero
     public var isPlaying = false
     var videoId: Int32 = -1
@@ -660,12 +662,14 @@ public final class SKVideoNode: SKNode {
         super.init()
         self.videoId = withUTF8Ptr(name) { vid_load($0, $1) }
     }
+    #if !hasFeature(Embedded)
     public init(url: SKAudioURL) {
         videoName = nil
-        videoURL = url
+        videoURL = url.lastPathComponent
         super.init()
         self.videoId = withUTF8Ptr(url.lastPathComponent) { vid_load($0, $1) }
     }
+    #endif
     public func play() {
         if videoId >= 0 { vid_play(videoId) }
         isPlaying = true
