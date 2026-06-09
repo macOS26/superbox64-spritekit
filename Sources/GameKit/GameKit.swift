@@ -47,13 +47,6 @@ public final class GKScore {
 public final class GKLeaderboard {
     public enum PlayerScope: Int { case global, friendsOnly }
     public enum TimeScope: Int { case today, week, allTime }
-    public final class Entry {
-        public var player = GKPlayer()
-        public var rank = 0
-        public var score = 0
-        public var formattedScore = ""
-        public init() {}
-    }
     public var identifier: String?
     public var playerScope: PlayerScope = .global
     public var timeScope: TimeScope = .allTime
@@ -88,7 +81,7 @@ public struct NSRange {
 }
 
 public final class GKLeaderboardEntry {
-    public var player: GKPlayer?
+    public var player = GKPlayer()
     public var score: Int = 0
     public var rank: Int = 0
     public var formattedScore: String = ""
