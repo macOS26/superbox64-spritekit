@@ -75,7 +75,11 @@ public final class GKScene {
 // GKEntity / GKComponent / GKComponentSystem — empty bones for the ECS pattern.
 // =============================================================================
 open class GKComponent {
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var entity: GKEntity?
+    #else
     public weak var entity: GKEntity?
+    #endif
     public init() {}
     open func update(deltaTime seconds: TimeInterval) {}
     open func didAddToEntity() {}

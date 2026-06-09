@@ -125,7 +125,11 @@ public protocol GKGameCenterControllerDelegate: AnyObject {
 }
 public final class GKGameCenterViewController: UIViewController {
     public enum State: Int { case `default`, leaderboards, achievements, challenges, localPlayerProfile }
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var gameCenterDelegate: GKGameCenterControllerDelegate?
+    #else
     public weak var gameCenterDelegate: GKGameCenterControllerDelegate?
+    #endif
     public var viewState: State = .default
     public override init() { super.init() }
     public init(state: State) {

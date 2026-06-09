@@ -58,9 +58,15 @@ public final class PassthroughSubject<Output, Failure: Error>: Publisher {
         let id = nextId
         nextId += 1
         sinks.append((id, receiveValue))
+        #if hasFeature(Embedded)
+        return AnyCancellable { [unowned(unsafe) self] in
+            self.sinks.removeAll { $0.0 == id }
+        }
+        #else
         return AnyCancellable { [weak self] in
             self?.sinks.removeAll { $0.0 == id }
         }
+        #endif
     }
 }
 
@@ -76,9 +82,15 @@ public final class CurrentValueSubject<Output, Failure: Error>: Publisher {
         nextId += 1
         sinks.append((id, receiveValue))
         receiveValue(value)
+        #if hasFeature(Embedded)
+        return AnyCancellable { [unowned(unsafe) self] in
+            self.sinks.removeAll { $0.0 == id }
+        }
+        #else
         return AnyCancellable { [weak self] in
             self?.sinks.removeAll { $0.0 == id }
         }
+        #endif
     }
 }
 

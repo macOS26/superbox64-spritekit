@@ -33,7 +33,11 @@ public protocol UISceneDelegate: AnyObject {}
 
 public final class UIApplication {
     public static let shared = UIApplication()
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var delegate: UIApplicationDelegate?
+    #else
     public weak var delegate: UIApplicationDelegate?
+    #endif
     public var isIdleTimerDisabled = false
     public func open(_ url: SKAudioURL, options: [String: Any] = [:], completionHandler: ((Bool) -> Void)? = nil) {
         completionHandler?(false)
@@ -65,7 +69,11 @@ open class UIView: UIResponder {
     public var alpha: CGFloat = 1
     public var tag: Int = 0
     public var subviews: [UIView] = []
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var superview: UIView?
+    #else
     public weak var superview: UIView?
+    #endif
     public var clipsToBounds = false
     public var transform: Any = ()  // CGAffineTransform stand-in
 
@@ -134,7 +142,11 @@ public final class UITouch: Hashable {
     public var force: CGFloat = 0
     public var maximumPossibleForce: CGFloat = 1
     public var timestamp: TimeInterval = 0
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var view: UIView?
+    #else
     public weak var view: UIView?
+    #endif
     private let id = UUID()
     public init() {}
     public func location(in view: UIView?) -> CGPoint { CGPoint(x: CGFloat(mouse_x()), y: CGFloat(mouse_y())) }
@@ -176,7 +188,11 @@ public struct UUID: Hashable {
 // targets/actions so iOS code compiles and runs (without firing).
 // =============================================================================
 open class UIGestureRecognizer {
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var view: UIView?
+    #else
     public weak var view: UIView?
+    #endif
     public var state: UIGestureRecognizerState = .possible
     public var isEnabled = true
     var target: AnyObject?

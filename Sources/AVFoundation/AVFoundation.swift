@@ -65,7 +65,11 @@ public final class AVAudioPlayer {
     let buffer: Int32
     var voice: Int32 = -1
 
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var delegate: AVAudioPlayerDelegate?
+    #else
     public weak var delegate: AVAudioPlayerDelegate?
+    #endif
 
     public init(contentsOf url: SKAudioURL) throws {
         let name = url.lastPathComponent
@@ -148,7 +152,11 @@ public let AVSpeechUtteranceMinimumSpeechRate: Float = 0.0
 public let AVSpeechUtteranceMaximumSpeechRate: Float = 1.0
 
 public final class AVSpeechSynthesizer {
+    #if hasFeature(Embedded)
+    public unowned(unsafe) var delegate: AVSpeechSynthesizerDelegate?
+    #else
     public weak var delegate: AVSpeechSynthesizerDelegate?
+    #endif
     public var isSpeaking = false
     public var isPaused = false
 
