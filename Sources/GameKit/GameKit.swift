@@ -62,15 +62,19 @@ public final class GKLeaderboard {
     public init(players: [GKPlayer]) {}
     public func loadScores(completionHandler h: @escaping ([GKScore]?, Error?) -> Void) { h([], nil) }
     public static func loadLeaderboards(IDs: [String]?, completionHandler h: @escaping ([GKLeaderboard]?, Error?) -> Void) { h([], nil) }
+    #if !hasFeature(Embedded)   // Embedded has no concurrency runtime (and Game Center is a wasm stub)
     public static func loadLeaderboards(IDs: [String]?) async throws -> [GKLeaderboard] { [] }
+    #endif
     public func loadEntries(for players: [GKPlayer], timeScope: TimeScope,
                             completionHandler h: @escaping (GKLeaderboardEntry?, [GKLeaderboardEntry]?, Error?) -> Void) {
         h(nil, [], nil)
     }
+    #if !hasFeature(Embedded)
     public func loadEntries(for playerScope: PlayerScope, timeScope: TimeScope,
                             range: NSRange) async throws -> (Entry?, [Entry], Int) {
         (nil, [], 0)
     }
+    #endif
     // Modern score submission (no Game Center on web): the player is never
     // authenticated, so callers no-op before reaching here, but shim it anyway so
     // unmodified macOS submit code compiles and runs.

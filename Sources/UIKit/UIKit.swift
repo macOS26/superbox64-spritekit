@@ -75,7 +75,11 @@ open class UIView: UIResponder {
     public weak var superview: UIView?
     #endif
     public var clipsToBounds = false
+    #if hasFeature(Embedded)
+    public var transform: CGFloat = 0  // CGAffineTransform stand-in (unused; Embedded has no Any)
+    #else
     public var transform: Any = ()  // CGAffineTransform stand-in
+    #endif
 
     public override init() { super.init() }
     public init(frame: CGRect) {

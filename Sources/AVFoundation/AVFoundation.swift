@@ -71,10 +71,12 @@ public final class AVAudioPlayer {
     public weak var delegate: AVAudioPlayerDelegate?
     #endif
 
+    #if !hasFeature(Embedded)
     public init(contentsOf url: SKAudioURL) throws {
         let name = url.lastPathComponent
         self.buffer = withUTF8Ptr(name) { snd_by_name($0, $1) }
     }
+    #endif
     public init(data: [UInt8]) throws { self.buffer = 0 }    // raw-data form: not supported on web
     public init(fileNamed name: String) throws {
         self.buffer = withUTF8Ptr(name) { snd_by_name($0, $1) }
@@ -357,9 +359,11 @@ public final class AVAudioPlayerNode: AVAudioNode {
 
 public final class AVAudioFile {
     public var soundHandle: Int32 = 0
+    #if !hasFeature(Embedded)
     public init(forReading url: SKAudioURL) throws {
         self.soundHandle = withUTF8Ptr(url.lastPathComponent) { snd_by_name($0, $1) }
     }
+    #endif
     public var length: Int64 = 0
     public var processingFormat: AVAudioFormat = AVAudioFormat()
     public func read(into buffer: AVAudioPCMBuffer) throws { buffer.soundHandle = self.soundHandle }
