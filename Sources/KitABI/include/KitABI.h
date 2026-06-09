@@ -14,8 +14,10 @@ WABI void gfx_scale(float sx, float sy);
 WABI void gfx_snap_translation(void);
 WABI void gfx_rotate(float degrees);
 WABI void gfx_set_alpha(float a);
+WABI void gfx_set_blend(int mode);
 /* Stroke line styling so SKShapeNode.lineJoin/lineCap behave like Apple's.
  * join: 0=miter 1=round 2=bevel; cap: 0=butt 1=round 2=square. */
+WABI void gfx_set_line_style(int join, int cap, float miterLimit);
 WABI void gfx_fill_rect(float x, float y, float w, float h, uint32_t rgba);
 WABI void gfx_stroke_rect(float x, float y, float w, float h, float t, uint32_t rgba);
 WABI void gfx_fill_circle(float cx, float cy, float r, uint32_t rgba);
@@ -46,6 +48,7 @@ WABI int   gp_connected(int pad);
 WABI int   gp_button(int pad, int button);
 WABI float gp_button_value(int pad, int button);
 WABI float gp_axis(int pad, int axis);
+WABI void  gp_map_to_keys(int enable);
 
 /* text-to-speech (Web Speech API) */
 WABI int   tts_speak(const char* utf8, int len, float rate, float pitch, float volume);
@@ -60,6 +63,7 @@ WABI void  tts_set_female_voices(const char* csv, int len);
 /* to gfx_offscreen_end to either commit (returns img handle) or discard. */
 WABI int   gfx_offscreen_begin(int w, int h);
 WABI int   gfx_offscreen_end_to_image(int handle);   /* returns img handle */
+WABI void  gfx_offscreen_end_discard(int handle);
 /* Release a baked image returned by gfx_offscreen_end_to_image so its canvas */
 /* is reclaimed. Do NOT call on preloaded/shared-atlas images. */
 WABI void  gfx_free_image(int img);
@@ -109,6 +113,9 @@ WABI int   eng_mixer_create(void);
 WABI void  eng_node_set_volume(int id, float v);
 WABI void  eng_node_set_pan(int id, float p);
 WABI void  eng_connect(int src, int dst);     /* dst = -1 means destination */
+WABI int   eng_player_schedule_buffer(int player, int sound, int loops);
+WABI void  eng_player_play(int id);
+WABI void  eng_player_stop(int id);
 WABI void  eng_start(void);
 WABI void  eng_stop(void);
 
@@ -120,6 +127,7 @@ WABI void  eng_stop(void);
 /* SpriteKit's standard preamble (u_time, v_tex_coord, v_color_mix,          */
 /* SKDefaultShading, #define texture2D=texture) is injected automatically.   */
 WABI int   gfx_shader_compile(const char* src, int len);
+WABI void  gfx_shader_release(int shader);
 WABI void  gfx_shader_set_uniform_f (int shader, const char* name, int nlen, float v);
 WABI void  gfx_shader_set_uniform_v2(int shader, const char* name, int nlen, float x, float y);
 WABI void  gfx_shader_set_uniform_v3(int shader, const char* name, int nlen, float x, float y, float z);
@@ -180,6 +188,7 @@ WABI int   img_polygon_from_alpha(int img, float alphaThreshold,
 WABI int  key_pressed(int sfKey);
 WABI int  mouse_x(void);
 WABI int  mouse_y(void);
+WABI int  mouse_button(int b);
 WABI int  evt_poll(int* type, int* a, int* b, int* c, int* d);
 WABI int  win_width(void);
 WABI int  win_height(void);
