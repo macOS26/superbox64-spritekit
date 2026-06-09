@@ -11,11 +11,12 @@ const char *_swift_stdlib_strtof_clocale(const char *nptr, float *outResult) {
 const char *_swift_stdlib_strtold_clocale(const char *nptr, void *outResult) {
     char *end = 0; *(double *)outResult = strtod(nptr, &end); return end;
 }
-// Minimal Embedded runtime stub: protocol-conformance lookup. Returning null
-// makes class-bound-protocol `as?` casts yield nil (proof-of-boot; the title
-// screen doesn't depend on them). A real build would resolve these statically.
-void *swift_conformsToProtocol(const void *type, const void *proto) { return 0; }
-// WASI reactor init the runtime calls before boot(): run C/C++ global ctors
-// (Box2D/libc++). Embedded bare-metal Swift doesn't synthesize _initialize.
+// NOTE: no swift_conformsToProtocol stub on purpose. Embedded has no runtime
+// conformance lookup, so a stub would make `as? Protocol` casts compile and
+// silently return nil at runtime (a hidden gameplay bug). Without it, any new
+// protocol cast fails loudly at link time; use a concrete class downcast or
+// base-class dispatch instead.
+// WASI reactor init the runtime calls before boot(): run wasi-libc's global
+// ctors (init_array). Embedded bare-metal Swift doesn't synthesize _initialize.
 extern void __wasm_call_ctors(void);
 void _initialize(void) { __wasm_call_ctors(); }
