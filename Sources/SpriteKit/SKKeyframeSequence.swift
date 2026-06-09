@@ -10,11 +10,23 @@ import KitABI
 public enum SKKeyframeInterpolationMode { case linear, spline, step }
 public enum SKRepeatMode { case clamp, loop }
 
+// Typed keyframe value so the sequence holds no existentials and compiles
+// under Embedded Swift. Accessors pull the concrete payload back out.
+public enum SKKeyframeValue {
+    case number(Double)
+    case vector(CGVector)
+    case color(SKColor)
+
+    public var cgFloat: CGFloat? { if case .number(let n) = self { return CGFloat(n) }; return nil }
+    public var vector: CGVector? { if case .vector(let v) = self { return v }; return nil }
+    public var color: SKColor? { if case .color(let c) = self { return c }; return nil }
+}
+
 public final class SKKeyframeSequence {
     public var interpolationMode: SKKeyframeInterpolationMode = .linear
     public var repeatMode: SKRepeatMode = .clamp
 
-    var values: [Any] = []
+    var values: [SKKeyframeValue] = []
     var times: [Double] = []
 
     public init() {}
@@ -22,15 +34,13 @@ public final class SKKeyframeSequence {
         values.reserveCapacity(capacity)
         times.reserveCapacity(capacity)
     }
-    #if !hasFeature(Embedded)   // [Any]/[NSNumberLike] existentials; sequence editor is unused on Embedded
-    public init(keyframeValues vs: [Any], times ts: [NSNumberLike]) {
+    public init(keyframeValues vs: [SKKeyframeValue], times ts: [Double]) {
         self.values = vs
-        self.times = ts.map { $0.doubleValue }
+        self.times = ts
     }
-    #endif
     public var count: Int { values.count }
 
-    public func addKeyframeValue(_ value: Any, time: Double) {
+    public func addKeyframeValue(_ value: SKKeyframeValue, time: Double) {
         values.append(value)
         times.append(time)
     }
@@ -43,10 +53,10 @@ public final class SKKeyframeSequence {
         _ = values.popLast()
         _ = times.popLast()
     }
-    public func getKeyframeValue(at index: Int) -> Any? {
+    public func getKeyframeValue(at index: Int) -> SKKeyframeValue? {
         (index >= 0 && index < values.count) ? values[index] : nil
     }
-    public func setKeyframeValue(_ value: Any, for index: Int) {
+    public func setKeyframeValue(_ value: SKKeyframeValue, for index: Int) {
         if index >= 0, index < values.count { values[index] = value }
     }
     public func getKeyframeTime(at index: Int) -> Double {
@@ -56,11 +66,10 @@ public final class SKKeyframeSequence {
         if index >= 0, index < times.count { times[index] = time }
     }
 
-    // Sample at arbitrary time. Numeric types are lerped; non-numeric types
-    // return the nearest keyframe. Use the typed extensions below for
+    // Sample at arbitrary time. Numeric types are lerped; mismatched cases
+    // return the nearest keyframe. Use the SKKeyframeValue accessors for
     // CGFloat / SKColor / CGVector sampling.
-    #if !hasFeature(Embedded)
-    public func sample(atTime t: Double) -> Any? {
+    public func sample(atTime t: Double) -> SKKeyframeValue? {
         guard !values.isEmpty else { return nil }
         if t <= times[0] { return values[0] }
         if t >= times.last! { return values.last }
@@ -74,28 +83,19 @@ public final class SKKeyframeSequence {
         return values.last
     }
 
-    private func lerp(_ a: Any, _ b: Any, _ p: CGFloat) -> Any {
-        if let af = a as? CGFloat, let bf = b as? CGFloat { return af + (bf - af) * p }
-        if let af = a as? Double,  let bf = b as? Double  { return af + (bf - af) * Double(p) }
-        if let av = a as? CGVector, let bv = b as? CGVector {
-            return CGVector(dx: av.dx + (bv.dx - av.dx) * p, dy: av.dy + (bv.dy - av.dy) * p)
+    private func lerp(_ a: SKKeyframeValue, _ b: SKKeyframeValue, _ p: CGFloat) -> SKKeyframeValue {
+        switch (a, b) {
+        case let (.number(an), .number(bn)):
+            return .number(an + (bn - an) * Double(p))
+        case let (.vector(av), .vector(bv)):
+            return .vector(CGVector(dx: av.dx + (bv.dx - av.dx) * p, dy: av.dy + (bv.dy - av.dy) * p))
+        case let (.color(ac), .color(bc)):
+            return .color(SKColor(red:   ac.r + (bc.r - ac.r) * p,
+                                  green: ac.g + (bc.g - ac.g) * p,
+                                  blue:  ac.b + (bc.b - ac.b) * p,
+                                  alpha: ac.a + (bc.a - ac.a) * p))
+        default:
+            return p < 0.5 ? a : b
         }
-        if let ac = a as? SKColor, let bc = b as? SKColor {
-            return SKColor(red:   ac.r + (bc.r - ac.r) * p,
-                           green: ac.g + (bc.g - ac.g) * p,
-                           blue:  ac.b + (bc.b - ac.b) * p,
-                           alpha: ac.a + (bc.a - ac.a) * p)
-        }
-        return p < 0.5 ? a : b
     }
-    #endif
 }
-
-// Apple uses [NSNumber] for the times array. Without Foundation, accept
-// anything that exposes a double value.
-public protocol NSNumberLike { var doubleValue: Double { get } }
-extension Double: NSNumberLike { public var doubleValue: Double { self } }
-extension Float:  NSNumberLike { public var doubleValue: Double { Double(self) } }
-extension Int:    NSNumberLike { public var doubleValue: Double { Double(self) } }
-
-

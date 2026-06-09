@@ -23,13 +23,11 @@ public final class SKAudioNode: SKNode {
     }
     // URL form: takes anything with a `lastPathComponent`, so games passing
     // Foundation `URL` work without us importing Foundation here.
-    #if !hasFeature(Embedded)   // Embedded forbids generic/existential init on classes; URL form is unused there
-    public init(url: SKAudioURL) {
+    public init(url: URL) {
         self.fileName = url.lastPathComponent
         super.init()
         self.buffer = withUTF8Ptr(self.fileName) { snd_by_name($0, $1) }
     }
-    #endif
 
     public func play() {
         if buffer == 0 { return }
@@ -49,11 +47,6 @@ public final class SKAudioNode: SKNode {
 
     func applyVolume() { if voice >= 0 { snd_set_volume(voice, volume) } }
 }
-
-// Tiny URL stand-in so we don't drag Foundation into the SpriteKit module.
-// Any value that exposes a `lastPathComponent: String` satisfies it; Foundation
-// `URL` already does, so consumers can pass `URL(fileURLWithPath:)` directly.
-public protocol SKAudioURL { var lastPathComponent: String { get } }
 
 public extension SKAction {
     // Node-targeted audio actions: `audioNode.run(.play(on: audioNode))` etc.

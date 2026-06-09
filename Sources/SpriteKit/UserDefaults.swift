@@ -10,9 +10,6 @@ public final class UserDefaults {
 
     // MARK: - Reads
     public func string(forKey key: String) -> String? { LocalStore.string(forKey: key) }
-    #if !hasFeature(Embedded)
-    public func object(forKey key: String) -> Any? { LocalStore.string(forKey: key) }
-    #endif
 
     public func bool(forKey key: String) -> Bool {
         guard let s = LocalStore.string(forKey: key), !s.isEmpty else { return false }
@@ -38,22 +35,7 @@ public final class UserDefaults {
     public func set(_ value: Int, forKey key: String)    { LocalStore.setString(String(value), forKey: key) }
     public func set(_ value: Double, forKey key: String) { LocalStore.setString(String(value), forKey: key) }
     public func set(_ value: Float, forKey key: String)  { LocalStore.setString(String(value), forKey: key) }
-    // Typed String overload: the generic set(Any?) below is #if'd out on Embedded
-    // (no Any), so this keeps the common Persistence.setString path working there.
     public func set(_ value: String, forKey key: String) { LocalStore.setString(value, forKey: key) }
-    #if !hasFeature(Embedded)
-    public func set(_ value: Any?, forKey key: String) {
-        switch value {
-        case let b as Bool:   set(b, forKey: key)
-        case let i as Int:    set(i, forKey: key)
-        case let d as Double: set(d, forKey: key)
-        case let f as Float:  set(f, forKey: key)
-        case let s as String: LocalStore.setString(s, forKey: key)
-        case .none:           removeObject(forKey: key)
-        default:              LocalStore.setString("", forKey: key)
-        }
-    }
-    #endif
 
     public func removeObject(forKey key: String) { LocalStore.setString("", forKey: key) }
     public func synchronize() -> Bool { true }

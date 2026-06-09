@@ -39,7 +39,7 @@ public final class UIApplication {
     public weak var delegate: UIApplicationDelegate?
     #endif
     public var isIdleTimerDisabled = false
-    public func open(_ url: SKAudioURL, options: [String: Any] = [:], completionHandler: ((Bool) -> Void)? = nil) {
+    public func open(_ url: URL, options: [String: String] = [:], completionHandler: ((Bool) -> Void)? = nil) {
         completionHandler?(false)
     }
 }

@@ -236,13 +236,11 @@ public final class SKReferenceNode: SKNode {
         url = nil
         super.init()
     }
-    #if !hasFeature(Embedded)
-    public init(url: SKAudioURL) {
+    public init(url: URL) {
         fileName = nil
         self.url = url.lastPathComponent
         super.init()
     }
-    #endif
     public func didLoad() {}
     public func resolve() {}
 }
@@ -658,14 +656,12 @@ public final class SKVideoNode: SKNode {
         super.init()
         self.videoId = withUTF8Ptr(name) { vid_load($0, $1) }
     }
-    #if !hasFeature(Embedded)
-    public init(url: SKAudioURL) {
+    public init(url: URL) {
         videoName = nil
         videoURL = url.lastPathComponent
         super.init()
         self.videoId = withUTF8Ptr(url.lastPathComponent) { vid_load($0, $1) }
     }
-    #endif
     public func play() {
         if videoId >= 0 { vid_play(videoId) }
         isPlaying = true
