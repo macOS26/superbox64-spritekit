@@ -203,4 +203,4 @@ The reference Embedded build pipeline (exact flags, module order, link line) liv
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Apache 2.0 grants an explicit patent license and terminates it on patent litigation, protecting contributors and users from patent ambush. Bundles Box2D 2.4.1 (MIT, Erin Catto).
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Apache 2.0 grants an explicit patent license and terminates it on patent litigation, protecting contributors and users from patent ambush. Bundles Box2D v3.1.1 (MIT, Erin Catto).
