@@ -69,16 +69,35 @@ enum B2 {
     // Apple's contactTest/collision split is emulated upstream (SKPhysicsBody
     // feeds the union mask + sensor flag); every shape opts into both event
     // streams so sensor and solid pairs alike surface in drainBeginContacts.
+    // Apple has two independent one-sided filters: collisionBitMask gates the
+    // bounce, contactTestBitMask gates didBegin. Box2D's two-way AND filter
+    // can't express that, so every body carries TWO shapes: the SOLID shape
+    // with the pure collision filter (real physics, no events), and a SENSOR
+    // twin on a reserved category bit with an everything mask. The sensor
+    // observes every solid one-sidedly; the drain dedups pairs and applies
+    // Apple's contactTest rule.
+    static let sensorBit: UInt64 = 1 << 63
+
     private static func shapeDef(_ cat: UInt32, _ mask: UInt32, _ sensor: Bool) -> b2ShapeDef {
         var sd = b2DefaultShapeDef()
         sd.density = 1.0
         sd.material.friction = pendingProps.friction
         sd.material.restitution = pendingProps.restitution
         sd.filter.categoryBits = UInt64(cat)
-        sd.filter.maskBits = UInt64(mask)
-        sd.isSensor = sensor
+        sd.filter.maskBits = sensor ? 0 : (UInt64(mask) | sensorBit)
+        sd.isSensor = false
+        sd.enableContactEvents = false
         sd.enableSensorEvents = true
-        sd.enableContactEvents = true
+        return sd
+    }
+
+    private static func sensorDef() -> b2ShapeDef {
+        var sd = b2DefaultShapeDef()
+        sd.density = 0
+        sd.filter.categoryBits = sensorBit
+        sd.filter.maskBits = UInt64.max
+        sd.isSensor = true
+        sd.enableSensorEvents = true
         return sd
     }
 
@@ -88,6 +107,8 @@ enum B2 {
         var sd = shapeDef(cat, mask, sensor)
         var poly = b2MakeBox(hw, hh)
         b2CreatePolygonShape(body, &sd, &poly)
+        var twin = sensorDef()
+        b2CreatePolygonShape(body, &twin, &poly)
         return id
     }
 
@@ -97,6 +118,8 @@ enum B2 {
         var sd = shapeDef(cat, mask, sensor)
         var circle = b2Circle(center: b2Vec2(x: 0, y: 0), radius: r)
         b2CreateCircleShape(body, &sd, &circle)
+        var twin = sensorDef()
+        b2CreateCircleShape(body, &twin, &circle)
         return id
     }
 
@@ -118,6 +141,8 @@ enum B2 {
         var h = hull
         var poly = b2MakePolygon(&h, 0)
         b2CreatePolygonShape(body, &sd, &poly)
+        var twin = sensorDef()
+        b2CreatePolygonShape(body, &twin, &poly)
         return id
     }
 
@@ -127,6 +152,8 @@ enum B2 {
         var sd = shapeDef(cat, mask, false)
         var seg = b2Segment(point1: b2Vec2(x: x1, y: y1), point2: b2Vec2(x: x2, y: y2))
         b2CreateSegmentShape(body, &sd, &seg)
+        var twin = sensorDef()
+        b2CreateSegmentShape(body, &twin, &seg)
         return id
     }
 
@@ -141,11 +168,13 @@ enum B2 {
         if n < 2 { return -1 }
         let (id, body) = newBody(0, 0, dynamic)
         var sd = shapeDef(cat, mask, sensor)
+        var twin = sensorDef()
         for i in 0..<(closed ? n : n - 1) {
             let j = (i + 1) % n
             var seg = b2Segment(point1: b2Vec2(x: pts[i*2], y: pts[i*2+1]),
                                 point2: b2Vec2(x: pts[j*2], y: pts[j*2+1]))
             b2CreateSegmentShape(body, &sd, &seg)
+            b2CreateSegmentShape(body, &twin, &seg)
         }
         return id
     }

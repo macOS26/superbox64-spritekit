@@ -177,7 +177,7 @@ public final class SKPhysicsBody {
         // pair is generated for either purpose, then mark contact-only bodies
         // (no collision intent) as sensors so they generate the event with no
         // impulse. The post-step drain re-applies Apple's contactTest OR.
-        let mask = collisionBitMask | contactTestBitMask
+        let mask = collisionBitMask
         let dyn = isDynamic
         let sensor = isSensor || collisionBitMask == 0
         // Apple honors these per body; hand them to the next B2 creation.
@@ -741,8 +741,8 @@ public final class SKPhysicsWorld {
         }
         for c in B2.drainBeginContacts() {
             guard let A = SKPhysicsWorld.registry[c.bodyA], let B = SKPhysicsWorld.registry[c.bodyB] else { continue }
-            let hit = (c.catA & B.contactTestBitMask) != 0
-                   || (c.catB & A.contactTestBitMask) != 0
+            let hit = (A.categoryBitMask & B.contactTestBitMask) != 0
+                   || (B.categoryBitMask & A.contactTestBitMask) != 0
             if hit { contactDelegate?.didBegin(SKPhysicsContact(A, B)) }
         }
     }
