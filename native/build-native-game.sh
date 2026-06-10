@@ -126,9 +126,20 @@ clang -c -O2 -I "$FW/Sources/KitABI/include" -target arm64-apple-macos14 "$B/stu
 clang -c -O2 -I "$FW/Sources/KitABI/include" -target arm64-apple-macos14 "$FW/Sources/KitABI/shim.c" -o "$B/mod/shim.o"
 
 echo "→ link"
+SDL_LINK=(-L /opt/homebrew/lib -lSDL3)
+if [ -f "$PWD/vendor/libSDL3.a" ]; then
+  # static minimal SDL3 baked in: single-file binary, only used subsystems
+  SDL_LINK=("$PWD/vendor/libSDL3.a"
+            -framework Cocoa -framework QuartzCore -framework Metal
+            -framework IOKit -framework CoreVideo -framework CoreAudio
+            -framework AudioToolbox -framework GameController
+            -framework ForceFeedback -framework Carbon -framework CoreHaptics
+            -framework CoreMedia -framework UniformTypeIdentifiers
+            -liconv)
+fi
 clang -target arm64-apple-macos14 -o "$OUT" \
   "$B"/mod/*.o "$B"/box2d/*.o \
-  -L /opt/homebrew/lib -lSDL3 \
+  "${SDL_LINK[@]}" \
   "$TC/lib/swift/embedded/arm64-apple-macos/libswiftUnicodeDataTables.a" \
   -dead_strip
 
