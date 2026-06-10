@@ -52,6 +52,23 @@ open class SKNode {
         node.parent = self
         children.insert(node, at: max(0, min(index, children.count)))
     }
+    deinit {
+        // Children can outlive this node when the game holds direct
+        // references (AsteroidZ keeps its flame nodes across respawns). Under
+        // Embedded, parent is unowned(unsafe), so a destroyed parent must
+        // clear the back-pointers or a later removeFromParent walks freed
+        // memory. The body's node pointer dangles the same way.
+        #if hasFeature(Embedded)
+        for c in children { c.parent = nil }
+        physicsBody?.node = nil
+        #else
+        MainActor.assumeIsolated {
+            for c in children { c.parent = nil }
+            physicsBody?.node = nil
+        }
+        #endif
+    }
+
     open func removeFromParent() {
         guard let p = parent else { return }
         p.children.removeAll { $0 === self }

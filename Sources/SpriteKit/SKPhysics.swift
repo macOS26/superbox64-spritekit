@@ -38,7 +38,8 @@ public final class SKPhysicsBody {
     public var linearDamping: CGFloat = 0.1
     public var friction: CGFloat = 0.2
     public var restitution: CGFloat = 0.2
-    public var mass: CGFloat = 1
+    public var mass: CGFloat = 1 { didSet { massExplicit = true } }
+    var massExplicit = false
     public var isSensor = false
     public var usesPreciseCollisionDetection = false   // no-op: Box2D continuous detection
     public var fieldBitMask: UInt32 = 0xFFFFFFFF       // no-op: SKFieldNode not yet implemented
@@ -146,10 +147,10 @@ public final class SKPhysicsBody {
 
     public func applyImpulse(_ v: CGVector) { velocity = CGVector(dx: velocity.dx + v.dx, dy: velocity.dy + v.dy) }
     public func applyImpulse(_ v: CGVector, at point: CGPoint) { applyImpulse(v) }
-    public func applyForce(_ v: CGVector) {}
-    public func applyForce(_ v: CGVector, at point: CGPoint) {}
-    public func applyTorque(_ t: CGFloat) {}
-    public func applyAngularImpulse(_ i: CGFloat) {}
+    public func applyForce(_ v: CGVector) { B2.applyForce(bodyId, Float(v.dx), Float(v.dy)) }
+    public func applyForce(_ v: CGVector, at point: CGPoint) { applyForce(v) }
+    public func applyTorque(_ t: CGFloat) { B2.applyTorque(bodyId, Float(t)) }
+    public func applyAngularImpulse(_ i: CGFloat) { B2.applyAngularImpulse(bodyId, Float(i)) }
 
     // Returns the set of bodies currently in contact with this one. The Box2D
     // shim doesn't expose a continuous contact list yet, so we filter the
@@ -231,7 +232,45 @@ public final class SKPhysicsBody {
         case let .texture(size):
             bodyId = B2.addBox(x, y, Float(size.width/2), Float(size.height/2), dyn, cat, mask, sensor)
         }
+        // Apple's default mass is density * area at 150 points per meter; v3
+        // sensor shapes contribute no mass, so without this a sensor-only ship
+        // sits at the 1kg fallback and applyForce barely moves it.
+        if bodyId >= 0, dyn {
+            let m = massExplicit ? mass : CGFloat(appleAreaPts2() / 22500.0)
+            if m > 0 { B2.setMass(bodyId, Float(m), Float(boundingRadius())) }
+        }
         SKPhysicsWorld.registry[bodyId] = self
+    }
+
+    func appleAreaPts2() -> Double {
+        switch shape {
+        case let .rect(w, h): return Double(w * h)
+        case let .circle(r): return Double.pi * Double(r * r)
+        case let .texture(sz): return Double(sz.width * sz.height)
+        case let .edgeLoop(rc): return Double(rc.width * rc.height)
+        case let .polygon(pts), let .edgeChain(pts):
+            var a = 0.0
+            for i in 0..<pts.count {
+                let j = (i + 1) % pts.count
+                a += Double(pts[i].x * pts[j].y - pts[j].x * pts[i].y)
+            }
+            return abs(a) / 2
+        case .edgeFromTo: return 0
+        }
+    }
+
+    func boundingRadius() -> Double {
+        switch shape {
+        case let .rect(w, h): return Double(max(w, h)) / 2
+        case let .circle(r): return Double(r)
+        case let .texture(sz): return Double(max(sz.width, sz.height)) / 2
+        case let .edgeLoop(rc): return Double(max(rc.width, rc.height)) / 2
+        case let .polygon(pts), let .edgeChain(pts):
+            var r = 0.0
+            for p in pts { r = max(r, Double(p.x * p.x + p.y * p.y).squareRoot()) }
+            return r
+        case .edgeFromTo: return 1
+        }
     }
 }
 

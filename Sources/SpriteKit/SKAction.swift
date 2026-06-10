@@ -14,6 +14,8 @@ public final class SKAction {
         case hide(Bool)                                     // hide(true) / unhide(false)
         case scaleToSize(CGSize)                            // scale(to: CGSize, duration:)
         case scaleXY(CGFloat, CGFloat)                      // scaleX(to:y:duration:)
+        case scaleXTo(CGFloat)                              // scaleX(to:duration:)
+        case scaleYTo(CGFloat)                              // scaleY(to:duration:)
         case setTexture(SKTexture)                          // SKSpriteNode.texture = t (instant)
         case animate([SKTexture], TimeInterval, Bool, Bool) // textures, timePerFrame, resize, restore
         case changeVolume(CGFloat)                          // for SKAudioNode
@@ -117,10 +119,10 @@ public final class SKAction {
         }
     }
     public static func scaleX(to x: CGFloat, duration d: TimeInterval) -> SKAction {
-        SKAction.customAction(withDuration: d) { node, _ in node.xScale = x }
+        SKAction(.scaleXTo(x), d)
     }
     public static func scaleY(to y: CGFloat, duration d: TimeInterval) -> SKAction {
-        SKAction.customAction(withDuration: d) { node, _ in node.yScale = y }
+        SKAction(.scaleYTo(y), d)
     }
 
     // Shortest-arc rotate — pick the direction with the smaller angular distance.
@@ -316,7 +318,7 @@ final class RunningAction {
     var elapsed: TimeInterval = 0
     var started = false
     var startPos = CGPoint.zero, targetPos = CGPoint.zero
-    var startScale: CGFloat = 1, startAlpha: CGFloat = 1, startRot: CGFloat = 0
+    var startScale: CGFloat = 1, startScaleY: CGFloat = 1, startAlpha: CGFloat = 1, startRot: CGFloat = 0
     var startColor = SKColor.white, startBlend: CGFloat = 0
     var seqIndex = 0
     var child: RunningAction?
@@ -403,6 +405,7 @@ final class RunningAction {
                 started = true
                 startPos = node.position
                 startScale = node.xScale
+                startScaleY = node.yScale
                 startAlpha = node.alpha
                 startRot = node.zRotation
                 if let s = node as? SKSpriteNode {
@@ -453,7 +456,9 @@ final class RunningAction {
             }
         case let .scaleXY(tx, ty):
             node.xScale = startScale + (tx - startScale) * p
-            node.yScale = startScale + (ty - startScale) * p
+            node.yScale = startScaleY + (ty - startScaleY) * p
+        case .scaleXTo(let tx): node.xScale = startScale + (tx - startScale) * p
+        case .scaleYTo(let ty): node.yScale = startScaleY + (ty - startScaleY) * p
         case .fadeTo(let a): node.alpha = startAlpha + (a - startAlpha) * p
         case .rotateBy(let a): node.zRotation = startRot + a * p
         case .rotateTo(let a): node.zRotation = startRot + (a - startRot) * p

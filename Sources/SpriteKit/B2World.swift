@@ -204,6 +204,15 @@ enum B2 {
         b2Body_ApplyLinearImpulseToCenter(b, b2Vec2(x: ix, y: iy), true)
     }
 
+    static func setMass(_ id: Int32, _ m: Float, _ r: Float) {
+        guard let b = body(id) else { return }
+        var md = b2MassData()
+        md.mass = m
+        md.center = b2Vec2(x: 0, y: 0)
+        md.rotationalInertia = 0.5 * m * r * r
+        b2Body_SetMassData(b, md)
+    }
+
     static func applyTorque(_ id: Int32, _ t: Float) {
         guard let b = body(id) else { return }
         b2Body_ApplyTorque(b, t, true)
