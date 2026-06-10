@@ -254,3 +254,9 @@ open class SKNode {
 }
 
 
+
+// Apple's SKNode inherits NSObject identity equality; games rely on it for
+// array firstIndex(of:) and friends.
+extension SKNode: Equatable {
+    public static func == (lhs: SKNode, rhs: SKNode) -> Bool { lhs === rhs }
+}

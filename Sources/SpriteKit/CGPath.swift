@@ -5,6 +5,12 @@ public final class CGMutablePath {
     var subpaths: [[CGPoint]] = []
     var current: [CGPoint] = []
     public init() {}
+    public func mutableCopy() -> CGMutablePath? {
+        let c = CGMutablePath()
+        c.subpaths = subpaths
+        c.current = current
+        return c
+    }
     public func move(to p: CGPoint) {
         flush()
         current = [p]
@@ -171,6 +177,9 @@ public func exp(_ x: Float) -> Float { Float(sb64_exp(Double(x))) }
 public func exp(_ x: Double) -> Double { sb64_exp(x) }
 public func tanh(_ x: Float) -> Float { Float(sb64_tanh(Double(x))) }
 public func tanh(_ x: Double) -> Double { sb64_tanh(x) }
+public func hypot(_ x: Double, _ y: Double) -> Double { sb64_hypot(x, y) }
+public func sqrt(_ x: Double) -> Double { x.squareRoot() }
+public func atan2(_ y: Double, _ x: Double) -> Double { sb64_atan2(y, x) }
 public func pow(_ base: Float, _ exp: Float) -> Float { Float(sb64_pow(Double(base), Double(exp))) }
 public func pow(_ base: Double, _ exp: Double) -> Double { sb64_pow(base, exp) }
 public func floor(_ x: Float) -> Float { Float(sb64_floor(Double(x))) }

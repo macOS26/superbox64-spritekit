@@ -64,6 +64,10 @@ public final class SKView {
         renderAccum = 1e9   // draw the incoming scene on the very next tick
         if let s = scene {
             s.view = self
+            if !s._sceneDidLoadFired {
+                s._sceneDidLoadFired = true
+                s.sceneDidLoad()
+            }
             s.didMove(to: self)
         }
     }

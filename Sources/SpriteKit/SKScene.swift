@@ -26,6 +26,9 @@ open class SKScene: SKNode {
     open func willMove(from view: SKView) {}
     open func didChangeSize(_ oldSize: CGSize) {}
     open func sceneDidLoad() {}                // called once before didMove
+    var _sceneDidLoadFired = false
+    // Apple: a scene's frame is its size at the origin (default anchorPoint).
+    override public var frame: CGRect { CGRect(x: 0, y: 0, width: size.width, height: size.height) }
     open func update(_ currentTime: TimeInterval) {}
     open func didEvaluateActions() {}          // after actions, before physics
     open func didSimulatePhysics() {}
@@ -45,8 +48,8 @@ open class SKScene: SKNode {
     open func convertPoint(toView p: CGPoint) -> CGPoint { p }
 
     // input hooks the demo/game can override
-    open func keyDown(_ key: Int) { keyDown(with: NSEvent(keyCode: UInt16(truncatingIfNeeded: key))) }
-    open func keyUp(_ key: Int) { keyUp(with: NSEvent(keyCode: UInt16(truncatingIfNeeded: key))) }
+    open func keyDown(_ key: Int) { keyDown(with: NSEvent(keyCode: UInt16(truncatingIfNeeded: sfToMacKeyCode(key)))) }
+    open func keyUp(_ key: Int) { keyUp(with: NSEvent(keyCode: UInt16(truncatingIfNeeded: sfToMacKeyCode(key)))) }
     open func mouseDown(at p: CGPoint) { mouseDown(with: NSEvent(location: p)) }
     open func mouseUp(at p: CGPoint) { mouseUp(with: NSEvent(location: p)) }
     open func mouseMoved(to p: CGPoint) { mouseDragged(with: NSEvent(location: p)) }
@@ -106,6 +109,18 @@ public struct NSEvent {
         public static let function = ModifierFlags(rawValue: 1 << 4)
     }
     public var keyCode: UInt16
+    // Letter/digit for the current (mac virtual) keyCode, like AppKit provides.
+    public var charactersIgnoringModifiers: String? {
+        let letters: [UInt16: String] = [
+            0: "a", 11: "b", 8: "c", 2: "d", 14: "e", 3: "f", 5: "g", 4: "h",
+            34: "i", 38: "j", 40: "k", 37: "l", 46: "m", 45: "n", 31: "o",
+            35: "p", 12: "q", 15: "r", 1: "s", 17: "t", 32: "u", 9: "v",
+            13: "w", 7: "x", 16: "y", 6: "z",
+            29: "0", 18: "1", 19: "2", 20: "3", 21: "4", 23: "5", 22: "6",
+            26: "7", 28: "8", 25: "9", 49: " ",
+        ]
+        return letters[keyCode]
+    }
     public var modifierFlags: ModifierFlags
     // macOS-parity fields so unmodified AppKit game code reads them with no #if.
     // The web runtime delivers discrete key/pointer callbacks: no auto-repeat
@@ -126,3 +141,57 @@ public struct NSEvent {
     public func location(in node: SKNode) -> CGPoint { point }
 }
 
+
+// The runtime delivers SFML key codes; NSEvent.keyCode is macOS virtual codes.
+// Translating here lets unmodified macOS keyCode switches (case 123, 49, ...)
+// work on wasm, so games need no platform key tables.
+func sfToMacKeyCode(_ sf: Int) -> Int {
+    switch sf {
+    case 0: return 0       // A
+    case 1: return 11      // B
+    case 2: return 8       // C
+    case 3: return 2       // D
+    case 4: return 14      // E
+    case 5: return 3       // F
+    case 6: return 5       // G
+    case 7: return 4       // H
+    case 8: return 34      // I
+    case 9: return 38      // J
+    case 10: return 40     // K
+    case 11: return 37     // L
+    case 12: return 46     // M
+    case 13: return 45     // N
+    case 14: return 31     // O
+    case 15: return 35     // P
+    case 16: return 12     // Q
+    case 17: return 15     // R
+    case 18: return 1      // S
+    case 19: return 17     // T
+    case 20: return 32     // U
+    case 21: return 9      // V
+    case 22: return 13     // W
+    case 23: return 7      // X
+    case 24: return 16     // Y
+    case 25: return 6      // Z
+    case 26: return 29     // 0
+    case 27: return 18     // 1
+    case 28: return 19     // 2
+    case 29: return 20     // 3
+    case 30: return 21     // 4
+    case 31: return 23     // 5
+    case 32: return 22     // 6
+    case 33: return 26     // 7
+    case 34: return 28     // 8
+    case 35: return 25     // 9
+    case 36: return 53     // Escape
+    case 57: return 49     // Space
+    case 58: return 36     // Enter -> Return
+    case 59: return 51     // Backspace -> Delete
+    case 60: return 48     // Tab
+    case 71: return 123    // Left
+    case 72: return 124    // Right
+    case 73: return 126    // Up
+    case 74: return 125    // Down
+    default: return sf + 1000
+    }
+}
