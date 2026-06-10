@@ -17,6 +17,30 @@ GAME_SRC="${GAME_SRC:?set GAME_SRC to the game source directory}"
 GAME_MAIN="${GAME_MAIN:?set GAME_MAIN to the native main.swift}"
 OUT="${OUT:-game-native}"
 ASSETS_DIR="${ASSETS_DIR:-}"
+
+# Platform detection for system include/lib paths
+detect_sys() {
+  case "$(uname -s)" in
+    Darwin)
+      if [ -d /opt/homebrew/include ]; then
+        SYS_INC="/opt/homebrew/include"
+        SYS_LIB="/opt/homebrew/lib"
+      else
+        SYS_INC="/usr/local/include"
+        SYS_LIB="/usr/local/lib"
+      fi
+      ;;
+    Linux)
+      SYS_INC="/usr/include"
+      SYS_LIB="/usr/lib"
+      ;;
+    *)
+      echo "Unsupported platform: $(uname -s)" >&2; exit 1
+      ;;
+  esac
+}
+detect_sys
+
 TC="$(dirname "$(dirname "$(TOOLCHAINS=${SWIFT_TOOLCHAIN:-org.swift.6.3.2-release} xcrun --toolchain swift -f swiftc)")")"
 B="$(mktemp -d)"
 trap 'rm -rf "$B"' EXIT
@@ -26,7 +50,7 @@ EMB=(-enable-experimental-feature Embedded -wmo -Osize -parse-as-library
      -Xcc -fmodule-map-file="$FW/Sources/KitABI/include/module.modulemap"
      -Xcc -fmodule-map-file="$FW/Sources/CBox2D/include/module.modulemap"
      -Xcc -fmodule-map-file="$PWD/CSDL3/module.modulemap"
-     -Xcc -I/opt/homebrew/include
+     -Xcc -I"$SYS_INC"
      -I "$FW/Sources/KitABI/include" -I "$FW/Sources/CBox2D/include" -I "$PWD/CSDL3"
      -I "$B/mod")
 
@@ -126,7 +150,7 @@ clang -c -O2 -I "$FW/Sources/KitABI/include" -target arm64-apple-macos14 "$B/stu
 clang -c -O2 -I "$FW/Sources/KitABI/include" -target arm64-apple-macos14 "$FW/Sources/KitABI/shim.c" -o "$B/mod/shim.o"
 
 echo "→ link"
-SDL_LINK=(-L /opt/homebrew/lib -lSDL3)
+SDL_LINK=(-L "$SYS_LIB" -lSDL3)
 if [ -f "$PWD/vendor/libSDL3.a" ]; then
   # static minimal SDL3 baked in: single-file binary, only used subsystems
   SDL_LINK=("$PWD/vendor/libSDL3.a"
