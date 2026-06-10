@@ -36,19 +36,33 @@ public final class GCController {
     }
 
     public static func controllers() -> [GCController] { all() }
-    public static func startWirelessControllerDiscovery(completionHandler h: (() -> Void)? = nil) { h?() }
+    public static func startWirelessControllerDiscovery(completionHandler h: (() -> Void)? = nil) { installPump(); h?() }
     public static func stopWirelessControllerDiscovery() {}
 
     // Internal: enumerates pads connected this frame via gp_connected.
     nonisolated(unsafe) private static var cache: [Int: GCController] = [:]
+    nonisolated(unsafe) private static var pumpInstalled = false
     private static func all() -> [GCController] {
+        installPump()
         var out: [GCController] = []
         for i in 0..<4 where gp_connected(Int32(i)) != 0 {
-            let c = cache[i] ?? GCController(index: i)
-            cache[i] = c
-            out.append(c)
+            if cache[i] == nil {
+                let c = GCController(index: i)
+                cache[i] = c
+                NotificationCenter.default.post(name: .GCControllerDidConnect, object: c)
+            }
+            out.append(cache[i]!)
         }
         return out
+    }
+    // The kit frame loop fires handlers and connect notifications; installed on
+    // first GameController use so games that never touch pads pay nothing.
+    private static func installPump() {
+        if pumpInstalled { return }
+        pumpInstalled = true
+        KitRunLoop.addPerFrameHook {
+            for c in all() { c.refresh() }
+        }
     }
 
     // Game code calls this once per frame to fire valueChangedHandler closures.
@@ -223,6 +237,11 @@ public final class GCControllerDirectionPad: GCControllerElement {
 public extension String {
     static let GCControllerDidConnect = "GCControllerDidConnect"
     static let GCControllerDidDisconnect = "GCControllerDidDisconnect"
+}
+
+public extension Notification.Name {
+    static let GCControllerDidConnect = Notification.Name("GCControllerDidConnect")
+    static let GCControllerDidDisconnect = Notification.Name("GCControllerDidDisconnect")
 }
 
 

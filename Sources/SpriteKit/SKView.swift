@@ -120,6 +120,7 @@ public final class SKView {
         let dt = min(dtMs / 1000.0, 1.0 / 60.0)
         elapsed += dt
         SKSpriteNode._setKitClock(Float(elapsed))    // u_time for SKShader binds
+        KitRunLoop._tick(dt)
         _kitDrainAudioCompletions()
         let hadInput = pollEvents(s)
         s.stepActions(dt)

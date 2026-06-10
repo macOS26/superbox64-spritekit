@@ -18,7 +18,7 @@ open class SKNode {
     #endif
     public private(set) var children: [SKNode] = []
 
-    public var userData: [String: Any]? = nil
+    public var userData: NSMutableDictionary? = nil
     public var physicsBody: SKPhysicsBody? {
         didSet {
             // Apple SpriteKit removes the old body from the simulation when
