@@ -46,6 +46,7 @@ enum B2 {
         var restitution: Float = 0.1
         var linearDamping: Float = 0
         var angularDamping: Float = 0
+        var gravityScale: Float = 1
     }
     nonisolated(unsafe) static var pendingProps = BodyProps()
 
@@ -56,6 +57,7 @@ enum B2 {
         bd.position = b2Vec2(x: x, y: y)
         bd.linearDamping = pendingProps.linearDamping
         bd.angularDamping = pendingProps.angularDamping
+        bd.gravityScale = pendingProps.gravityScale
         let id = Int32(bodies.count)
         bd.userData = UnsafeMutableRawPointer(bitPattern: Int(id) + 1)
         let body = b2CreateBody(w, &bd)
@@ -167,7 +169,10 @@ enum B2 {
         guard let b = body(id) else { return }
         let p = b2Body_GetPosition(b)
         let a = b2Rot_GetAngle(b2Body_GetRotation(b))
-        if p.x == x && p.y == y && a == angle { return }
+        // Epsilon, not equality: angle/position round-trip through b2Rot with
+        // float error, and exact compares re-teleported every body every frame
+        // (a visible wobble on rotating ships).
+        if abs(p.x - x) < 0.001, abs(p.y - y) < 0.001, abs(a - angle) < 0.0005 { return }
         b2Body_SetTransform(b, b2Vec2(x: x, y: y), b2MakeRot(angle))
         // SetTransform refreshes the broad phase but does not wake the body.
         // Game-driven bodies move by teleport with zero velocity, so without

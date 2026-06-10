@@ -183,7 +183,8 @@ public final class SKPhysicsBody {
         B2.pendingProps = B2.BodyProps(friction: Float(friction),
                                        restitution: Float(restitution),
                                        linearDamping: Float(linearDamping),
-                                       angularDamping: Float(angularDamping))
+                                       angularDamping: Float(angularDamping),
+                                       gravityScale: affectedByGravity ? 1 : 0)
         switch shape {
         case let .rect(w, h): bodyId = B2.addBox(x, y, Float(w/2), Float(h/2), dyn, cat, mask, sensor)
         case let .circle(r):  bodyId = B2.addCircle(x, y, Float(r), dyn, cat, mask, sensor)
@@ -691,8 +692,13 @@ public final class SKPhysicsWorld {
         for (id, b) in SKPhysicsWorld.registry {
             guard b.isDynamic, let n = b.node else { continue }
             let (x, y) = B2.getPosition(id)
-            n.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
-            if b.allowsRotation { n.zRotation = CGFloat(B2.getAngle(id)) }
+            if abs(n.position.x - CGFloat(x)) > 0.001 || abs(n.position.y - CGFloat(y)) > 0.001 {
+                n.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
+            }
+            if b.allowsRotation {
+                let a = CGFloat(B2.getAngle(id))
+                if abs(n.zRotation - a) > 0.0005 { n.zRotation = a }
+            }
         }
         for c in B2.drainBeginContacts() {
             guard let A = SKPhysicsWorld.registry[c.bodyA], let B = SKPhysicsWorld.registry[c.bodyB] else { continue }
