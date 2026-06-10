@@ -30,8 +30,28 @@ public final class SKAudioNode: SKNode {
     }
 
     var manuallyPaused = false
+    var tickStamp: UInt64 = 0
+
+    // Voices whose nodes left the scene tree must stop (Apple stops audio on
+    // detach; games remove the PARENT, e.g. the saucer, never the audio
+    // child). Only nodes with live voices are retained here, so reaped ones
+    // deallocate normally.
+    nonisolated(unsafe) static var activeVoices: [SKAudioNode] = []
+    nonisolated(unsafe) static var frameStamp: UInt64 = 1
+
+    static func reapDetached() {
+        for a in activeVoices where a.tickStamp != frameStamp {
+            if a.voice >= 0 {
+                snd_stop(a.voice)
+                a.voice = -1
+            }
+        }
+        activeVoices.removeAll { $0.tickStamp != frameStamp }
+        frameStamp += 1
+    }
 
     func autoplayTick() {
+        tickStamp = Self.frameStamp
         if autoplayLooped, voice < 0, !manuallyPaused, buffer != 0 { play() }
         positionalTick()
     }
@@ -72,11 +92,16 @@ public final class SKAudioNode: SKNode {
         manuallyPaused = false
         if voice >= 0 { snd_stop(voice) }
         voice = snd_play(buffer, volume * 100, autoplayLooped ? 1 : 0)
+        if voice >= 0, !Self.activeVoices.contains(where: { $0 === self }) {
+            tickStamp = Self.frameStamp
+            Self.activeVoices.append(self)
+        }
     }
     public func pause() {
         manuallyPaused = true
         if voice >= 0 { snd_stop(voice) }
         voice = -1
+        Self.activeVoices.removeAll { $0 === self }
     }
     public func stop()  { pause() }
 
