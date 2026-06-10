@@ -1,6 +1,10 @@
 #pragma once
 #include <stdint.h>
+#ifdef __wasm__
 #define WABI __attribute__((import_module("env")))
+#else
+#define WABI
+#endif
 
 /* graphics (see wasm-web-kit/include/abi.h) */
 WABI void js_log(const char* p, int len);
