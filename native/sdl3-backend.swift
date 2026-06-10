@@ -48,6 +48,7 @@ final class Kit {
     var voiceStreams: [OpaquePointer] = []
     var voiceLoops: [Int32] = []
     var voiceIds: [Int32] = []
+    var voicePans: [Float] = []
     var nextVoice: Int32 = 1
     var storeKeys: [String] = []
     var storeVals: [String] = []
@@ -206,7 +207,56 @@ final class Kit {
         voiceStreams.append(stream)
         voiceLoops.append(loop ? id : 0)
         voiceIds.append(voice)
+        voicePans.append(0)
         return voice
+    }
+
+    // Pan by re-encoding the mono source as gain-weighted stereo at put time.
+    // Loops refill every buffer, so pan changes land within a buffer's length.
+    func putData(_ stream: OpaquePointer, _ soundIdx: Int, pan: Float) {
+        guard let buf = soundBufs[soundIdx] else { return }
+        var spec = soundSpecs[soundIdx]
+        let len = Int(soundLens[soundIdx])
+        let isU8 = spec.format == SDL_AUDIO_U8
+        let isS16 = spec.format == SDL_AUDIO_S16LE
+        if spec.channels == 1, pan != 0, isU8 || isS16 {
+            let gl = min(1, 1 - pan)
+            let gr = min(1, 1 + pan)
+            var stereo = spec
+            stereo.channels = 2
+            _ = SDL_SetAudioStreamFormat(stream, &stereo, nil)
+            if isU8 {
+                var out = [UInt8]()
+                out.reserveCapacity(len * 2)
+                for i in 0..<len {
+                    let centered = Float(buf[i]) - 128
+                    out.append(UInt8(max(0, min(255, 128 + centered * gl))))
+                    out.append(UInt8(max(0, min(255, 128 + centered * gr))))
+                }
+                _ = out.withUnsafeBufferPointer { SDL_PutAudioStreamData(stream, $0.baseAddress, Int32(out.count)) }
+            } else {
+                let samples = len / 2
+                let src = UnsafeRawPointer(buf)
+                var out = [Int16]()
+                out.reserveCapacity(samples * 2)
+                for i in 0..<samples {
+                    let v = Float(src.loadUnaligned(fromByteOffset: i * 2, as: Int16.self))
+                    out.append(Int16(max(-32768, min(32767, v * gl))))
+                    out.append(Int16(max(-32768, min(32767, v * gr))))
+                }
+                _ = out.withUnsafeBufferPointer { SDL_PutAudioStreamData(stream, $0.baseAddress, Int32(out.count * 2)) }
+            }
+        } else {
+            _ = SDL_SetAudioStreamFormat(stream, &spec, nil)
+            _ = SDL_PutAudioStreamData(stream, buf, Int32(len))
+        }
+    }
+
+    func setVoicePan(_ voice: Int32, _ pan: Float) {
+        for i in 0..<voiceIds.count where voiceIds[i] == voice {
+            voicePans[i] = max(-1, min(1, pan))
+            return
+        }
     }
 
     func stopVoice(_ voice: Int32) {
@@ -216,6 +266,7 @@ final class Kit {
             voiceStreams.remove(at: i)
             voiceLoops.remove(at: i)
             voiceIds.remove(at: i)
+            voicePans.remove(at: i)
             return
         }
     }
@@ -235,8 +286,8 @@ final class Kit {
             let loopId = voiceLoops[i]
             if loopId > 0 {
                 let li = Int(loopId)
-                if queued < Int32(soundLens[li]) / 2, let buf = soundBufs[li] {
-                    _ = SDL_PutAudioStreamData(stream, buf, Int32(soundLens[li]))
+                if queued < Int32(soundLens[li]) / 2 {
+                    putData(stream, li, pan: voicePans[i])
                 }
                 i += 1
             } else if queued <= 0, SDL_GetAudioStreamAvailable(stream) <= 0 {
@@ -245,6 +296,7 @@ final class Kit {
                 voiceStreams.remove(at: i)
                 voiceLoops.remove(at: i)
                 voiceIds.remove(at: i)
+                voicePans.remove(at: i)
             } else {
                 i += 1
             }
@@ -517,6 +569,11 @@ func snd_stop(_ voice: Int32) {
 @_cdecl("snd_set_volume")
 func snd_set_volume(_ voice: Int32, _ volume: Float) {
     Kit.shared.setVoiceVolume(voice, volume)
+}
+
+@_cdecl("snd_set_pan")
+func snd_set_pan(_ voice: Int32, _ pan: Float) {
+    Kit.shared.setVoicePan(voice, pan)
 }
 
 @_cdecl("store_get")

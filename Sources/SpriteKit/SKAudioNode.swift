@@ -9,7 +9,7 @@ import KitABI
 // ship the AVFoundation shim.
 public final class SKAudioNode: SKNode {
     public var autoplayLooped: Bool = true
-    public var isPositional: Bool = false
+    public var isPositional: Bool = true
     public var volume: Float = 1.0 { didSet { applyVolume() } }
 
     let fileName: String
@@ -33,6 +33,38 @@ public final class SKAudioNode: SKNode {
 
     func autoplayTick() {
         if autoplayLooped, voice < 0, !manuallyPaused, buffer != 0 { play() }
+        positionalTick()
+    }
+
+    // Apple's positional default: volume fades with distance off the scene
+    // and the voice pans by horizontal offset (both saucer drones get this).
+    func positionalTick() {
+        guard isPositional, voice >= 0 else { return }
+        var x = position.x
+        var y = position.y
+        var sceneW: CGFloat = 0
+        var sceneH: CGFloat = 0
+        var p = parent
+        while let node = p {
+            if let sc = node as? SKScene {
+                sceneW = sc.size.width
+                sceneH = sc.size.height
+                break
+            }
+            x += node.position.x
+            y += node.position.y
+            p = node.parent
+        }
+        guard sceneW > 0 else { return }
+        let pan = max(-1, min(1, (x - sceneW / 2) / (sceneW / 2) * 0.8))
+        var fade: CGFloat = 1
+        let margin: CGFloat = 300
+        if x < 0 { fade = min(fade, max(0, 1 + x / margin)) }
+        if x > sceneW { fade = min(fade, max(0, 1 - (x - sceneW) / margin)) }
+        if y < 0 { fade = min(fade, max(0, 1 + y / margin)) }
+        if y > sceneH { fade = min(fade, max(0, 1 - (y - sceneH) / margin)) }
+        snd_set_volume(voice, volume * 100 * Float(fade))
+        snd_set_pan(voice, Float(pan))
     }
 
     public func play() {
