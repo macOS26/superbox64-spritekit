@@ -16,6 +16,7 @@ FW="$(cd .. && pwd)"
 GAME_SRC="${GAME_SRC:?set GAME_SRC to the game source directory}"
 GAME_MAIN="${GAME_MAIN:?set GAME_MAIN to the native main.swift}"
 OUT="${OUT:-game-native}"
+ASSETS_DIR="${ASSETS_DIR:-}"
 TC="$(dirname "$(dirname "$(TOOLCHAINS=${SWIFT_TOOLCHAIN:-org.swift.6.3.2-release} xcrun --toolchain swift -f swiftc)")")"
 B="$(mktemp -d)"
 trap 'rm -rf "$B"' EXIT
@@ -60,6 +61,38 @@ cp sdl3-backend.swift "$B/src/game/"
 cp "$GAME_MAIN" "$B/src/game/native-main.swift"
 xcrun --toolchain swift swiftc "${EMB[@]}" -module-name GameNative \
   -c "$B/src/game"/*.swift -o "$B/mod/game.o"
+
+echo "→ assets (baked into the binary when ASSETS_DIR is set)"
+python3 - "$ASSETS_DIR" "$B/assets.c" <<'PYEOF'
+import os, sys
+src, out = sys.argv[1], sys.argv[2]
+lines = ["#include <stdint.h>"]
+entries = []
+if src and os.path.isdir(src):
+    for i, name in enumerate(sorted(os.listdir(src))):
+        if not name.endswith(".wav"):
+            continue
+        data = open(os.path.join(src, name), "rb").read()
+        lines.append(f"static const unsigned char a{i}[] = {{{','.join(str(b) for b in data)}}};")
+        entries.append((name, f"a{i}", len(data)))
+lines.append("static const struct { const char *n; const unsigned char *d; uint32_t l; } tbl[] = {")
+for name, sym, ln in entries:
+    lines.append(f'    {{"{name}", {sym}, {ln}}},')
+lines.append("};")
+lines.append("""const unsigned char *kit_asset_data(const char *name, uint32_t *len) {
+    for (unsigned i = 0; i < sizeof(tbl) / sizeof(tbl[0]); i++) {
+        const char *a = tbl[i].n, *b = name;
+        while (*a && *a == *b) { a++; b++; }
+        if (*a == *b) { *len = tbl[i].l; return tbl[i].d; }
+    }
+    *len = 0;
+    return 0;
+}""")
+open(out, "w").write("\n".join(lines) + "\n")
+total = sum(e[2] for e in entries)
+print(f"  {len(entries)} assets baked in ({total} bytes)")
+PYEOF
+clang -c -O2 -target arm64-apple-macos14 "$B/assets.c" -o "$B/mod/assets.o"
 
 echo "→ stubs (Embedded strtod + untouched KitABI surface)"
 python3 - "$FW/Sources/KitABI/include/KitABI.h" "$B/stubs.c" <<'PYEOF'

@@ -29,6 +29,9 @@ struct Mat {
     }
 }
 
+@_silgen_name("kit_asset_data")
+func kit_asset_data(_ name: UnsafePointer<CChar>?, _ len: UnsafeMutablePointer<UInt32>?) -> UnsafePointer<UInt8>?
+
 final class Kit {
     static let shared = Kit()
     var window: OpaquePointer? = nil
@@ -126,6 +129,10 @@ final class Kit {
     }
 
     func loadSound(_ name: String) -> Int32 {
+        return loadSoundImpl(name)
+    }
+
+    func loadSoundImpl(_ name: String) -> Int32 {
         var base = name
         var lastSlash = -1
         var i = 0
@@ -145,8 +152,16 @@ final class Kit {
         var spec = SDL_AudioSpec()
         var buf: UnsafeMutablePointer<UInt8>? = nil
         var len: UInt32 = 0
-        let path = assetDir + "/" + base
-        _ = path.withCString { SDL_LoadWAV($0, &spec, &buf, &len) }
+        // assets baked into the binary take priority; disk is the fallback
+        var memLen: UInt32 = 0
+        let mem = base.withCString { kit_asset_data($0, &memLen) }
+        if let mem, memLen > 0 {
+            let io = SDL_IOFromConstMem(mem, Int(memLen))
+            _ = SDL_LoadWAV_IO(io, true, &spec, &buf, &len)
+        } else {
+            let path = assetDir + "/" + base
+            _ = path.withCString { SDL_LoadWAV($0, &spec, &buf, &len) }
+        }
         soundSpecs.append(spec)
         soundBufs.append(buf)
         soundLens.append(len)
