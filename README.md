@@ -10,6 +10,17 @@ No Emscripten. No loading screens. No watermarks.
 
 ---
 
+## One source, three shapes
+
+Every game built on this framework compiles three ways from the same source
+tree: a wasm for the browser, a wasm "cartridge" played by a native host
+(see superbox64-wasmkit/cartridge), and a plain native binary with no wasm
+at all. `native/` holds the SDL3 backend that fills the KitABI surface
+in-process plus `build-native-game.sh`, which links game + framework +
+Box2D v3 into one Embedded Swift executable (AsteroidZ: 662 KB). The web
+build is untouched; the KitABI import attribute only applies under
+`__wasm__`. See `native/README.md` for the full permutation map.
+
 ## Quick Start
 
 ### 1. Add the package
