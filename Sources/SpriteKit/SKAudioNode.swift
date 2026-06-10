@@ -29,12 +29,20 @@ public final class SKAudioNode: SKNode {
         self.buffer = withUTF8Ptr(self.fileName) { snd_by_name($0, $1) }
     }
 
+    var manuallyPaused = false
+
+    func autoplayTick() {
+        if autoplayLooped, voice < 0, !manuallyPaused, buffer != 0 { play() }
+    }
+
     public func play() {
         if buffer == 0 { return }
+        manuallyPaused = false
         if voice >= 0 { snd_stop(voice) }
         voice = snd_play(buffer, volume * 100, autoplayLooped ? 1 : 0)
     }
     public func pause() {
+        manuallyPaused = true
         if voice >= 0 { snd_stop(voice) }
         voice = -1
     }

@@ -234,6 +234,9 @@ open class SKNode {
     public var hasActions: Bool { !runningActions.isEmpty }
 
     final func stepActions(_ dt: CGFloat) {
+        // Apple's SKAudioNode autoplays once it lives in the active tree;
+        // the per-frame walk is where the framework knows both facts.
+        if let audio = self as? SKAudioNode { audio.autoplayTick() }
         if isPaused { return }                       // halt this subtree
         let scaled = dt * speed                      // SKNode.speed scales time per subtree
         // Step every action ONCE this frame, including actions started mid-frame
