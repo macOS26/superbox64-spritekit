@@ -45,7 +45,7 @@ public final class SKPhysicsBody {
     public var pinned = false                          // no-op
     public var density: CGFloat = 1                    // no-op (mass drives the body)
     public var angularDamping: CGFloat = 0.1           // no-op
-    public var angularVelocity: CGFloat = 0            // no-op (Box2D shim takes linear velocity only)
+    public var angularVelocity: CGFloat = 0 { didSet { angularDirty = true } }
     public var charge: CGFloat = 0                     // no-op (SKFieldNode interaction)
     public var resting: Bool = false                   // no-op
     public var area: CGFloat { 0 }                     // computed by shape; cheap to leave at 0
@@ -57,6 +57,7 @@ public final class SKPhysicsBody {
     #endif
     var bodyId: Int32 = -1
     var velocityDirty = false
+    var angularDirty = false
 
     enum Shape {
         case rect(CGFloat, CGFloat)
@@ -187,7 +188,12 @@ public final class SKPhysicsBody {
                 CGPoint(x: rc.minX, y: rc.minY), CGPoint(x: rc.maxX, y: rc.minY),
                 CGPoint(x: rc.maxX, y: rc.maxY), CGPoint(x: rc.minX, y: rc.maxY),
             ]
-            bodyId = B2.addChain(flatXY(pts), closed: true, cat, mask)
+            if dyn {
+                bodyId = B2.addBox(x + Float(rc.midX), y + Float(rc.midY),
+                                   Float(rc.width/2), Float(rc.height/2), dyn, cat, mask, sensor)
+            } else {
+                bodyId = B2.addChain(flatXY(pts), closed: true, dyn, cat, mask, sensor)
+            }
         case let .polygon(pts):
             // Real convex polygon (Box2D enforces convexity and caps the vertex
             // count). Falls back to AABB on degenerate inputs.
@@ -202,7 +208,20 @@ public final class SKPhysicsBody {
         case let .edgeFromTo(a, b):
             bodyId = B2.addEdge(Float(a.x), Float(a.y), Float(b.x), Float(b.y), cat, mask)
         case let .edgeChain(pts):
-            bodyId = B2.addChain(flatXY(pts), closed: false, cat, mask)
+            // Apple lets a game flip an edge-loop body dynamic afterward (the
+            // AsteroidZ fragment pattern). Massless segment bodies don't
+            // integrate in Box2D v3, so a dynamic outline becomes its convex
+            // hull: proper mass, same velocity-driven flight and contacts.
+            if dyn, pts.count >= 3 {
+                bodyId = B2.addPolygon(x, y, flatXY(pts), dyn, cat, mask, sensor)
+                if bodyId < 0 {
+                    let r = boundingBox(of: pts)
+                    bodyId = B2.addBox(x + Float(r.midX), y + Float(r.midY),
+                                       Float(r.width/2), Float(r.height/2), dyn, cat, mask, sensor)
+                }
+            } else {
+                bodyId = B2.addChain(flatXY(pts), closed: false, dyn, cat, mask, sensor)
+            }
         case let .texture(size):
             bodyId = B2.addBox(x, y, Float(size.width/2), Float(size.height/2), dyn, cat, mask, sensor)
         }
@@ -625,6 +644,10 @@ public final class SKPhysicsWorld {
         for (_, b) in SKPhysicsWorld.registry where b.velocityDirty {
             B2.setVelocity(b.bodyId, Float(b.velocity.dx), Float(b.velocity.dy))
             b.velocityDirty = false
+        }
+        for (_, b) in SKPhysicsWorld.registry where b.angularDirty {
+            B2.setAngularVelocity(b.bodyId, Float(b.angularVelocity))
+            b.angularDirty = false
         }
         // Push every body's Box2D transform FROM its SKNode each frame
         // so contact detection always sees the actual current scene

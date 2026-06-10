@@ -187,7 +187,7 @@ public final class SKShapeNode: SKNode {
             if hasStroke { gfx_stroke_circle(0, 0, Float(r), Float(lineWidth), strokeColor.rgba) }
         case .path:
             guard let p = path else { return }
-            for sub in p.resolved where sub.count >= 2 {
+            for (sub, closed) in p.resolvedWithFlags where sub.count >= 2 {
                 var xy = [Float]()
                 xy.reserveCapacity(sub.count * 2)
                 for pt in sub {
@@ -197,7 +197,7 @@ public final class SKShapeNode: SKNode {
                 xy.withUnsafeBufferPointer { buf in
                     let n = Int32(sub.count)
                     if hasFill && sub.count >= 3 { gfx_fill_poly(buf.baseAddress, n, fillColor.rgba) }
-                    if hasStroke { gfx_stroke_poly(buf.baseAddress, n, 1, Float(lineWidth), strokeColor.rgba) }
+                    if hasStroke { gfx_stroke_poly(buf.baseAddress, n, closed ? 1 : 0, Float(lineWidth), strokeColor.rgba) }
                 }
             }
         }

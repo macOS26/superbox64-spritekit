@@ -3,11 +3,13 @@ import KitABI
 // Minimal CGPath/CGMutablePath: records subpaths of points for SKShapeNode.
 public final class CGMutablePath {
     var subpaths: [[CGPoint]] = []
+    var closedFlags: [Bool] = []
     var current: [CGPoint] = []
     public init() {}
     public func mutableCopy() -> CGMutablePath? {
         let c = CGMutablePath()
         c.subpaths = subpaths
+        c.closedFlags = closedFlags
         c.current = current
         return c
     }
@@ -20,6 +22,7 @@ public final class CGMutablePath {
         flush()
         subpaths.append([CGPoint(x: r.minX, y: r.minY), CGPoint(x: r.maxX, y: r.minY),
                          CGPoint(x: r.maxX, y: r.maxY), CGPoint(x: r.minX, y: r.maxY)])
+        closedFlags.append(true)
     }
     // Coarse ellipse flattening (16-point polygon) so addEllipse(in:) keeps shape
     // games working without pulling in trig — uses the unit-circle table.
@@ -32,6 +35,7 @@ public final class CGMutablePath {
             pts.append(CGPoint(x: cx + CGFloat(c) * rx, y: cy + CGFloat(s) * ry))
         }
         subpaths.append(pts)
+        closedFlags.append(true)
     }
     public func addArc(center c: CGPoint, radius r: CGFloat, startAngle s: CGFloat,
                        endAngle e: CGFloat, clockwise cw: Bool) {
@@ -126,13 +130,29 @@ public final class CGMutablePath {
         corner(r.minX + rad, r.minY + rad, from: q * 2, to: q * 3)   // bottom-left
         flush()
         subpaths.append(pts)
+        closedFlags.append(true)
     }
-    public func closeSubpath() { flush() }
+    public func closeSubpath() {
+        if !current.isEmpty {
+            subpaths.append(current)
+            closedFlags.append(true)
+            current = []
+        }
+    }
     func flush() {
         if !current.isEmpty {
             subpaths.append(current)
+            closedFlags.append(false)
             current = []
         }
+    }
+    var resolvedWithFlags: [(points: [CGPoint], closed: Bool)] {
+        var out: [(points: [CGPoint], closed: Bool)] = []
+        for (i, sp) in subpaths.enumerated() {
+            out.append((sp, i < closedFlags.count ? closedFlags[i] : true))
+        }
+        if !current.isEmpty { out.append((current, false)) }
+        return out
     }
     var resolved: [[CGPoint]] {
         var s = subpaths

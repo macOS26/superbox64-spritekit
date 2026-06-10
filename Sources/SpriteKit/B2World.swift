@@ -117,14 +117,17 @@ enum B2 {
         return id
     }
 
-    // Polyline / closed loop as individual two-sided segments on one static
-    // body. v3 chain shapes are one-sided with a winding requirement; discrete
+    // Polyline / closed loop as individual two-sided segments on one body.
+    // v3 chain shapes are one-sided with a winding requirement; discrete
     // segments keep the 2.4 two-sided behavior the games were written against.
-    static func addChain(_ pts: [Float], closed: Bool, _ cat: UInt32, _ mask: UInt32) -> Int32 {
+    // Apple allows flipping an edge-loop body dynamic afterward (AsteroidZ
+    // fragments fly this way), so dynamic + sensor are honored here too.
+    static func addChain(_ pts: [Float], closed: Bool, _ dynamic: Bool,
+                         _ cat: UInt32, _ mask: UInt32, _ sensor: Bool) -> Int32 {
         let n = pts.count / 2
         if n < 2 { return -1 }
-        let (id, body) = newBody(0, 0, false)
-        var sd = shapeDef(cat, mask, false)
+        let (id, body) = newBody(0, 0, dynamic)
+        var sd = shapeDef(cat, mask, sensor)
         for i in 0..<(closed ? n : n - 1) {
             let j = (i + 1) % n
             var seg = b2Segment(point1: b2Vec2(x: pts[i*2], y: pts[i*2+1]),
