@@ -142,9 +142,48 @@ Add the modules your game imports. On macOS they resolve to Apple's frameworks. 
 | `Combine` | `PassthroughSubject`, `CurrentValueSubject`, `AnyCancellable` |
 | `SwiftUI` | `Color`, `View` stubs |
 
-### Physics (Box2D 2.4.1)
+### Physics (Box2D v3, pure C)
 
-`Box2DBridge` ships with the package. `SKPhysicsBody` and `SKPhysicsWorld` map directly to Box2D bodies, fixtures, joints, and contacts.
+`CBox2D` ships with the package: vendored [Box2D v3.1.1](https://github.com/erincatto/box2d), compiled as plain C and called directly from Swift through a module map. There is no C++ bridge and no libc++ anywhere in the link (the old `Box2DBridge` C++ 2.4 layer is gone).
+
+`SKPhysicsBody` / `SKPhysicsWorld` / `SKPhysicsContactDelegate` preserve Apple's semantics on top of v3:
+
+- Apple's independent `collisionBitMask` / `contactTestBitMask` map to a union Box2D filter; contact-only bodies become sensors so they report without imparting impulses.
+- Bodies wake on teleport, so node-driven movement (`node.position = ...`, `SKAction.move`) keeps producing `didBegin` contacts exactly like Apple SpriteKit.
+- Edge loops and chains are built from two-sided segments (v3 chain shapes are one-sided).
+- Begin-touch events are snapshotted before delivery, so a `didBegin` handler can safely remove bodies mid-iteration.
+- Sensor pairs are deduped to keep Apple's one-`didBegin`-per-pair contract.
+
+Why v3 instead of staying on 2.4: v3 is pure C (Embedded Swift imports it directly, no bridge to maintain), actively developed (2.4 is frozen), and compiled with function/data sections + `-DNDEBUG` so the linker keeps only the physics a game actually calls.
+
+---
+
+## How a frame renders
+
+`SKView.render` walks the scene tree like Apple's compositor (transforms, anchor points, z-order, alpha, color blending) and emits flat calls over a ~100-function C ABI that the [wasmkit runtime](https://github.com/macOS26/superbox64-wasmkit) implements in the browser:
+
+- `SKSpriteNode` → `gfx_draw_image(handle, srcRect, dstRect, tint)`; textures are browser-decoded images addressed by handle, and `SKTexture(rect:in:)` sub-rects give atlas sampling.
+- `SKShapeNode` / color sprites → `gfx_fill_rect` / `gfx_fill_poly` / `gfx_stroke_*`; `SKLabelNode` → `gfx_draw_text` with real font metrics.
+- `SKView.texture(from:)`, `SKCropNode`, `SKEffectNode` render through offscreen canvases (`gfx_offscreen_*`), so bake-to-texture and masking behave like macOS.
+- `SKShader`, `SKLightNode`, `SKWarpGeometry` compile real GLSL on a hidden WebGL2 canvas and blit back into the 2D scene.
+
+Audio takes the same shape: `SKAudioNode` / `AVFoundation` land on Web Audio buffers and an `AVAudioEngine`-style node graph; `AVSpeechSynthesizer` is the browser's own speech synthesis.
+
+---
+
+## Embedded Swift
+
+All package modules compile under `-enable-experimental-feature Embedded` (target `wasm32-unknown-none-wasm`): no Foundation, no runtime metadata, no reflection. A full game built this way (Boss-Man: this framework + 48 game files) ships as an 866 KB wasm, 344 KB gzipped, roughly 6x smaller than the same game with the Swift stdlib, and plays identically.
+
+What it takes to write Embedded-compatible code against this framework:
+
+- No `weak`/`unowned` (the framework uses `unowned(unsafe)` behind `#if hasFeature(Embedded)` for Apple-contract non-owning refs like `node` and `delegate`).
+- No `Any`, non-class existentials, metatypes, or `Mirror`; APIs here are typed (e.g. `SKKeyframeSequence` takes an `SKKeyframeValue` enum, never `[Any]`).
+- No runtime protocol casts: `as? SomeProtocol` never succeeds in Embedded. Use a concrete class downcast or base-class override; if a new cast sneaks in, the link fails loudly rather than silently returning nil.
+- No `async`/`await`/`Task`/`@MainActor`: the framework's GameKit and friends are completion-handler based, and timers belong in `update(_:)`/`SKAction`.
+- Classes, inheritance, generics, closures, optionals and all the collection types work normally.
+
+The reference Embedded build pipeline (exact flags, module order, link line) lives in the Boss-Man repo at `docs/embedded/build-embedded-game.sh`.
 
 ---
 
