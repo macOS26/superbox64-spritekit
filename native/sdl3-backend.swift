@@ -56,12 +56,16 @@ final class Kit {
     var storePath = ".native-store.tsv"
     var fullscreen = false
 
+    // RenderGeometry ignores vertex alpha against the backbuffer in practice,
+    // so transparency is baked by scaling the color toward black - exact on
+    // this game's black background.
     func fcolor(_ rgba: UInt32) -> SDL_FColor {
-        SDL_FColor(
-            r: Float((rgba >> 24) & 0xFF) / 255,
-            g: Float((rgba >> 16) & 0xFF) / 255,
-            b: Float((rgba >> 8) & 0xFF) / 255,
-            a: Float(rgba & 0xFF) / 255 * alpha
+        let a = Float(rgba & 0xFF) / 255 * alpha
+        return SDL_FColor(
+            r: Float((rgba >> 24) & 0xFF) / 255 * a,
+            g: Float((rgba >> 16) & 0xFF) / 255 * a,
+            b: Float((rgba >> 8) & 0xFF) / 255 * a,
+            a: 1
         )
     }
 
