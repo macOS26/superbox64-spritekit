@@ -41,11 +41,21 @@ enum B2 {
     // Bodies are addressed by a stable Int32 slot (the registry key); removal
     // nulls the slot so older ids never alias a newer body. The Box2D-side
     // userData carries slot+1 (0 would decode as a nil pointer).
+    struct BodyProps {
+        var friction: Float = 0.2
+        var restitution: Float = 0.1
+        var linearDamping: Float = 0
+        var angularDamping: Float = 0
+    }
+    nonisolated(unsafe) static var pendingProps = BodyProps()
+
     private static func newBody(_ x: Float, _ y: Float, _ dynamic: Bool) -> (Int32, b2BodyId) {
         let w = ensureWorld()
         var bd = b2DefaultBodyDef()
         bd.type = dynamic ? b2_dynamicBody : b2_staticBody
         bd.position = b2Vec2(x: x, y: y)
+        bd.linearDamping = pendingProps.linearDamping
+        bd.angularDamping = pendingProps.angularDamping
         let id = Int32(bodies.count)
         bd.userData = UnsafeMutableRawPointer(bitPattern: Int(id) + 1)
         let body = b2CreateBody(w, &bd)
@@ -59,8 +69,8 @@ enum B2 {
     private static func shapeDef(_ cat: UInt32, _ mask: UInt32, _ sensor: Bool) -> b2ShapeDef {
         var sd = b2DefaultShapeDef()
         sd.density = 1.0
-        sd.material.friction = 0.2
-        sd.material.restitution = 0.1
+        sd.material.friction = pendingProps.friction
+        sd.material.restitution = pendingProps.restitution
         sd.filter.categoryBits = UInt64(cat)
         sd.filter.maskBits = UInt64(mask)
         sd.isSensor = sensor

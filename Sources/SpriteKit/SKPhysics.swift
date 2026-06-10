@@ -179,6 +179,11 @@ public final class SKPhysicsBody {
         let mask = collisionBitMask | contactTestBitMask
         let dyn = isDynamic
         let sensor = isSensor || collisionBitMask == 0
+        // Apple honors these per body; hand them to the next B2 creation.
+        B2.pendingProps = B2.BodyProps(friction: Float(friction),
+                                       restitution: Float(restitution),
+                                       linearDamping: Float(linearDamping),
+                                       angularDamping: Float(angularDamping))
         switch shape {
         case let .rect(w, h): bodyId = B2.addBox(x, y, Float(w/2), Float(h/2), dyn, cat, mask, sensor)
         case let .circle(r):  bodyId = B2.addCircle(x, y, Float(r), dyn, cat, mask, sensor)

@@ -77,9 +77,10 @@ public final class RunLoop {
 // MARK: - DispatchQueue (main only; deadlines resolve against frame time)
 
 public struct DispatchTime {
-    let offset: Double
-    public static func now() -> DispatchTime { DispatchTime(offset: 0) }
-    public static func + (lhs: DispatchTime, rhs: Double) -> DispatchTime {
+    @usableFromInline let offset: Double
+    @usableFromInline init(offset: Double) { self.offset = offset }
+    @inlinable public static func now() -> DispatchTime { DispatchTime(offset: 0) }
+    @inlinable public static func + (lhs: DispatchTime, rhs: Double) -> DispatchTime {
         DispatchTime(offset: lhs.offset + rhs)
     }
 }
@@ -87,12 +88,12 @@ public struct DispatchTime {
 public final class DispatchQueue {
     public static let main = DispatchQueue()
 
-    nonisolated(unsafe) private static var pending: [(remaining: Double, work: () -> Void)] = []
+    @usableFromInline nonisolated(unsafe) static var pending: [(remaining: Double, work: () -> Void)] = []
 
-    public func async(execute work: @escaping () -> Void) {
+    @inlinable public func async(execute work: @escaping () -> Void) {
         DispatchQueue.pending.append((0, work))
     }
-    public func asyncAfter(deadline: DispatchTime, execute work: @escaping () -> Void) {
+    @inlinable public func asyncAfter(deadline: DispatchTime, execute work: @escaping () -> Void) {
         DispatchQueue.pending.append((deadline.offset, work))
     }
 
@@ -116,8 +117,8 @@ public struct Notification {
         public init(_ raw: String) { self.rawValue = raw }
     }
     public let name: Name
-    public let object: Any?
-    public init(name: Name, object: Any? = nil) {
+    public let object: AnyObject?
+    public init(name: Name, object: AnyObject? = nil) {
         self.name = name
         self.object = object
     }
@@ -130,22 +131,20 @@ public final class NotificationCenter {
     private var observers: [(name: Notification.Name?, token: ObserverToken, block: (Notification) -> Void)] = []
 
     @discardableResult
-    public func addObserver(forName name: Notification.Name?, object: Any?, queue: Any?,
+    public func addObserver(forName name: Notification.Name?, object: AnyObject?, queue: AnyObject?,
                             using block: @escaping (Notification) -> Void) -> ObserverToken {
         let token = ObserverToken()
         observers.append((name, token, block))
         return token
     }
 
-    public func post(name: Notification.Name, object: Any?) {
+    public func post(name: Notification.Name, object: AnyObject?) {
         let note = Notification(name: name, object: object)
         for o in observers where o.name == nil || o.name == name { o.block(note) }
     }
 
-    public func removeObserver(_ token: Any) {
-        if let t = token as? ObserverToken {
-            observers.removeAll { $0.token === t }
-        }
+    public func removeObserver(_ token: ObserverToken) {
+        observers.removeAll { $0.token === token }
     }
 }
 
@@ -160,3 +159,24 @@ public final class NSMutableDictionary {
         set { storage[key] = newValue }
     }
 }
+
+#if hasFeature(Embedded)
+// The Embedded stdlib has no substring search (that lives in _StringProcessing);
+// a byte-window scan covers the games' contains(_:) calls.
+public extension String {
+    func contains(_ other: String) -> Bool {
+        let h = Array(utf8), n = Array(other.utf8)
+        if n.isEmpty { return true }
+        if n.count > h.count { return false }
+        for start in 0...(h.count - n.count) {
+            var match = true
+            for k in 0..<n.count where h[start + k] != n[k] {
+                match = false
+                break
+            }
+            if match { return true }
+        }
+        return false
+    }
+}
+#endif

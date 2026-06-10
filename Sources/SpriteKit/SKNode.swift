@@ -187,10 +187,11 @@ open class SKNode {
         gfx_translate(Float(position.x), Float(position.y))
         // We're rendering inside the SKView's outer scale(1,-1) Y-flip, so
         // Canvas2D's positive-rotate-clockwise convention appears as CCW on
-        // screen — which is exactly what SpriteKit's positive zRotation
-        // means. Pass zRotation through without inverting; the prior code
-        // negated it and rendered every rotation in the wrong direction.
-        if zRotation != 0 { gfx_rotate(Float(zRotation * 180.0 / Double.pi)) }
+        // SpriteKit's positive zRotation is counter-clockwise. The canvas runs
+        // y-flipped, which mirrors chirality: a positive canvas rotate reads
+        // clockwise on screen, so the angle is negated here (verified against
+        // the macOS master with AsteroidZ's ship).
+        if zRotation != 0 { gfx_rotate(Float(-zRotation * 180.0 / Double.pi)) }
         if xScale != 1 || yScale != 1 { gfx_scale(Float(xScale), Float(yScale)) }
         draw(alpha: eff)
         if children.count > 1 {
