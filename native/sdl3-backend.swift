@@ -47,6 +47,8 @@ final class Kit {
     var audioDevice: UInt32 = 0
     var voiceStreams: [OpaquePointer] = []
     var voiceLoops: [Int32] = []
+    var voiceIds: [Int32] = []
+    var nextVoice: Int32 = 1
     var storeKeys: [String] = []
     var storeVals: [String] = []
     var assetDir = "assets/sfx"
@@ -88,6 +90,22 @@ final class Kit {
             idx.append(base)
             idx.append(base + 2)
             idx.append(base + 3)
+        }
+        // round joins: a small fan at every vertex seals the segment quads,
+        // otherwise corners crack open and shimmer while shapes rotate
+        for p in pts {
+            let base = Int32(verts.count)
+            verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+            for j in 0...8 {
+                let t = Float(j) / 8 * 2 * Float.pi
+                verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + w * SDL_cosf(t), y: p.y + w * SDL_sinf(t)),
+                                        color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+            }
+            for j in 0..<8 {
+                idx.append(base)
+                idx.append(base + 1 + Int32(j))
+                idx.append(base + 2 + Int32(j))
+            }
         }
         SDL_RenderGeometry(renderer, nil, verts, Int32(verts.count), idx, Int32(idx.count))
     }
@@ -168,22 +186,45 @@ final class Kit {
         return id
     }
 
-    func play(_ id: Int32, volume: Float, loop: Bool) {
+    @discardableResult
+    func play(_ id: Int32, volume: Float, loop: Bool) -> Int32 {
         let i = Int(id)
-        guard i > 0, i < soundBufs.count, let buf = soundBufs[i] else { return }
+        guard i > 0, i < soundBufs.count, let buf = soundBufs[i] else { return -1 }
         if audioDevice == 0 {
             audioDevice = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nil)
-            guard audioDevice != 0 else { return }
+            guard audioDevice != 0 else { return -1 }
             _ = SDL_ResumeAudioDevice(audioDevice)
         }
         var spec = soundSpecs[i]
-        guard let stream = SDL_CreateAudioStream(&spec, nil) else { return }
+        guard let stream = SDL_CreateAudioStream(&spec, nil) else { return -1 }
         _ = SDL_SetAudioStreamGain(stream, max(0, min(1, volume / 100)))
         _ = SDL_BindAudioStream(audioDevice, stream)
         _ = SDL_PutAudioStreamData(stream, buf, Int32(soundLens[i]))
         if !loop { _ = SDL_FlushAudioStream(stream) }
+        let voice = nextVoice
+        nextVoice += 1
         voiceStreams.append(stream)
         voiceLoops.append(loop ? id : 0)
+        voiceIds.append(voice)
+        return voice
+    }
+
+    func stopVoice(_ voice: Int32) {
+        for i in 0..<voiceIds.count where voiceIds[i] == voice {
+            SDL_UnbindAudioStream(voiceStreams[i])
+            SDL_DestroyAudioStream(voiceStreams[i])
+            voiceStreams.remove(at: i)
+            voiceLoops.remove(at: i)
+            voiceIds.remove(at: i)
+            return
+        }
+    }
+
+    func setVoiceVolume(_ voice: Int32, _ volume: Float) {
+        for i in 0..<voiceIds.count where voiceIds[i] == voice {
+            _ = SDL_SetAudioStreamGain(voiceStreams[i], max(0, min(1, volume / 100)))
+            return
+        }
     }
 
     func reapVoices() {
@@ -203,6 +244,7 @@ final class Kit {
                 SDL_DestroyAudioStream(stream)
                 voiceStreams.remove(at: i)
                 voiceLoops.remove(at: i)
+                voiceIds.remove(at: i)
             } else {
                 i += 1
             }
@@ -465,7 +507,16 @@ func snd_by_name(_ name: UnsafePointer<CChar>?, _ len: Int32) -> Int32 {
 @_cdecl("snd_play")
 func snd_play(_ buffer: Int32, _ volume: Float, _ loop: Int32) -> Int32 {
     Kit.shared.play(buffer, volume: volume, loop: loop != 0)
-    return buffer
+}
+
+@_cdecl("snd_stop")
+func snd_stop(_ voice: Int32) {
+    Kit.shared.stopVoice(voice)
+}
+
+@_cdecl("snd_set_volume")
+func snd_set_volume(_ voice: Int32, _ volume: Float) {
+    Kit.shared.setVoiceVolume(voice, volume)
 }
 
 @_cdecl("store_get")

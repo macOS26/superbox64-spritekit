@@ -27,6 +27,7 @@ enum B2 {
         }
         var def = b2DefaultWorldDef()
         def.gravity = b2Vec2(x: gx, y: gy)
+        def.enableSleep = false
         def.maximumLinearSpeed = 4000.0
         world = b2CreateWorld(&def)
         bodies.removeAll()

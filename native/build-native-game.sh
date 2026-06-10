@@ -104,8 +104,8 @@ implemented = {
     "js_log", "gfx_clear", "gfx_save", "gfx_restore", "gfx_translate",
     "gfx_rotate", "gfx_scale", "gfx_set_alpha", "gfx_stroke_poly",
     "gfx_fill_poly", "gfx_fill_circle", "gfx_stroke_circle", "gfx_fill_rect",
-    "gfx_stroke_rect", "evt_poll", "snd_by_name", "snd_play", "store_get",
-    "store_set", "gp_connected",
+    "gfx_stroke_rect", "evt_poll", "snd_by_name", "snd_play", "snd_stop",
+    "snd_set_volume", "store_get", "store_set", "gp_connected",
 }
 lines = ['#include "KitABI.h"', "#include <stdlib.h>",
          "double _swift_stdlib_strtod_clocale(const char *str, char **end) { return strtod(str, end); }"]
@@ -132,9 +132,8 @@ if [ -f "$PWD/vendor/libSDL3.a" ]; then
   SDL_LINK=("$PWD/vendor/libSDL3.a"
             -framework Cocoa -framework QuartzCore -framework Metal
             -framework IOKit -framework CoreVideo -framework CoreAudio
-            -framework AudioToolbox -framework GameController
-            -framework ForceFeedback -framework Carbon -framework CoreHaptics
-            -framework CoreMedia -framework UniformTypeIdentifiers
+            -framework AudioToolbox -framework Carbon
+            -framework UniformTypeIdentifiers
             -liconv)
 fi
 clang -target arm64-apple-macos14 -o "$OUT" \
@@ -143,4 +142,5 @@ clang -target arm64-apple-macos14 -o "$OUT" \
   "$TC/lib/swift/embedded/arm64-apple-macos/libswiftUnicodeDataTables.a" \
   -dead_strip
 
-echo "✓ $OUT ($(stat -f%z "$OUT") bytes) - native, no wasm, same game source"
+strip "$OUT" 2>/dev/null || true
+echo "✓ $OUT ($(stat -f%z "$OUT") bytes, stripped) - native, no wasm, same game source"
