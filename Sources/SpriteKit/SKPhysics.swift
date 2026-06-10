@@ -34,7 +34,20 @@ public final class SKPhysicsBody {
     public var isDynamic = true
     public var affectedByGravity = true
     public var allowsRotation = true
-    public var velocity = CGVector.zero { didSet { velocityDirty = true } }
+    var _velocity = CGVector.zero
+    public var velocity: CGVector {
+        get {
+            if bodyId >= 0 {
+                let (vx, vy) = B2.getVelocity(bodyId)
+                return CGVector(dx: CGFloat(vx), dy: CGFloat(vy))
+            }
+            return _velocity
+        }
+        set {
+            _velocity = newValue
+            velocityDirty = true
+        }
+    }
     public var linearDamping: CGFloat = 0.1
     public var friction: CGFloat = 0.2
     public var restitution: CGFloat = 0.2
@@ -687,7 +700,7 @@ public final class SKPhysicsWorld {
         createPendingJoints()                                 // joints added before their bodies
         applyFields(scene, dt: dt)                            // SKFieldNode → B2.applyForce
         for (_, b) in SKPhysicsWorld.registry where b.velocityDirty {
-            B2.setVelocity(b.bodyId, Float(b.velocity.dx), Float(b.velocity.dy))
+            B2.setVelocity(b.bodyId, Float(b._velocity.dx), Float(b._velocity.dy))
             b.velocityDirty = false
         }
         for (_, b) in SKPhysicsWorld.registry where b.angularDirty {

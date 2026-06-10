@@ -190,6 +190,12 @@ enum B2 {
         bodies[Int(id)] = nil
     }
 
+    static func getVelocity(_ id: Int32) -> (Float, Float) {
+        guard let b = body(id) else { return (0, 0) }
+        let v = b2Body_GetLinearVelocity(b)
+        return (v.x, v.y)
+    }
+
     static func setVelocity(_ id: Int32, _ vx: Float, _ vy: Float) {
         guard let b = body(id) else { return }
         b2Body_SetLinearVelocity(b, b2Vec2(x: vx, y: vy))
