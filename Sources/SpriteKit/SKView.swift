@@ -129,7 +129,6 @@ public final class SKView {
         let hadInput = pollEvents(s)
         s.stepActions(dt)
         SKAudioNode.reapDetached()
-        SKAudioNode.reapDetached()
         s.update(elapsed)
         s.physicsWorld.step(dt, scene: s)
         s.didSimulatePhysics()
