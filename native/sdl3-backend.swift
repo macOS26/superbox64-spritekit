@@ -71,6 +71,13 @@ final class Kit {
 
     func strokePoly(_ pts: [SDL_FPoint], closed: Bool, thickness: Float, rgba: UInt32) {
         if pts.count < 2 { return }
+        // degenerate paths (pathless container shapes) must not leave a dot
+        var minX = pts[0].x, maxX = pts[0].x, minY = pts[0].y, maxY = pts[0].y
+        for p in pts {
+            minX = min(minX, p.x); maxX = max(maxX, p.x)
+            minY = min(minY, p.y); maxY = max(maxY, p.y)
+        }
+        if maxX - minX < 0.01, maxY - minY < 0.01 { return }
         let color = fcolor(rgba)
         let w = max(1, thickness * mat.lengthScale) / 2
         var verts = [SDL_Vertex]()
