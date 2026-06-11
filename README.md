@@ -1,4 +1,4 @@
-# superbox64-spritekit
+# SuperBox64Kit
 
 A Swift reimplementation of Apple's SpriteKit that compiles to WebAssembly via WASI Preview 1. A macOS or iOS SpriteKit game adds this package, keeps every `import SpriteKit` unchanged, and runs in any modern browser with no source edits.
 
@@ -6,7 +6,7 @@ No Emscripten. No loading screens. No watermarks.
 
 **Live demo:** [boss-man.us/play](https://boss-man.us/play)
 
-**Runtime:** [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit) — the JavaScript runtime that loads and drives the WASM binary
+**Runtime:** [WasmKit](https://github.com/SuperBox64/WasmKit) — the JavaScript runtime that loads and drives the WASM binary
 
 ---
 
@@ -14,7 +14,7 @@ No Emscripten. No loading screens. No watermarks.
 
 Every game built on this framework compiles three ways from the same source
 tree: a wasm for the browser, a wasm "cartridge" played by a native host
-(see superbox64-wasmkit/cartridge), and a plain native binary with no wasm
+(see WasmKit/cartridge), and a plain native binary with no wasm
 at all. `native/` holds the SDL3 backend that fills the KitABI surface
 in-process plus `build-native-game.sh`, which links game + framework +
 Box2D v3 into one Embedded Swift executable (AsteroidZ: 662 KB). The web
@@ -28,16 +28,16 @@ build is untouched; the KitABI import attribute only applies under
 ```swift
 // Package.swift
 dependencies: [
-    .package(url: "https://github.com/macOS26/superbox64-spritekit", branch: "main"),
+    .package(url: "https://github.com/SuperBox64/SuperBox64Kit", branch: "main"),
 ],
 targets: [
     .executableTarget(
         name: "MyGame",
         dependencies: [
-            .product(name: "SpriteKit",   package: "superbox64-spritekit"),
-            .product(name: "AppKit",      package: "superbox64-spritekit"),
-            .product(name: "GameKit",     package: "superbox64-spritekit"),
-            .product(name: "AVFoundation",package: "superbox64-spritekit"),
+            .product(name: "SpriteKit",   package: "SuperBox64Kit"),
+            .product(name: "AppKit",      package: "SuperBox64Kit"),
+            .product(name: "GameKit",     package: "SuperBox64Kit"),
+            .product(name: "AVFoundation",package: "SuperBox64Kit"),
         ],
         swiftSettings: [.defaultIsolation(MainActor.self)],
         linkerSettings: [.unsafeFlags([
@@ -110,7 +110,7 @@ xcrun --toolchain swift swift build \
     -c release
 ```
 
-The output is a WASM reactor at `.build/wasm32-unknown-wasip1/release/MyGame.wasm`. Serve it with [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit).
+The output is a WASM reactor at `.build/wasm32-unknown-wasip1/release/MyGame.wasm`. Serve it with [WasmKit](https://github.com/SuperBox64/WasmKit).
 
 ---
 
@@ -171,7 +171,7 @@ Why v3 instead of staying on 2.4: v3 is pure C (Embedded Swift imports it direct
 
 ## How a frame renders
 
-`SKView.render` walks the scene tree like Apple's compositor (transforms, anchor points, z-order, alpha, color blending) and emits flat calls over a ~100-function C ABI that the [wasmkit runtime](https://github.com/macOS26/superbox64-wasmkit) implements in the browser:
+`SKView.render` walks the scene tree like Apple's compositor (transforms, anchor points, z-order, alpha, color blending) and emits flat calls over a ~100-function C ABI that the [wasmkit runtime](https://github.com/SuperBox64/WasmKit) implements in the browser:
 
 - `SKSpriteNode` → `gfx_draw_image(handle, srcRect, dstRect, tint)`; textures are browser-decoded images addressed by handle, and `SKTexture(rect:in:)` sub-rects give atlas sampling.
 - `SKShapeNode` / color sprites → `gfx_fill_rect` / `gfx_fill_poly` / `gfx_stroke_*`; `SKLabelNode` → `gfx_draw_text` with real font metrics.
@@ -207,7 +207,7 @@ The reference Embedded build pipeline (exact flags, module order, link line) liv
 
 ## Related
 
-- [superbox64-wasmkit](https://github.com/macOS26/superbox64-wasmkit) — JavaScript runtime, host page, and C++ SFML shim
+- [WasmKit](https://github.com/SuperBox64/WasmKit) — JavaScript runtime, host page, and C++ SFML shim
 - [Boss-Man](https://github.com/macOS26/Boss-Man) — full arcade game built with this engine, shipping on 6 platforms from one Swift source
 
 ---
