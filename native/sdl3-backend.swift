@@ -120,8 +120,10 @@ final class Kit {
             idx.append(base + 3)
         }
         // round joins: a small fan at every vertex seals the segment quads,
-        // otherwise corners crack open and shimmer while shapes rotate
-        for p in pts {
+        // otherwise corners crack open and shimmer while shapes rotate.
+        // Skipped in additive mode where the fan overlapping its own line
+        // doubles the brightness into a hot dot at every end.
+        for p in additive ? [] : pts {
             let base = Int32(verts.count)
             verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
             for j in 0...8 {
