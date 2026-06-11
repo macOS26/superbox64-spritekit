@@ -29,6 +29,7 @@ enum B2 {
         def.gravity = b2Vec2(x: gx, y: gy)
         def.enableSleep = false
         def.maximumLinearSpeed = 4000.0
+        def.restitutionThreshold = 0.0
         world = b2CreateWorld(&def)
         bodies.removeAll()
         joints.removeAll()
