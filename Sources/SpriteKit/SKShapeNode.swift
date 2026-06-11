@@ -164,6 +164,7 @@ public final class SKShapeNode: SKNode {
 
     override func draw(alpha: CGFloat) {
         gfx_set_alpha(Float(alpha))
+        if blendMode == .add { gfx_set_blend(1) }
         let hasFill = fillColor.a > 0
         let hasStroke = strokeColor.a > 0 && lineWidth > 0
         // Activate Canvas2D shadowBlur for this draw if the node opted in. dy
@@ -201,6 +202,7 @@ public final class SKShapeNode: SKNode {
                 }
             }
         }
+        if blendMode == .add { gfx_set_blend(0) }
     }
 }
 

@@ -128,7 +128,7 @@ implemented = {
     "js_log", "gfx_clear", "gfx_save", "gfx_restore", "gfx_translate",
     "gfx_rotate", "gfx_scale", "gfx_set_alpha", "gfx_stroke_poly",
     "gfx_fill_poly", "gfx_fill_circle", "gfx_stroke_circle", "gfx_fill_rect",
-    "gfx_stroke_rect", "evt_poll", "snd_by_name", "snd_play", "snd_stop",
+    "gfx_stroke_rect", "gfx_set_blend", "evt_poll", "snd_by_name", "snd_play", "snd_stop",
     "snd_set_volume", "snd_set_pan", "store_get", "store_set", "gp_connected",
 }
 lines = ['#include "KitABI.h"', "#include <stdlib.h>",
