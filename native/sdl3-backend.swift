@@ -420,7 +420,7 @@ func toLogical(_ window: OpaquePointer?, _ x: Float, _ y: Float) -> (Int32, Int3
 
 // MARK: - host lifecycle (called by main)
 
-func kitHostInit() {
+func kitHostInit(appName: String = "KitGame") {
     guard SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) else { fatalError("SDL_Init failed") }
     let k = Kit.shared
     let ok = "AsteroidZ - Embedded Swift DIRECT native (no wasm)".withCString {
@@ -431,6 +431,10 @@ func kitHostInit() {
     guard ok else { fatalError("window failed") }
     _ = SDL_SetRenderVSync(k.renderer, 1)
     _ = SDL_SetRenderDrawBlendMode(k.renderer, SDL_BLENDMODE_BLEND)
+    if let pref = ("SuperBox64".withCString { org in appName.withCString { SDL_GetPrefPath(org, $0) } }) {
+        k.storePath = String(cString: pref) + "store.tsv"
+        SDL_free(pref)
+    }
     k.loadStore()
 }
 
