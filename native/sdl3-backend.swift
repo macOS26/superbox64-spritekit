@@ -51,11 +51,11 @@ final class Kit {
     var voicePans: [Float] = []
     var nextVoice: Int32 = 1
     var additive = false
-    var whiteTex: OpaquePointer? = nil
+    var whiteTex: UnsafeMutablePointer<SDL_Texture>? = nil
 
     // 1x1 white texture: RenderGeometry honors TEXTURE blend modes, the
     // reliable route to alpha and additive (matchstick crossings brighten)
-    func geometryTexture() -> OpaquePointer? {
+    func geometryTexture() -> UnsafeMutablePointer<SDL_Texture>? {
         if whiteTex == nil {
             whiteTex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
                                          SDL_TEXTUREACCESS_STATIC, 1, 1)
