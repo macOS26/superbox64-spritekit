@@ -42,6 +42,7 @@ public final class SKAudioNode: SKNode {
     static func reapDetached() {
         for a in activeVoices where a.tickStamp != frameStamp {
             if a.voice >= 0 {
+                print("[reap] stopping detached voice \(a.voice) file \(a.fileName)")
                 snd_stop(a.voice)
                 a.voice = -1
             }
