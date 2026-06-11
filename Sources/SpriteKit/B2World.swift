@@ -22,7 +22,7 @@ enum B2 {
     static func reset(_ gx: Float, _ gy: Float) {
         if let w = world { b2DestroyWorld(w) }
         if !unitsConfigured {
-            b2SetLengthUnitsPerMeter(100.0)
+            b2SetLengthUnitsPerMeter(150.0)
             unitsConfigured = true
         }
         var def = b2DefaultWorldDef()
