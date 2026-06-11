@@ -50,6 +50,22 @@ final class Kit {
     var voiceIds: [Int32] = []
     var voicePans: [Float] = []
     var nextVoice: Int32 = 1
+    var additive = false
+    var whiteTex: OpaquePointer? = nil
+
+    // 1x1 white texture: RenderGeometry honors TEXTURE blend modes, the
+    // reliable route to alpha and additive (matchstick crossings brighten)
+    func geometryTexture() -> OpaquePointer? {
+        if whiteTex == nil {
+            whiteTex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+                                         SDL_TEXTUREACCESS_STATIC, 1, 1)
+            var px: UInt32 = 0xFFFFFFFF
+            var rect = SDL_Rect(x: 0, y: 0, w: 1, h: 1)
+            _ = SDL_UpdateTexture(whiteTex, &rect, &px, 4)
+        }
+        _ = SDL_SetTextureBlendMode(whiteTex, additive ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND)
+        return whiteTex
+    }
     var storeKeys: [String] = []
     var storeVals: [String] = []
     var assetDir = "assets/sfx"
@@ -119,7 +135,7 @@ final class Kit {
                 idx.append(base + 2 + Int32(j))
             }
         }
-        SDL_RenderGeometry(renderer, nil, verts, Int32(verts.count), idx, Int32(idx.count))
+        SDL_RenderGeometry(renderer, geometryTexture(), verts, Int32(verts.count), idx, Int32(idx.count))
     }
 
     func fillPoly(_ pts: [SDL_FPoint], rgba: UInt32) {
@@ -136,7 +152,7 @@ final class Kit {
             idx.append(Int32(i))
             idx.append(Int32(i + 1))
         }
-        SDL_RenderGeometry(renderer, nil, verts, Int32(verts.count), idx, Int32(idx.count))
+        SDL_RenderGeometry(renderer, geometryTexture(), verts, Int32(verts.count), idx, Int32(idx.count))
     }
 
     func circlePts(_ cx: Float, _ cy: Float, _ r: Float) -> [SDL_FPoint] {
@@ -470,6 +486,7 @@ func gfx_clear(_ rgba: UInt32) {
                 f: (Float(ph) - LOGICAL_H * sc) / 2)
     k.stack = []
     k.alpha = 1
+        k.additive = false
     let c = k.fcolor(rgba)
     _ = SDL_SetRenderDrawColorFloat(k.renderer, c.r, c.g, c.b, 1)
     _ = SDL_RenderClear(k.renderer)
@@ -499,6 +516,9 @@ func gfx_scale(_ sx: Float, _ sy: Float) {
 
 @_cdecl("gfx_set_alpha")
 func gfx_set_alpha(_ a: Float) { Kit.shared.alpha = a }
+
+@_cdecl("gfx_set_blend")
+func gfx_set_blend(_ mode: Int32) { Kit.shared.additive = mode == 1 }
 
 @_cdecl("gfx_stroke_poly")
 func gfx_stroke_poly(_ xy: UnsafePointer<Float>?, _ n: Int32, _ closed: Int32, _ t: Float, _ rgba: UInt32) {
