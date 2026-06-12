@@ -151,7 +151,14 @@ clang -c -O2 -I "$FW/Sources/KitABI/include" -target arm64-apple-macos14 "$FW/So
 
 echo "→ link"
 SDL_LINK=(-L "$SYS_LIB" -lSDL3)
-if [ -f "$PWD/vendor/libSDL3.a" ]; then
+if [ -n "${SDL_STATIC_A:-}" ] && [ -f "$SDL_STATIC_A" ]; then
+  SDL_LINK=("$SDL_STATIC_A"
+            -framework Cocoa -framework QuartzCore -framework Metal
+            -framework IOKit -framework CoreVideo -framework CoreAudio
+            -framework AudioToolbox -framework Carbon
+            -framework UniformTypeIdentifiers
+            -liconv)
+elif [ -f "$PWD/vendor/libSDL3.a" ]; then
   # static minimal SDL3 baked in: single-file binary, only used subsystems
   SDL_LINK=("$PWD/vendor/libSDL3.a"
             -framework Cocoa -framework QuartzCore -framework Metal

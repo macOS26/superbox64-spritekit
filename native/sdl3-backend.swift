@@ -459,6 +459,7 @@ func kitHostInit(appName: String = "KitGame") {
 // reaches the game and lands in kitEscapePressed instead.
 nonisolated(unsafe) var kitEscapeReserved = false
 nonisolated(unsafe) var kitEscapePressed = false
+nonisolated(unsafe) var kitDroppedFile: String? = nil
 
 func kitHostPump() -> Bool {
     let k = Kit.shared
@@ -467,6 +468,10 @@ func kitHostPump() -> Bool {
     while SDL_PollEvent(&e) {
         if e.type == SDL_EVENT_QUIT.rawValue {
             alive = false
+        } else if e.type == SDL_EVENT_DROP_FILE.rawValue {
+            if let dropped = e.drop.data {
+                kitDroppedFile = String(cString: dropped)
+            }
         } else if e.type == SDL_EVENT_KEY_DOWN.rawValue, e.key.scancode == SDL_SCANCODE_F, !e.key.`repeat` {
             k.fullscreen = !k.fullscreen
             _ = SDL_SetWindowFullscreen(k.window, k.fullscreen)
