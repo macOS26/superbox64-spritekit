@@ -145,6 +145,7 @@ implemented = {
     "tts_set_robotic_voices", "tts_set_female_voices",
     "gp_button", "gp_button_value", "gp_axis", "gp_map_to_keys",
     "key_pressed", "mouse_x", "mouse_y", "mouse_button",
+    "gfx_warp_draw", "gfx_3d_draw_billboard",
 }
 lines = ['#include "KitABI.h"', "#include <stdlib.h>",
          "double _swift_stdlib_strtod_clocale(const char *str, char **end) { return strtod(str, end); }"]

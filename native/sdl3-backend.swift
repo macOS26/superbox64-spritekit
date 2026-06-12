@@ -2267,3 +2267,52 @@ func tts_set_robotic_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {}
 
 @_cdecl("tts_set_female_voices")
 func tts_set_female_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {}
+
+// MARK: - warp + billboard
+
+@_cdecl("gfx_warp_draw")
+func gfx_warp_draw(_ srcImg: Int32, _ cols: Int32, _ rows: Int32,
+                   _ srcUV: UnsafePointer<Float>?, _ dstXY: UnsafePointer<Float>?,
+                   _ dstX: Float, _ dstY: Float, _ dstW: Float, _ dstH: Float, _ colorRgba: UInt32) {
+    let k = Kit.shared
+    guard srcImg > 0, Int(srcImg) < k.images.count,
+          let rec = k.images[Int(srcImg)], let tex = rec.tex else { return }
+    guard let srcUV, let dstXY, cols > 0, rows > 0 else { return }
+    _ = SDL_SetTextureBlendMode(tex, k.currentBlend())
+    let a = Float(colorRgba & 0xFF) / 255 * k.alpha
+    let color = SDL_FColor(r: 1, g: 1, b: 1, a: a)
+    let vCount = Int((cols + 1) * (rows + 1))
+    var verts = [SDL_Vertex]()
+    verts.reserveCapacity(vCount)
+    for i in 0..<vCount {
+        let px = dstX + dstXY[i * 2] * dstW
+        let py = dstY + dstXY[i * 2 + 1] * dstH
+        let pos = k.mat.apply(px, py)
+        let uv = SDL_FPoint(x: srcUV[i * 2], y: srcUV[i * 2 + 1])
+        verts.append(SDL_Vertex(position: pos, color: color, tex_coord: uv))
+    }
+    var idx = [Int32]()
+    idx.reserveCapacity(Int(cols * rows * 6))
+    let stride = Int(cols + 1)
+    for r in 0..<Int(rows) {
+        for c in 0..<Int(cols) {
+            let tl = Int32(r * stride + c)
+            let tr = tl + 1
+            let bl = Int32((r + 1) * stride + c)
+            let br = bl + 1
+            idx.append(contentsOf: [tl, tr, br, tl, br, bl])
+        }
+    }
+    SDL_RenderGeometry(k.renderer, tex, verts, Int32(vCount), idx, Int32(idx.count))
+}
+
+@_cdecl("gfx_3d_draw_billboard")
+func gfx_3d_draw_billboard(_ srcImg: Int32, _ camX: Float, _ camY: Float, _ camZ: Float,
+                            _ dstX: Float, _ dstY: Float, _ dstW: Float, _ dstH: Float, _ colorRgba: UInt32) {
+    let k = Kit.shared
+    guard srcImg > 0, Int(srcImg) < k.images.count,
+          let rec = k.images[Int(srcImg)], rec.tex != nil else { return }
+    let a = Float(colorRgba & 0xFF) / 255 * k.alpha
+    let color = SDL_FColor(r: 1, g: 1, b: 1, a: a)
+    k.drawTexturedQuad(rec.tex, dstX, dstY, dstW, dstH, 0, 0, 1, 1, color)
+}
