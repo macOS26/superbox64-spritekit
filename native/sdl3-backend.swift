@@ -482,6 +482,8 @@ final class Kit {
         }
         if maxX - minX < 0.01, maxY - minY < 0.01 { return }
         let color = fcolor(rgba)
+        var clear = color
+        clear.a = 0
         let w = max(1, thickness * mat.lengthScale) / 2
         var verts = [SDL_Vertex]()
         var idx = [Int32]()
@@ -492,8 +494,10 @@ final class Kit {
             let dx = p2.x - p1.x
             let dy = p2.y - p1.y
             let len = max(SDL_sqrtf(dx * dx + dy * dy), 0.0001)
-            let nx = -dy / len * w
-            let ny = dx / len * w
+            let ux = -dy / len
+            let uy = dx / len
+            let nx = ux * w
+            let ny = uy * w
             let base = Int32(verts.count)
             verts.append(SDL_Vertex(position: SDL_FPoint(x: p1.x + nx, y: p1.y + ny), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
             verts.append(SDL_Vertex(position: SDL_FPoint(x: p2.x + nx, y: p2.y + ny), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
@@ -505,11 +509,31 @@ final class Kit {
             idx.append(base)
             idx.append(base + 2)
             idx.append(base + 3)
+            if !additive {
+                let fb = Int32(verts.count)
+                verts.append(SDL_Vertex(position: SDL_FPoint(x: p1.x + nx + ux, y: p1.y + ny + uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                verts.append(SDL_Vertex(position: SDL_FPoint(x: p2.x + nx + ux, y: p2.y + ny + uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                verts.append(SDL_Vertex(position: SDL_FPoint(x: p2.x - nx - ux, y: p2.y - ny - uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                verts.append(SDL_Vertex(position: SDL_FPoint(x: p1.x - nx - ux, y: p1.y - ny - uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                idx.append(base)
+                idx.append(base + 1)
+                idx.append(fb + 1)
+                idx.append(base)
+                idx.append(fb + 1)
+                idx.append(fb)
+                idx.append(base + 3)
+                idx.append(base + 2)
+                idx.append(fb + 2)
+                idx.append(base + 3)
+                idx.append(fb + 2)
+                idx.append(fb + 3)
+            }
         }
         // round joins: a small fan at every vertex seals the segment quads,
         // otherwise corners crack open and shimmer while shapes rotate.
         // Skipped in additive mode where the fan overlapping its own line
-        // doubles the brightness into a hot dot at every end.
+        // doubles the brightness into a hot dot at every end. The fan rim
+        // carries its own feather ring.
         for p in additive ? [] : pts {
             let base = Int32(verts.count)
             verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
@@ -518,9 +542,20 @@ final class Kit {
                 verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + w * SDL_cosf(t), y: p.y + w * SDL_sinf(t)),
                                         color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
             }
+            for j in 0...8 {
+                let t = Float(j) / 8 * 2 * Float.pi
+                verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + (w + 1) * SDL_cosf(t), y: p.y + (w + 1) * SDL_sinf(t)),
+                                        color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+            }
             for j in 0..<8 {
                 idx.append(base)
                 idx.append(base + 1 + Int32(j))
+                idx.append(base + 2 + Int32(j))
+                idx.append(base + 1 + Int32(j))
+                idx.append(base + 10 + Int32(j))
+                idx.append(base + 11 + Int32(j))
+                idx.append(base + 1 + Int32(j))
+                idx.append(base + 11 + Int32(j))
                 idx.append(base + 2 + Int32(j))
             }
         }
@@ -531,7 +566,7 @@ final class Kit {
         if pts.count < 3 { return }
         let color = fcolor(rgba)
         var verts = [SDL_Vertex]()
-        verts.reserveCapacity(pts.count)
+        verts.reserveCapacity(pts.count * 2)
         for p in pts {
             verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
         }
@@ -540,6 +575,53 @@ final class Kit {
             idx.append(0)
             idx.append(Int32(i))
             idx.append(Int32(i + 1))
+        }
+
+        // 1-device-px feather ring along the boundary: the edge smoothing
+        // Canvas2D paths get for free; vertex alpha ramps to clear outward
+        if !additive {
+            let n = pts.count
+            var area: Float = 0
+            for i in 0..<n {
+                let p1 = pts[i]
+                let p2 = pts[(i + 1) % n]
+                area += p1.x * p2.y - p2.x * p1.y
+            }
+            let sign: Float = area >= 0 ? 1 : -1
+            var clear = color
+            clear.a = 0
+            let base = Int32(verts.count)
+            for i in 0..<n {
+                let prev = pts[(i + n - 1) % n]
+                let cur = pts[i]
+                let next = pts[(i + 1) % n]
+                var n1x = (cur.y - prev.y) * sign
+                var n1y = (prev.x - cur.x) * sign
+                var n2x = (next.y - cur.y) * sign
+                var n2y = (cur.x - next.x) * sign
+                let l1 = max(SDL_sqrtf(n1x * n1x + n1y * n1y), 0.0001)
+                n1x /= l1
+                n1y /= l1
+                let l2 = max(SDL_sqrtf(n2x * n2x + n2y * n2y), 0.0001)
+                n2x /= l2
+                n2y /= l2
+                var nx = n1x + n2x
+                var ny = n1y + n2y
+                let l = max(SDL_sqrtf(nx * nx + ny * ny), 0.0001)
+                nx /= l
+                ny /= l
+                verts.append(SDL_Vertex(position: SDL_FPoint(x: cur.x + nx, y: cur.y + ny),
+                                        color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+            }
+            for i in 0..<n {
+                let j = (i + 1) % n
+                idx.append(Int32(i))
+                idx.append(Int32(j))
+                idx.append(base + Int32(i))
+                idx.append(Int32(j))
+                idx.append(base + Int32(j))
+                idx.append(base + Int32(i))
+            }
         }
         SDL_RenderGeometry(renderer, geometryTexture(), verts, Int32(verts.count), idx, Int32(idx.count))
     }
