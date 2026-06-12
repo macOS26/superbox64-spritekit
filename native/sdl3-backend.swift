@@ -323,6 +323,21 @@ final class Kit {
         }
     }
 
+    func stopAllVoices() {
+        for stream in voiceStreams {
+            SDL_UnbindAudioStream(stream)
+            SDL_DestroyAudioStream(stream)
+        }
+        voiceStreams.removeAll()
+        voiceLoops.removeAll()
+        voiceIds.removeAll()
+        voicePans.removeAll()
+        soundSpecs = [SDL_AudioSpec()]
+        soundBufs = [nil]
+        soundLens = [0]
+        soundNames = [:]
+    }
+
     func reapVoices() {
         var i = 0
         while i < voiceStreams.count {
