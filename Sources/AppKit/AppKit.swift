@@ -67,7 +67,7 @@ public final class NSBezierPath {
 // NSScreen / NSWindow stubs so module-level references compile. Games that
 // query window size should read SKScene.size instead.
 public final class NSScreen {
-    public static let main: NSScreen? = NSScreen()
+    nonisolated(unsafe) public static let main: NSScreen? = NSScreen()
     public var frame: CGRect = .zero
     public var backingScaleFactor: CGFloat = 1
 }
@@ -81,7 +81,7 @@ public final class NSWindow {
 // modal, so runModal() reports the first (destructive/OK) button — matching the
 // web's prior no-prompt behaviour. macOS uses the real AppKit NSAlert.
 public enum NSApplication {
-    public struct ModalResponse: Equatable {
+    public struct ModalResponse: Equatable, Sendable {
         public let rawValue: Int
         public init(rawValue: Int) { self.rawValue = rawValue }
         public static let alertFirstButtonReturn = ModalResponse(rawValue: 1000)

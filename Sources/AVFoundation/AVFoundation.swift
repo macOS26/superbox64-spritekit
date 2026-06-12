@@ -97,7 +97,7 @@ public final class AVAudioPlayer {
 
 // ---- AVAudioSession --------------------------------------------------------
 public final class AVAudioSession {
-    public static let sharedInstance = AVAudioSession()
+    nonisolated(unsafe) public static let sharedInstance = AVAudioSession()
     public struct Category: RawRepresentable, Sendable {
         public let rawValue: String
         public init(rawValue: String) { self.rawValue = rawValue }

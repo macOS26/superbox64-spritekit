@@ -111,7 +111,7 @@ public final class DispatchQueue {
 // MARK: - Notification / NotificationCenter
 
 public struct Notification {
-    public struct Name: Hashable, RawRepresentable {
+    public struct Name: Hashable, RawRepresentable, Sendable {
         public let rawValue: String
         public init(rawValue: String) { self.rawValue = rawValue }
         public init(_ raw: String) { self.rawValue = raw }
