@@ -143,6 +143,8 @@ implemented = {
     "win_request_fullscreen", "win_exit_fullscreen", "win_download",
     "tts_speak", "tts_cancel", "tts_set_preferred_voices",
     "tts_set_robotic_voices", "tts_set_female_voices",
+    "gp_button", "gp_button_value", "gp_axis", "gp_map_to_keys",
+    "key_pressed", "mouse_x", "mouse_y", "mouse_button",
 }
 lines = ['#include "KitABI.h"', "#include <stdlib.h>",
          "double _swift_stdlib_strtod_clocale(const char *str, char **end) { return strtod(str, end); }"]

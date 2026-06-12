@@ -104,6 +104,21 @@ final class Kit {
     var additive = false
     var composite: Int32 = 0
     var deadTextures: [UnsafeMutablePointer<SDL_Texture>] = []
+
+    var gamepads: [OpaquePointer?] = [nil, nil, nil, nil]
+    var gamepadInstanceIds: [UInt32] = [0, 0, 0, 0]
+    var mapToKeys = false
+
+    var lineJoin: Int32 = 1
+    var lineCap: Int32 = 1
+    var lineMiterLimit: Float = 10
+
+    var mouseLogX: Int32 = 0
+    var mouseLogY: Int32 = 0
+    var mouseHeld: [Bool] = [false, false, false]
+    var sfKeyHeld: [Bool] = Array(repeating: false, count: 128)
+
+    var ttsPreferredVoice = ""
     var whiteTex: UnsafeMutablePointer<SDL_Texture>? = nil
 
     // Canvas2D globalCompositeOperation table; destination-in/out and screen
@@ -335,6 +350,57 @@ final class Kit {
     var ttsSynthPath = ""
     var ttsVoice: Int32 = 0
 
+    func gpButtonValue(_ slot: Int, _ webButton: Int32) -> Float {
+        guard slot >= 0, slot < 4, let pad = gamepads[slot] else { return 0 }
+        switch webButton {
+        case 0: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_SOUTH) ? 1 : 0
+        case 1: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_EAST) ? 1 : 0
+        case 2: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_WEST) ? 1 : 0
+        case 3: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_NORTH) ? 1 : 0
+        case 4: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) ? 1 : 0
+        case 5: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER) ? 1 : 0
+        case 6: return max(0, Float(SDL_GetGamepadAxis(pad, SDL_GAMEPAD_AXIS_LEFT_TRIGGER)) / 32767)
+        case 7: return max(0, Float(SDL_GetGamepadAxis(pad, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER)) / 32767)
+        case 8: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_BACK) ? 1 : 0
+        case 9: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_START) ? 1 : 0
+        case 10: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_LEFT_STICK) ? 1 : 0
+        case 11: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_RIGHT_STICK) ? 1 : 0
+        case 12: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_UP) ? 1 : 0
+        case 13: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_DOWN) ? 1 : 0
+        case 14: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_LEFT) ? 1 : 0
+        case 15: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT) ? 1 : 0
+        case 16: return SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_GUIDE) ? 1 : 0
+        default: return 0
+        }
+    }
+
+    func gpAxisValue(_ slot: Int, _ webAxis: Int32) -> Float {
+        guard slot >= 0, slot < 4, let pad = gamepads[slot] else { return 0 }
+        let sdlAxis: SDL_GamepadAxis
+        switch webAxis {
+        case 0: sdlAxis = SDL_GAMEPAD_AXIS_LEFTX
+        case 1: sdlAxis = SDL_GAMEPAD_AXIS_LEFTY
+        case 2: sdlAxis = SDL_GAMEPAD_AXIS_RIGHTX
+        case 3: sdlAxis = SDL_GAMEPAD_AXIS_RIGHTY
+        default: return 0
+        }
+        let v = SDL_GetGamepadAxis(pad, sdlAxis)
+        return Float(v) / (v < 0 ? 32768 : 32767)
+    }
+
+    func sdlButtonToSfKey(_ btn: UInt8) -> Int32 {
+        switch Int32(btn) {
+        case SDL_GAMEPAD_BUTTON_SOUTH.rawValue: return 57
+        case SDL_GAMEPAD_BUTTON_BACK.rawValue: return 36
+        case SDL_GAMEPAD_BUTTON_START.rawValue: return 58
+        case SDL_GAMEPAD_BUTTON_DPAD_UP.rawValue: return 73
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN.rawValue: return 74
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT.rawValue: return 71
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT.rawValue: return 72
+        default: return -1
+        }
+    }
+
     func ttsToolPath() -> String? {
         if let ttsTool { return ttsTool.isEmpty ? nil : ttsTool }
         var found = ""
@@ -379,7 +445,7 @@ final class Kit {
             ttsQueue.append((text, rate))
             return true
         }
-        let key = String(ttsWpm(rate)) + "|" + text
+        let key = String(ttsWpm(rate)) + "|" + ttsPreferredVoice + "|" + text
         if let id = ttsCache[key] {
             ttsVoice = play(id, volume: 100, loop: false)
             if ttsVoice > 0 {
@@ -500,7 +566,8 @@ final class Kit {
         if tool.hasSuffix("/say") {
             if ttsWarm == nil { ttsWarmup() }
             guard let warm = ttsWarm, let input = SDL_GetProcessInput(warm) else { return false }
-            let line = "[[rate " + wpm + "]] " + text + "\n"
+            let voiceCmd = ttsPreferredVoice.isEmpty ? "" : ("[[voice " + ttsPreferredVoice + "]] ")
+            let line = voiceCmd + "[[rate " + wpm + "]] " + text + "\n"
             let bytes = Array(line.utf8)
             _ = bytes.withUnsafeBufferPointer { SDL_WriteIO(input, $0.baseAddress, $0.count) }
             _ = SDL_CloseIO(input)
@@ -538,7 +605,10 @@ final class Kit {
         ttsSynthPath = storePath + ".tts.wav"
         var args: [String]
         if tool.hasSuffix("/say") {
-            args = [tool, "-o", ttsSynthPath, "--data-format=LEI16@22050", "-r", wpm, text]
+            var a = [tool, "-o", ttsSynthPath, "--data-format=LEI16@22050"]
+            if !ttsPreferredVoice.isEmpty { a += ["-v", ttsPreferredVoice] }
+            a += ["-r", wpm, text]
+            args = a
         } else if tool.hasSuffix("spd-say") {
             return
         } else {
@@ -554,7 +624,7 @@ final class Kit {
         for p in argv where p != nil { SDL_free(p) }
         guard let proc else { return }
         ttsSynth = proc
-        ttsSynthKey = wpm + "|" + text
+        ttsSynthKey = wpm + "|" + ttsPreferredVoice + "|" + text
     }
 
     func assetBytes(_ name: String) -> [UInt8]? {
@@ -824,76 +894,131 @@ final class Kit {
         let w = max(1, thickness * mat.lengthScale) / 2
         var verts = [SDL_Vertex]()
         var idx = [Int32]()
-        let segs = closed ? pts.count : pts.count - 1
+        let n = pts.count
+        let segs = closed ? n : n - 1
+
+        var segTx = [Float](repeating: 0, count: segs)
+        var segTy = [Float](repeating: 0, count: segs)
+        var segNx = [Float](repeating: 0, count: segs)
+        var segNy = [Float](repeating: 0, count: segs)
         for i in 0..<segs {
-            let p1 = pts[i]
-            let p2 = pts[(i + 1) % pts.count]
-            let dx = p2.x - p1.x
-            let dy = p2.y - p1.y
+            let p1 = pts[i], p2 = pts[(i + 1) % n]
+            let dx = p2.x - p1.x, dy = p2.y - p1.y
             let len = max(SDL_sqrtf(dx * dx + dy * dy), 0.0001)
-            let ux = -dy / len
-            let uy = dx / len
-            let nx = ux * w
-            let ny = uy * w
+            segTx[i] = dx / len; segTy[i] = dy / len
+            segNx[i] = -dy / len; segNy[i] = dx / len
+        }
+
+        for i in 0..<segs {
+            let p1 = pts[i], p2 = pts[(i + 1) % n]
+            let ux = segNx[i], uy = segNy[i]
+            let nx = ux * w, ny = uy * w
             let base = Int32(verts.count)
             verts.append(SDL_Vertex(position: SDL_FPoint(x: p1.x + nx, y: p1.y + ny), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
             verts.append(SDL_Vertex(position: SDL_FPoint(x: p2.x + nx, y: p2.y + ny), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
             verts.append(SDL_Vertex(position: SDL_FPoint(x: p2.x - nx, y: p2.y - ny), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
             verts.append(SDL_Vertex(position: SDL_FPoint(x: p1.x - nx, y: p1.y - ny), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
-            idx.append(base)
-            idx.append(base + 1)
-            idx.append(base + 2)
-            idx.append(base)
-            idx.append(base + 2)
-            idx.append(base + 3)
+            idx.append(base); idx.append(base + 1); idx.append(base + 2)
+            idx.append(base); idx.append(base + 2); idx.append(base + 3)
             if !additive {
                 let fb = Int32(verts.count)
                 verts.append(SDL_Vertex(position: SDL_FPoint(x: p1.x + nx + ux, y: p1.y + ny + uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
                 verts.append(SDL_Vertex(position: SDL_FPoint(x: p2.x + nx + ux, y: p2.y + ny + uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
                 verts.append(SDL_Vertex(position: SDL_FPoint(x: p2.x - nx - ux, y: p2.y - ny - uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
                 verts.append(SDL_Vertex(position: SDL_FPoint(x: p1.x - nx - ux, y: p1.y - ny - uy), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
-                idx.append(base)
-                idx.append(base + 1)
-                idx.append(fb + 1)
-                idx.append(base)
-                idx.append(fb + 1)
-                idx.append(fb)
-                idx.append(base + 3)
-                idx.append(base + 2)
-                idx.append(fb + 2)
-                idx.append(base + 3)
-                idx.append(fb + 2)
-                idx.append(fb + 3)
+                idx.append(base); idx.append(base + 1); idx.append(fb + 1)
+                idx.append(base); idx.append(fb + 1); idx.append(fb)
+                idx.append(base + 3); idx.append(base + 2); idx.append(fb + 2)
+                idx.append(base + 3); idx.append(fb + 2); idx.append(fb + 3)
             }
         }
-        // round joins: a small fan at every vertex seals the segment quads,
-        // otherwise corners crack open and shimmer while shapes rotate.
-        // Skipped in additive mode where the fan overlapping its own line
-        // doubles the brightness into a hot dot at every end. The fan rim
-        // carries its own feather ring.
-        for p in additive ? [] : pts {
-            let base = Int32(verts.count)
-            verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
-            for j in 0...8 {
-                let t = Float(j) / 8 * 2 * Float.pi
-                verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + w * SDL_cosf(t), y: p.y + w * SDL_sinf(t)),
-                                        color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
-            }
-            for j in 0...8 {
-                let t = Float(j) / 8 * 2 * Float.pi
-                verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + (w + 1) * SDL_cosf(t), y: p.y + (w + 1) * SDL_sinf(t)),
-                                        color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
-            }
-            for j in 0..<8 {
-                idx.append(base)
-                idx.append(base + 1 + Int32(j))
-                idx.append(base + 2 + Int32(j))
-                idx.append(base + 1 + Int32(j))
-                idx.append(base + 10 + Int32(j))
-                idx.append(base + 11 + Int32(j))
-                idx.append(base + 1 + Int32(j))
-                idx.append(base + 11 + Int32(j))
-                idx.append(base + 2 + Int32(j))
+
+        if !additive {
+            let join = lineJoin
+            let cap = lineCap
+            for vi in 0..<n {
+                let isFirst = !closed && vi == 0
+                let isLast  = !closed && vi == n - 1
+                let p = pts[vi]
+                if isFirst || isLast {
+                    if cap == 0 { continue }
+                    let si = isLast ? segs - 1 : 0
+                    let tx: Float = isLast ? segTx[si] : -segTx[si]
+                    let ty: Float = isLast ? segTy[si] : -segTy[si]
+                    let nx = segNx[si], ny = segNy[si]
+                    if cap == 2 {
+                        let base = Int32(verts.count)
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + nx*w, y: p.y + ny*w), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x - nx*w, y: p.y - ny*w), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + nx*w + tx*w, y: p.y + ny*w + ty*w), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x - nx*w + tx*w, y: p.y - ny*w + ty*w), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        idx.append(base); idx.append(base+1); idx.append(base+2)
+                        idx.append(base+1); idx.append(base+3); idx.append(base+2)
+                        let fb = Int32(verts.count)
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + nx*(w+1) + tx*(w+1), y: p.y + ny*(w+1) + ty*(w+1)), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x - nx*(w+1) + tx*(w+1), y: p.y - ny*(w+1) + ty*(w+1)), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        idx.append(base+2); idx.append(base+3); idx.append(fb+1)
+                        idx.append(base+2); idx.append(fb+1); idx.append(fb)
+                        continue
+                    }
+                } else {
+                    if join != 1 {
+                        let inSeg  = closed ? (vi + n - 1) % n : vi - 1
+                        let outSeg = vi
+                        let n1x = segNx[inSeg], n1y = segNy[inSeg]
+                        let n2x = segNx[outSeg], n2y = segNy[outSeg]
+                        let o1x = p.x + n1x * w, o1y = p.y + n1y * w
+                        let o2x = p.x + n2x * w, o2y = p.y + n2y * w
+                        var bx = n1x + n2x, by = n1y + n2y
+                        let bl = SDL_sqrtf(bx * bx + by * by)
+                        if bl < 0.001 {
+                            let base = Int32(verts.count)
+                            verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                            verts.append(SDL_Vertex(position: SDL_FPoint(x: o1x, y: o1y), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                            verts.append(SDL_Vertex(position: SDL_FPoint(x: o2x, y: o2y), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                            idx.append(base); idx.append(base+1); idx.append(base+2)
+                            continue
+                        }
+                        bx /= bl; by /= bl
+                        let dot = n1x * bx + n1y * by
+                        if join == 0, dot > 0.001 {
+                            let miterLen = w / dot
+                            if miterLen <= lineMiterLimit * w {
+                                let mx = p.x + bx * miterLen
+                                let my = p.y + by * miterLen
+                                let base = Int32(verts.count)
+                                verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                                verts.append(SDL_Vertex(position: SDL_FPoint(x: o1x, y: o1y), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                                verts.append(SDL_Vertex(position: SDL_FPoint(x: mx, y: my), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                                verts.append(SDL_Vertex(position: SDL_FPoint(x: o2x, y: o2y), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                                idx.append(base); idx.append(base+1); idx.append(base+2)
+                                idx.append(base); idx.append(base+2); idx.append(base+3)
+                                continue
+                            }
+                        }
+                        let base = Int32(verts.count)
+                        verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: o1x, y: o1y), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        verts.append(SDL_Vertex(position: SDL_FPoint(x: o2x, y: o2y), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                        idx.append(base); idx.append(base+1); idx.append(base+2)
+                        continue
+                    }
+                }
+                let base = Int32(verts.count)
+                verts.append(SDL_Vertex(position: p, color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                for j in 0...8 {
+                    let t = Float(j) / 8 * 2 * Float.pi
+                    verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + w * SDL_cosf(t), y: p.y + w * SDL_sinf(t)), color: color, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                }
+                for j in 0...8 {
+                    let t = Float(j) / 8 * 2 * Float.pi
+                    verts.append(SDL_Vertex(position: SDL_FPoint(x: p.x + (w + 1) * SDL_cosf(t), y: p.y + (w + 1) * SDL_sinf(t)), color: clear, tex_coord: SDL_FPoint(x: 0, y: 0)))
+                }
+                for j in 0..<8 {
+                    idx.append(base); idx.append(base + 1 + Int32(j)); idx.append(base + 2 + Int32(j))
+                    idx.append(base + 1 + Int32(j)); idx.append(base + 10 + Int32(j)); idx.append(base + 11 + Int32(j))
+                    idx.append(base + 1 + Int32(j)); idx.append(base + 11 + Int32(j)); idx.append(base + 2 + Int32(j))
+                }
             }
         }
         SDL_RenderGeometry(renderer, geometryTexture(), verts, Int32(verts.count), idx, Int32(idx.count))
@@ -1261,7 +1386,7 @@ func toLogical(_ window: OpaquePointer?, _ x: Float, _ y: Float) -> (Int32, Int3
 // MARK: - host lifecycle (called by main)
 
 func kitHostInit(appName: String = "KitGame") {
-    guard SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) else { fatalError("SDL_Init failed") }
+    guard SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD) else { fatalError("SDL_Init failed") }
     let k = Kit.shared
     k.window = appName.withCString {
         SDL_CreateWindow($0, 1920, 1080, windowResizable | windowHighPixelDensity)
@@ -1298,6 +1423,29 @@ func kitHostPump() -> Bool {
             if let dropped = e.drop.data {
                 kitDroppedFile = String(cString: dropped)
             }
+        } else if e.type == SDL_EVENT_GAMEPAD_ADDED.rawValue {
+            let which = e.gdevice.which
+            if let slot = (0..<4).first(where: { k.gamepads[$0] == nil }) {
+                k.gamepads[slot] = SDL_OpenGamepad(which)
+                k.gamepadInstanceIds[slot] = which
+            }
+        } else if e.type == SDL_EVENT_GAMEPAD_REMOVED.rawValue {
+            let which = e.gdevice.which
+            for i in 0..<4 where k.gamepadInstanceIds[i] == which {
+                SDL_CloseGamepad(k.gamepads[i])
+                k.gamepads[i] = nil
+                k.gamepadInstanceIds[i] = 0
+            }
+        } else if e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN.rawValue || e.type == SDL_EVENT_GAMEPAD_BUTTON_UP.rawValue {
+            if k.mapToKeys {
+                let sfk = k.sdlButtonToSfKey(e.gbutton.button)
+                if sfk >= 0 {
+                    let isDown = e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN.rawValue
+                    let t: Int32 = isDown ? 5 : 6
+                    k.pushEvent((t, sfk, 0, 0, 0))
+                    if sfk < 128 { k.sfKeyHeld[Int(sfk)] = isDown }
+                }
+            }
         } else if e.type == SDL_EVENT_KEY_DOWN.rawValue, e.key.scancode == SDL_SCANCODE_F, !e.key.`repeat` {
             k.fullscreen = !k.fullscreen
             _ = SDL_SetWindowFullscreen(k.window, k.fullscreen)
@@ -1307,18 +1455,25 @@ func kitHostPump() -> Bool {
             kitEscapePressed = true
         } else if e.type == SDL_EVENT_KEY_DOWN.rawValue || e.type == SDL_EVENT_KEY_UP.rawValue {
             let sf = sfKey(e.key.scancode.rawValue)
+            let isDown = e.type == SDL_EVENT_KEY_DOWN.rawValue
             if sf >= 0, !e.key.`repeat` {
-                let t: Int32 = e.type == SDL_EVENT_KEY_DOWN.rawValue ? 5 : 6
+                let t: Int32 = isDown ? 5 : 6
                 let shift: Int32 = (UInt32(e.key.mod) & SDL_KMOD_SHIFT) != 0 ? 1 : 0
                 k.pushEvent((t, sf, shift, 0, 0))
             }
+            if sf >= 0, sf < 128 { k.sfKeyHeld[Int(sf)] = isDown }
         } else if e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue || e.type == SDL_EVENT_MOUSE_BUTTON_UP.rawValue {
             let t: Int32 = e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue ? 9 : 10
             let (lx, ly) = toLogical(k.window, e.button.x, e.button.y)
             k.pushEvent((t, 0, lx, ly, Int32(e.button.clicks)))
+            let isDown = e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue
+            let btn = Int(e.button.button) - 1
+            if btn >= 0, btn < 3 { k.mouseHeld[btn] = isDown }
         } else if e.type == SDL_EVENT_MOUSE_MOTION.rawValue {
             let (lx, ly) = toLogical(k.window, e.motion.x, e.motion.y)
             k.pushEvent((11, lx, ly, 0, 0))
+            k.mouseLogX = lx
+            k.mouseLogY = ly
         }
     }
     return alive
@@ -1510,7 +1665,48 @@ func store_set(_ key: UnsafePointer<CChar>?, _ klen: Int32,
 }
 
 @_cdecl("gp_connected")
-func gp_connected(_ pad: Int32) -> Int32 { 0 }
+func gp_connected(_ pad: Int32) -> Int32 {
+    guard pad >= 0, pad < 4 else { return 0 }
+    return Kit.shared.gamepads[Int(pad)] != nil ? 1 : 0
+}
+
+@_cdecl("gp_button")
+func gp_button(_ pad: Int32, _ button: Int32) -> Int32 {
+    return Kit.shared.gpButtonValue(Int(pad), button) > 0.5 ? 1 : 0
+}
+
+@_cdecl("gp_button_value")
+func gp_button_value(_ pad: Int32, _ button: Int32) -> Float {
+    return Kit.shared.gpButtonValue(Int(pad), button)
+}
+
+@_cdecl("gp_axis")
+func gp_axis(_ pad: Int32, _ axis: Int32) -> Float {
+    return Kit.shared.gpAxisValue(Int(pad), axis)
+}
+
+@_cdecl("gp_map_to_keys")
+func gp_map_to_keys(_ enable: Int32) {
+    Kit.shared.mapToKeys = enable != 0
+}
+
+@_cdecl("key_pressed")
+func key_pressed(_ sfKey: Int32) -> Int32 {
+    guard sfKey >= 0, sfKey < 128 else { return 0 }
+    return Kit.shared.sfKeyHeld[Int(sfKey)] ? 1 : 0
+}
+
+@_cdecl("mouse_x")
+func mouse_x() -> Int32 { Kit.shared.mouseLogX }
+
+@_cdecl("mouse_y")
+func mouse_y() -> Int32 { Kit.shared.mouseLogY }
+
+@_cdecl("mouse_button")
+func mouse_button(_ b: Int32) -> Int32 {
+    guard b >= 0, b < 3 else { return 0 }
+    return Kit.shared.mouseHeld[Int(b)] ? 1 : 0
+}
 
 // MARK: - images, offscreen targets, text (the texture half of the ABI)
 
@@ -1850,7 +2046,12 @@ func gfx_snap_translation() {
 }
 
 @_cdecl("gfx_set_line_style")
-func gfx_set_line_style(_ join: Int32, _ cap: Int32, _ miterLimit: Float) {}
+func gfx_set_line_style(_ join: Int32, _ cap: Int32, _ miterLimit: Float) {
+    let k = Kit.shared
+    k.lineJoin = join
+    k.lineCap = cap
+    k.lineMiterLimit = miterLimit <= 0 ? 10 : miterLimit
+}
 
 // MARK: - assets
 
@@ -2050,7 +2251,16 @@ func tts_cancel() {
 }
 
 @_cdecl("tts_set_preferred_voices")
-func tts_set_preferred_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {}
+func tts_set_preferred_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {
+    let k = Kit.shared
+    let s = k.cString(csv, len)
+    var first = ""
+    for b in s.utf8 {
+        if b == 44 { break }
+        first.append(Character(UnicodeScalar(b)))
+    }
+    k.ttsPreferredVoice = first
+}
 
 @_cdecl("tts_set_robotic_voices")
 func tts_set_robotic_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {}
