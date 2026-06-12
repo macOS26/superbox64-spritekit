@@ -98,6 +98,8 @@ final class Kit {
     var voiceLoops: [Int32] = []
     var voiceIds: [Int32] = []
     var voicePans: [Float] = []
+    var voiceGains: [Float] = []
+    var duck: Float = 1
     var nextVoice: Int32 = 1
     var additive = false
     var composite: Int32 = 0
@@ -285,11 +287,19 @@ final class Kit {
     var engPlayers: [Int32: (sound: Int32, loops: Int32, voice: Int32)] = [:]
     var nextEngId: Int32 = 1
 
-    // text-to-speech through the platform speech CLI; game audio ducks while
-    // the process lives, the same treatment the web runtime gives utterances
+    // text-to-speech, buffered: a line's first utterance speaks instantly
+    // through the pre-warmed say process while a parallel silent synth
+    // (say -o) renders the same line to a wav; the wav loads into the sound
+    // table so every repeat plays with sound-effect latency
     var ttsProcess: OpaquePointer? = nil
     var ttsTool: String? = nil
     var ttsQueue: [(String, Float)] = []
+    var ttsWarm: OpaquePointer? = nil
+    var ttsCache: [String: Int32] = [:]
+    var ttsSynth: OpaquePointer? = nil
+    var ttsSynthKey = ""
+    var ttsSynthPath = ""
+    var ttsVoice: Int32 = 0
 
     func ttsToolPath() -> String? {
         if let ttsTool { return ttsTool.isEmpty ? nil : ttsTool }
@@ -305,6 +315,15 @@ final class Kit {
         return found.isEmpty ? nil : found
     }
 
+    func ttsWpm(_ rate: Float) -> Int32 {
+        let r = rate <= 0 ? 1 : max(0.1, min(rate, 10))
+        return Int32(max(60, min(400, 175 * r)))
+    }
+
+    func ttsBusy() -> Bool {
+        ttsProcess != nil || ttsVoice != 0
+    }
+
     func ttsStop() {
         ttsQueue = []
         if let p = ttsProcess {
@@ -312,39 +331,82 @@ final class Kit {
             SDL_DestroyProcess(p)
             ttsProcess = nil
         }
-        if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 1) }
-    }
-
-    // utterances queue like the web's speechSynthesis: the next line starts
-    // when the current process exits, never on top of it
-    func ttsReap() {
-        guard let p = ttsProcess else { return }
-        var code: Int32 = 0
-        if SDL_WaitProcess(p, false, &code) {
-            SDL_DestroyProcess(p)
-            ttsProcess = nil
-            if !ttsQueue.isEmpty {
-                let (text, rate) = ttsQueue.removeFirst()
-                _ = ttsSpawn(text, rate: rate)
-            }
-            if ttsProcess == nil, audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 1) }
+        if ttsVoice != 0 {
+            let v = ttsVoice
+            ttsVoice = 0
+            stopVoice(v)
         }
+        setDuck(1)
     }
 
     func ttsSpeak(_ text: String, rate: Float) -> Bool {
         guard ttsToolPath() != nil else { return false }
-        if ttsProcess != nil {
+        if ttsBusy() {
             ttsQueue.append((text, rate))
             return true
         }
+        let key = String(ttsWpm(rate)) + "|" + text
+        if let id = ttsCache[key] {
+            ttsVoice = play(id, volume: 100, loop: false)
+            if ttsVoice > 0 {
+                setDuck(0.4)
+            } else {
+                ttsVoice = 0
+            }
+            return true
+        }
+        if ttsSynth == nil { ttsSynthesize(text, rate: rate) }
         return ttsSpawn(text, rate: rate)
+    }
+
+    // queue advance + synth harvesting, called once per frame
+    func ttsReap() {
+        if let p = ttsSynth {
+            var code: Int32 = 0
+            if SDL_WaitProcess(p, false, &code) {
+                SDL_DestroyProcess(p)
+                ttsSynth = nil
+                var spec = SDL_AudioSpec()
+                var buf: UnsafeMutablePointer<UInt8>? = nil
+                var len: UInt32 = 0
+                let ok = ttsSynthPath.withCString { SDL_LoadWAV($0, &spec, &buf, &len) }
+                _ = ttsSynthPath.withCString { SDL_RemovePath($0) }
+                if ok, len > 0 {
+                    let id = Int32(soundSpecs.count)
+                    soundSpecs.append(spec)
+                    soundBufs.append(buf)
+                    soundLens.append(len)
+                    ttsCache[ttsSynthKey] = id
+                }
+            }
+        }
+        if let p = ttsProcess {
+            var code: Int32 = 0
+            if SDL_WaitProcess(p, false, &code) {
+                SDL_DestroyProcess(p)
+                ttsProcess = nil
+            }
+        }
+        if ttsVoice != 0 {
+            var alive = false
+            for v in voiceIds where v == ttsVoice {
+                alive = true
+                break
+            }
+            if !alive { ttsVoice = 0 }
+        }
+        if !ttsBusy() {
+            if duck < 1 { setDuck(1) }
+            if !ttsQueue.isEmpty {
+                let (text, rate) = ttsQueue.removeFirst()
+                _ = ttsSpeak(text, rate: rate)
+            }
+        }
     }
 
     // say pays ~400ms of voice setup at launch, so one process always sits
     // warm with stdin piped; speaking is write + EOF, near-instant, and the
     // replacement warms while the line plays
-    var ttsWarm: OpaquePointer? = nil
-
     func ttsWarmup() {
         guard let tool = ttsToolPath(), tool.hasSuffix("/say"), ttsWarm == nil else { return }
         var argv: [UnsafeMutablePointer<CChar>?] = [tool].map { s in s.withCString { SDL_strdup($0) } }
@@ -367,8 +429,7 @@ final class Kit {
 
     func ttsSpawn(_ text: String, rate: Float) -> Bool {
         guard let tool = ttsToolPath() else { return false }
-        let r = rate <= 0 ? 1 : max(0.1, min(rate, 10))
-        let wpm = String(Int32(max(60, min(400, 175 * r))))
+        let wpm = String(ttsWpm(rate))
 
         if tool.hasSuffix("/say") {
             if ttsWarm == nil { ttsWarmup() }
@@ -380,7 +441,7 @@ final class Kit {
             ttsProcess = warm
             ttsWarm = nil
             ttsWarmup()
-            if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 0.4) }
+            setDuck(0.4)
             return true
         }
 
@@ -400,8 +461,34 @@ final class Kit {
         for p in argv where p != nil { SDL_free(p) }
         guard let proc else { return false }
         ttsProcess = proc
-        if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 0.4) }
+        setDuck(0.4)
         return true
+    }
+
+    // silent render of the same line into the cache for instant replays
+    func ttsSynthesize(_ text: String, rate: Float) {
+        guard let tool = ttsToolPath() else { return }
+        let wpm = String(ttsWpm(rate))
+        ttsSynthPath = storePath + ".tts.wav"
+        var args: [String]
+        if tool.hasSuffix("/say") {
+            args = [tool, "-o", ttsSynthPath, "--data-format=LEI16@22050", "-r", wpm, text]
+        } else if tool.hasSuffix("spd-say") {
+            return
+        } else {
+            args = [tool, "-w", ttsSynthPath, "-s", wpm, text]
+        }
+        var argv: [UnsafeMutablePointer<CChar>?] = args.map { s in s.withCString { SDL_strdup($0) } }
+        argv.append(nil)
+        let proc = argv.withUnsafeBufferPointer { buf in
+            buf.baseAddress!.withMemoryRebound(to: UnsafePointer<CChar>?.self, capacity: buf.count) {
+                SDL_CreateProcess($0, false)
+            }
+        }
+        for p in argv where p != nil { SDL_free(p) }
+        guard let proc else { return }
+        ttsSynth = proc
+        ttsSynthKey = wpm + "|" + text
     }
 
     func assetBytes(_ name: String) -> [UInt8]? {
@@ -881,7 +968,8 @@ final class Kit {
         }
         var spec = soundSpecs[i]
         guard let stream = SDL_CreateAudioStream(&spec, nil) else { return -1 }
-        _ = SDL_SetAudioStreamGain(stream, max(0, min(1, volume / 100)))
+        let gain = max(0, min(1, volume / 100))
+        _ = SDL_SetAudioStreamGain(stream, gain * duck)
         _ = SDL_BindAudioStream(audioDevice, stream)
         _ = SDL_PutAudioStreamData(stream, buf, Int32(soundLens[i]))
         if !loop { _ = SDL_FlushAudioStream(stream) }
@@ -891,6 +979,7 @@ final class Kit {
         voiceLoops.append(loop ? id : 0)
         voiceIds.append(voice)
         voicePans.append(0)
+        voiceGains.append(gain)
         return voice
     }
 
@@ -950,14 +1039,25 @@ final class Kit {
             voiceLoops.remove(at: i)
             voiceIds.remove(at: i)
             voicePans.remove(at: i)
+            voiceGains.remove(at: i)
             return
         }
     }
 
     func setVoiceVolume(_ voice: Int32, _ volume: Float) {
         for i in 0..<voiceIds.count where voiceIds[i] == voice {
-            _ = SDL_SetAudioStreamGain(voiceStreams[i], max(0, min(1, volume / 100)))
+            voiceGains[i] = max(0, min(1, volume / 100))
+            _ = SDL_SetAudioStreamGain(voiceStreams[i], voiceGains[i] * (voiceIds[i] == ttsVoice ? 1 : duck))
             return
+        }
+    }
+
+    // speech ducking: every non-speech voice scales by the duck factor, the
+    // way the web runtime ducks around utterances
+    func setDuck(_ d: Float) {
+        duck = d
+        for i in 0..<voiceIds.count where voiceIds[i] != ttsVoice {
+            _ = SDL_SetAudioStreamGain(voiceStreams[i], voiceGains[i] * duck)
         }
     }
 
@@ -970,10 +1070,14 @@ final class Kit {
         voiceLoops.removeAll()
         voiceIds.removeAll()
         voicePans.removeAll()
+        voiceGains.removeAll()
         soundSpecs = [SDL_AudioSpec()]
         soundBufs = [nil]
         soundLens = [0]
         soundNames = [:]
+        ttsCache = [:]
+        ttsVoice = 0
+        duck = 1
     }
 
     func reapVoices() {
@@ -995,6 +1099,7 @@ final class Kit {
                 voiceLoops.remove(at: i)
                 voiceIds.remove(at: i)
                 voicePans.remove(at: i)
+                voiceGains.remove(at: i)
             } else {
                 i += 1
             }
