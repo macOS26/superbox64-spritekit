@@ -176,7 +176,7 @@ final class Kit {
         _ = SDL_GetWindowSizeInPixels(window, &pw, &ph)
         if screenTex == nil || pw != screenW || ph != screenH {
             if let old = screenTex { SDL_DestroyTexture(old) }
-            screenTex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, pw, ph)
+            screenTex = SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, pw, ph)
             screenW = pw
             screenH = ph
         }
@@ -424,14 +424,39 @@ final class Kit {
         SDL_RenderGeometry(renderer, tex, verts, 4, idx, 6)
     }
 
+    // Wide gamut: the web runtime renders game colors as display-p3 when the
+    // canvas supports it, so the native renderer does the same through an
+    // extended-linear swapchain; game rgba is interpreted as P3 coordinates
+    // and converted to (possibly out-of-gamut) linear sRGB
+    var wideGamut = false
+
+    var targetFormat: SDL_PixelFormat {
+        wideGamut ? SDL_PIXELFORMAT_RGBA64_FLOAT : SDL_PIXELFORMAT_ABGR8888
+    }
+
+    func srgbLinearize(_ c: Float) -> Float {
+        c <= 0.04045 ? c / 12.92 : SDL_powf((c + 0.055) / 1.055, 2.4)
+    }
+
+    func gameColor(_ rgba: UInt32) -> (r: Float, g: Float, b: Float) {
+        let r = Float((rgba >> 24) & 0xFF) / 255
+        let g = Float((rgba >> 16) & 0xFF) / 255
+        let b = Float((rgba >> 8) & 0xFF) / 255
+        if !wideGamut { return (r, g, b) }
+        let lr = srgbLinearize(r)
+        let lg = srgbLinearize(g)
+        let lb = srgbLinearize(b)
+        return (1.22494 * lr - 0.22494 * lg,
+                -0.04206 * lr + 1.04206 * lg,
+                -0.01963 * lr - 0.07879 * lg + 1.09842 * lb)
+    }
+
     // Drawing always targets a texture now, where vertex alpha blends
     // reliably, so translucency is real; additive keeps the premultiplied
     // scale-toward-black so overlaps brighten instead of washing out.
     func fcolor(_ rgba: UInt32) -> SDL_FColor {
         let a = Float(rgba & 0xFF) / 255 * alpha
-        let r = Float((rgba >> 24) & 0xFF) / 255
-        let g = Float((rgba >> 16) & 0xFF) / 255
-        let b = Float((rgba >> 8) & 0xFF) / 255
+        let (r, g, b) = gameColor(rgba)
         if additive {
             return SDL_FColor(r: r * a, g: g * a, b: b * a, a: 1)
         }
@@ -792,12 +817,27 @@ func toLogical(_ window: OpaquePointer?, _ x: Float, _ y: Float) -> (Int32, Int3
 func kitHostInit(appName: String = "KitGame") {
     guard SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) else { fatalError("SDL_Init failed") }
     let k = Kit.shared
-    let ok = appName.withCString {
-        SDL_CreateWindowAndRenderer($0, 1920, 1080,
-                                    windowResizable | windowHighPixelDensity,
-                                    &k.window, &k.renderer)
+    k.window = appName.withCString {
+        SDL_CreateWindow($0, 1920, 1080, windowResizable | windowHighPixelDensity)
     }
-    guard ok else { fatalError("window failed") }
+    guard k.window != nil else { fatalError("window failed") }
+
+    // ask for an extended-linear swapchain first (Metal EDR / scRGB): game
+    // colors then render as display-p3 like the web canvas; fall back to the
+    // default sRGB pipeline anywhere that fails
+    let props = SDL_CreateProperties()
+    _ = "SDL.renderer.create.window".withCString { SDL_SetPointerProperty(props, $0, UnsafeMutableRawPointer(k.window)) }
+    _ = "SDL.renderer.create.output_colorspace".withCString {
+        SDL_SetNumberProperty(props, $0, Int64(SDL_COLORSPACE_SRGB_LINEAR.rawValue))
+    }
+    k.renderer = SDL_CreateRendererWithProperties(props)
+    SDL_DestroyProperties(props)
+    if k.renderer != nil {
+        k.wideGamut = true
+    } else {
+        k.renderer = SDL_CreateRenderer(k.window, nil)
+    }
+    guard k.renderer != nil else { fatalError("renderer failed") }
     _ = SDL_SetRenderVSync(k.renderer, 1)
     _ = SDL_SetRenderDrawBlendMode(k.renderer, SDL_BLENDMODE_BLEND)
     if let pref = ("SuperBox64".withCString { org in appName.withCString { SDL_GetPrefPath(org, $0) } }) {
@@ -1111,7 +1151,7 @@ func gfx_offscreen_begin(_ w: Int32, _ h: Int32) -> Int32 {
     let tw = Int32(Float(w) * dpr + 0.5)
     let th = Int32(Float(h) * dpr + 0.5)
     guard tw > 0, th > 0,
-          let tex = SDL_CreateTexture(k.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, tw, th) else { return 0 }
+          let tex = SDL_CreateTexture(k.renderer, k.targetFormat, SDL_TEXTUREACCESS_TARGET, tw, th) else { return 0 }
     _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND)
     let prev = SDL_GetRenderTarget(k.renderer)
     _ = SDL_SetRenderTarget(k.renderer, tex)
@@ -1204,20 +1244,41 @@ func gfx_draw_text(_ font: Int32, _ utf8: UnsafePointer<CChar>?, _ len: Int32,
     kit_font_vmetrics(info, &ascent, &descent, &lineGap)
     let ascentPx = Float(ascent) * scale
     let descentPx = Float(descent) * scale
+    let dpr = max(1, k.baseScale)
+    let rasterPx = Int32(Float(sizePx) * dpr + 0.5)
+    let fid = font > 0 ? font : k.defaultFont
     var baselineY = y
     switch k.textBaseline {
     case 0: baselineY = y
-    case 1: baselineY = y + (ascentPx + descentPx) / 2
+    case 1:
+        // visual centring like the web: the string's measured ink bounds,
+        // not the em box, land centred on y (emoji read as the emoji's box)
+        var inkAscent: Float = 0
+        var inkDescent: Float = 0
+        var any = false
+        for cp in cps where cp != 0xFE0F && cp != 0x200D {
+            if kit_font_glyph_index(info, cp) == 0, let eg = k.emojiGlyph(cp), eg.tex != nil {
+                let escale = Float(sizePx) / Float(eg.ppem)
+                inkAscent = max(inkAscent, Float(eg.bearingY) * escale)
+                inkDescent = max(inkDescent, Float(eg.h - eg.bearingY) * escale)
+                any = true
+            } else if let g = k.glyph(fid, info, cp, rasterPx), g.h > 0 {
+                inkAscent = max(inkAscent, Float(-g.yoff) / dpr)
+                inkDescent = max(inkDescent, Float(g.yoff + g.h) / dpr)
+                any = true
+            }
+        }
+        if !any {
+            inkAscent = Float(sizePx) * 0.8
+            inkDescent = Float(sizePx) * 0.2
+        }
+        baselineY = y + (inkAscent - inkDescent) / 2
     case 3: baselineY = y + descentPx
     default: baselineY = y + ascentPx
     }
     let a = Float(rgba & 0xFF) / 255 * k.alpha
-    let color = SDL_FColor(r: Float((rgba >> 24) & 0xFF) / 255,
-                           g: Float((rgba >> 16) & 0xFF) / 255,
-                           b: Float((rgba >> 8) & 0xFF) / 255,
-                           a: a)
-    let dpr = max(1, k.baseScale)
-    let rasterPx = Int32(Float(sizePx) * dpr + 0.5)
+    let (cr, cg, cb) = k.gameColor(rgba)
+    let color = SDL_FColor(r: cr, g: cg, b: cb, a: a)
     var pen = x
     for i in 0..<cps.count {
         let cp = cps[i]
@@ -1264,7 +1325,7 @@ func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h
     let tw = Int32(SDL_ceilf(w / texel) + margin * 2)
     let th = Int32(SDL_ceilf(h / texel) + margin * 2)
     guard tw > 0, th > 0,
-          let small = SDL_CreateTexture(k.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, tw, th) else { return }
+          let small = SDL_CreateTexture(k.renderer, k.targetFormat, SDL_TEXTUREACCESS_TARGET, tw, th) else { return }
     _ = SDL_SetTextureBlendMode(small, SDL_BLENDMODE_BLEND)
 
     let prev = SDL_GetRenderTarget(k.renderer)
@@ -1273,9 +1334,8 @@ func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h
     _ = SDL_RenderClear(k.renderer)
     let savedMat = k.mat
     k.mat = Mat()
-    _ = SDL_SetTextureColorModFloat(tex, Float((rgba >> 24) & 0xFF) / 255,
-                                    Float((rgba >> 16) & 0xFF) / 255,
-                                    Float((rgba >> 8) & 0xFF) / 255)
+    let (sr, sg, sb) = k.gameColor(rgba)
+    _ = SDL_SetTextureColorModFloat(tex, sr, sg, sb)
     k.drawTexturedQuad(tex, margin, margin, Float(tw) - margin * 2, Float(th) - margin * 2,
                        0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: 1))
     _ = SDL_SetTextureColorModFloat(tex, 1, 1, 1)
