@@ -1454,6 +1454,7 @@ func kitHostInit(appName: String = "KitGame") {
         SDL_CreateWindow($0, 1920, 1080, windowResizable | windowHighPixelDensity)
     }
     guard k.window != nil else { fatalError("window failed") }
+    _ = SDL_SetWindowAspectRatio(k.window, 1920.0 / 1080.0, 1920.0 / 1080.0)
     k.renderer = SDL_CreateRenderer(k.window, nil)
     guard k.renderer != nil else { fatalError("renderer failed") }
     _ = SDL_SetRenderVSync(k.renderer, 1)
