@@ -1,0 +1,4 @@
+module CZip {
+    header "Zip.h"
+    export *
+}

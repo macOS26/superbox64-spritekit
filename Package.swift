@@ -28,6 +28,7 @@ let package = Package(
         .library(name: "CBox2D",         targets: ["CBox2D"]),
         .library(name: "CSDL3",          targets: ["CSDL3"]),
         .library(name: "CWamr",          targets: ["CWamr"]),
+        .library(name: "CZip",           targets: ["CZip"]),
         .library(name: "Combine",        targets: ["Combine"]),
         .library(name: "SwiftUI",        targets: ["SwiftUI"]),
     ],
@@ -56,6 +57,12 @@ let package = Package(
         .target(
             name: "CWamr",
             path: "Sources/CWamr",
+            sources: ["src"],
+            publicHeadersPath: "include"
+        ),
+        .target(
+            name: "CZip",
+            path: "Sources/CZip",
             sources: ["src"],
             publicHeadersPath: "include"
         ),
