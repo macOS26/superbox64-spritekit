@@ -252,8 +252,34 @@ final class Kit {
         var savedStack: [Mat]
         var savedAlpha: Float
         var prevTarget: UnsafeMutablePointer<SDL_Texture>?
+        var blur: Float = 0
     }
     var targets: [OffTarget?] = []
+
+    // Gaussian-ish blur via downsample + bilinear upsample, the same trick
+    // the soft shadows use; blur is linear so blurring the finished bake
+    // once equals Canvas2D blurring every draw op into it
+    func blurTexture(_ tex: UnsafeMutablePointer<SDL_Texture>?, _ w: Int32, _ h: Int32, _ blurLogical: Float) -> UnsafeMutablePointer<SDL_Texture>? {
+        let f = max(2, blurLogical * max(1, baseScale) / 2)
+        let sw = max(1, Int32(Float(w) / f))
+        let sh = max(1, Int32(Float(h) / f))
+        guard let small = SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, sw, sh),
+              let out = SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, w, h) else { return nil }
+        let prev = SDL_GetRenderTarget(renderer)
+        _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE)
+        _ = SDL_SetRenderTarget(renderer, small)
+        _ = SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, 0)
+        _ = SDL_RenderClear(renderer)
+        _ = SDL_RenderTexture(renderer, tex, nil, nil)
+        _ = SDL_SetTextureBlendMode(small, SDL_BLENDMODE_NONE)
+        _ = SDL_SetRenderTarget(renderer, out)
+        _ = SDL_RenderClear(renderer)
+        _ = SDL_RenderTexture(renderer, small, nil, nil)
+        _ = SDL_SetRenderTarget(renderer, prev)
+        _ = SDL_SetTextureBlendMode(out, SDL_BLENDMODE_BLEND)
+        retireTexture(small)
+        return out
+    }
 
     var engVolumes: [Int32: Float] = [:]
     var engPlayers: [Int32: (sound: Int32, loops: Int32, voice: Int32)] = [:]
@@ -424,14 +450,15 @@ final class Kit {
         SDL_RenderGeometry(renderer, tex, verts, 4, idx, 6)
     }
 
-    // Wide gamut: the web runtime renders game colors as display-p3 when the
-    // canvas supports it, so the native renderer does the same through an
-    // extended-linear swapchain; game rgba is interpreted as P3 coordinates
-    // and converted to (possibly out-of-gamut) linear sRGB
-    var wideGamut = false
+    // Wide gamut: the web runtime renders game colors as display-p3, so game
+    // rgba is interpreted as P3 coordinates and converted to sRGB with gamut
+    // clipping. The pipeline stays nonlinear sRGB end to end because Canvas2D
+    // composites in the canvas's nonlinear space; a linear EDR swapchain
+    // blends translucency visibly heavier than the web.
+    var wideGamut = true
 
     var targetFormat: SDL_PixelFormat {
-        wideGamut ? SDL_PIXELFORMAT_RGBA64_FLOAT : SDL_PIXELFORMAT_ABGR8888
+        SDL_PIXELFORMAT_ABGR8888
     }
 
     func srgbLinearize(_ c: Float) -> Float {
@@ -445,8 +472,8 @@ final class Kit {
         return c < 0 ? -e : e
     }
 
-    // SDL render colors are sRGB-encoded regardless of the output colorspace,
-    // so the converted color re-encodes after the P3 -> linear sRGB matrix
+    // P3 -> sRGB with clipping: in-gamut colors match the web's display-p3
+    // exactly, out-of-gamut ones land on the nearest sRGB edge
     func gameColor(_ rgba: UInt32) -> (r: Float, g: Float, b: Float) {
         let r = Float((rgba >> 24) & 0xFF) / 255
         let g = Float((rgba >> 16) & 0xFF) / 255
@@ -455,9 +482,9 @@ final class Kit {
         let lr = srgbLinearize(r)
         let lg = srgbLinearize(g)
         let lb = srgbLinearize(b)
-        return (srgbEncode(1.22494 * lr - 0.22494 * lg),
-                srgbEncode(-0.04206 * lr + 1.04206 * lg),
-                srgbEncode(-0.01963 * lr - 0.07879 * lg + 1.09842 * lb))
+        return (max(0, min(1, srgbEncode(1.22494 * lr - 0.22494 * lg))),
+                max(0, min(1, srgbEncode(-0.04206 * lr + 1.04206 * lg))),
+                max(0, min(1, srgbEncode(-0.01963 * lr - 0.07879 * lg + 1.09842 * lb))))
     }
 
     // Drawing always targets a texture now, where vertex alpha blends
@@ -912,22 +939,7 @@ func kitHostInit(appName: String = "KitGame") {
         SDL_CreateWindow($0, 1920, 1080, windowResizable | windowHighPixelDensity)
     }
     guard k.window != nil else { fatalError("window failed") }
-
-    // ask for an extended-linear swapchain first (Metal EDR / scRGB): game
-    // colors then render as display-p3 like the web canvas; fall back to the
-    // default sRGB pipeline anywhere that fails
-    let props = SDL_CreateProperties()
-    _ = "SDL.renderer.create.window".withCString { SDL_SetPointerProperty(props, $0, UnsafeMutableRawPointer(k.window)) }
-    _ = "SDL.renderer.create.output_colorspace".withCString {
-        SDL_SetNumberProperty(props, $0, Int64(SDL_COLORSPACE_SRGB_LINEAR.rawValue))
-    }
-    k.renderer = SDL_CreateRendererWithProperties(props)
-    SDL_DestroyProperties(props)
-    if k.renderer != nil {
-        k.wideGamut = true
-    } else {
-        k.renderer = SDL_CreateRenderer(k.window, nil)
-    }
+    k.renderer = SDL_CreateRenderer(k.window, nil)
     guard k.renderer != nil else { fatalError("renderer failed") }
     _ = SDL_SetRenderVSync(k.renderer, 1)
     _ = SDL_SetRenderDrawBlendMode(k.renderer, SDL_BLENDMODE_BLEND)
@@ -1267,7 +1279,12 @@ func gfx_offscreen_end_to_image(_ handle: Int32) -> Int32 {
     k.alpha = t.savedAlpha
     k.targets[Int(handle) - 1] = nil
     while let last = k.targets.last, last == nil { k.targets.removeLast() }
-    return k.registerImage(Kit.ImgRec(tex: t.tex, w: t.w, h: t.h))
+    var tex = t.tex
+    if t.blur > 0, let blurred = k.blurTexture(t.tex, t.w, t.h, t.blur) {
+        k.retireTexture(t.tex)
+        tex = blurred
+    }
+    return k.registerImage(Kit.ImgRec(tex: tex, w: t.w, h: t.h))
 }
 
 @_cdecl("gfx_offscreen_end_discard")
@@ -1446,7 +1463,45 @@ func gfx_set_shadow(_ blurRadius: Float, _ dx: Float, _ dy: Float, _ rgba: UInt3
 func gfx_clear_shadow() {}
 
 @_cdecl("gfx_set_filter")
-func gfx_set_filter(_ utf8: UnsafePointer<CChar>?, _ len: Int32) {}
+func gfx_set_filter(_ utf8: UnsafePointer<CChar>?, _ len: Int32) {
+    let k = Kit.shared
+    let s = k.cString(utf8, len)
+    var blur: Float = 0
+    let bytes = Array(s.utf8)
+    let pat = Array("blur(".utf8)
+    var i = 0
+    while i + pat.count < bytes.count {
+        var match = true
+        for j in 0..<pat.count where bytes[i + j] != pat[j] { match = false; break }
+        if match {
+            var p = i + pat.count
+            var v: Float = 0
+            var frac: Float = 0
+            while p < bytes.count, bytes[p] >= 48, bytes[p] <= 57 {
+                v = v * 10 + Float(bytes[p] - 48)
+                p += 1
+            }
+            if p < bytes.count, bytes[p] == 46 {
+                p += 1
+                var div: Float = 10
+                while p < bytes.count, bytes[p] >= 48, bytes[p] <= 57 {
+                    frac += Float(bytes[p] - 48) / div
+                    div *= 10
+                    p += 1
+                }
+            }
+            blur = v + frac
+            break
+        }
+        i += 1
+    }
+    if blur > 0 {
+        for i in stride(from: k.targets.count - 1, through: 0, by: -1) where k.targets[i] != nil {
+            k.targets[i]!.blur = max(k.targets[i]!.blur, blur)
+            break
+        }
+    }
+}
 
 @_cdecl("gfx_clear_filter")
 func gfx_clear_filter() {}
