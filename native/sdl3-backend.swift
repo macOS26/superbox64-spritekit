@@ -289,6 +289,7 @@ final class Kit {
     // the process lives, the same treatment the web runtime gives utterances
     var ttsProcess: OpaquePointer? = nil
     var ttsTool: String? = nil
+    var ttsQueue: [(String, Float)] = []
 
     func ttsToolPath() -> String? {
         if let ttsTool { return ttsTool.isEmpty ? nil : ttsTool }
@@ -305,6 +306,7 @@ final class Kit {
     }
 
     func ttsStop() {
+        ttsQueue = []
         if let p = ttsProcess {
             _ = SDL_KillProcess(p, false)
             SDL_DestroyProcess(p)
@@ -313,19 +315,48 @@ final class Kit {
         if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 1) }
     }
 
+    // utterances queue like the web's speechSynthesis: the next line starts
+    // when the current process exits, never on top of it
     func ttsReap() {
         guard let p = ttsProcess else { return }
         var code: Int32 = 0
         if SDL_WaitProcess(p, false, &code) {
             SDL_DestroyProcess(p)
             ttsProcess = nil
-            if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 1) }
+            if !ttsQueue.isEmpty {
+                let (text, rate) = ttsQueue.removeFirst()
+                _ = ttsSpawn(text, rate: rate)
+            }
+            if ttsProcess == nil, audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 1) }
         }
     }
 
     func ttsSpeak(_ text: String, rate: Float) -> Bool {
+        guard ttsToolPath() != nil else { return false }
+        if ttsProcess != nil {
+            ttsQueue.append((text, rate))
+            return true
+        }
+        return ttsSpawn(text, rate: rate)
+    }
+
+    // a throwaway empty utterance at startup warms the speech daemon so the
+    // first real line doesn't pay the cold-start delay
+    func ttsWarmup() {
+        guard let tool = ttsToolPath(), tool.hasSuffix("/say") else { return }
+        var argv: [UnsafeMutablePointer<CChar>?] = [tool, ""].map { s in s.withCString { SDL_strdup($0) } }
+        argv.append(nil)
+        let proc = argv.withUnsafeBufferPointer { buf in
+            buf.baseAddress!.withMemoryRebound(to: UnsafePointer<CChar>?.self, capacity: buf.count) {
+                SDL_CreateProcess($0, false)
+            }
+        }
+        for p in argv where p != nil { SDL_free(p) }
+        if let proc { SDL_DestroyProcess(proc) }
+    }
+
+    func ttsSpawn(_ text: String, rate: Float) -> Bool {
         guard let tool = ttsToolPath() else { return false }
-        ttsStop()
         let r = rate <= 0 ? 1 : max(0.1, min(rate, 10))
         let wpm = String(Int32(max(60, min(400, 175 * r))))
         var args: [String]
@@ -573,6 +604,45 @@ final class Kit {
             minY = min(minY, p.y); maxY = max(maxY, p.y)
         }
         if maxX - minX < 0.01, maxY - minY < 0.01 { return }
+
+        // A translucent stroke is many overlapping quads and join fans, and
+        // every overlap double-blends into blotches. Canvas2D strokes the
+        // path as ONE coverage shape, so do the same: render opaque into a
+        // scratch target, composite once at the stroke's alpha.
+        let aVal = Float(rgba & 0xFF) / 255 * alpha
+        if !additive, aVal < 0.999 {
+            let pad = max(1, thickness * mat.lengthScale) / 2 + 2
+            let ox = minX - pad
+            let oy = minY - pad
+            let tw = Int32(SDL_ceilf(maxX - minX + pad * 2))
+            let th = Int32(SDL_ceilf(maxY - minY + pad * 2))
+            if tw > 0, th > 0,
+               let scratch = SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, tw, th) {
+                _ = SDL_SetTextureBlendMode(scratch, SDL_BLENDMODE_BLEND)
+                let prev = SDL_GetRenderTarget(renderer)
+                _ = SDL_SetRenderTarget(renderer, scratch)
+                _ = SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, 0)
+                _ = SDL_RenderClear(renderer)
+                var shifted = pts
+                for i in 0..<shifted.count {
+                    shifted[i].x -= ox
+                    shifted[i].y -= oy
+                }
+                let savedAlpha = alpha
+                alpha = 1
+                strokePoly(shifted, closed: closed, thickness: thickness, rgba: rgba | 0xFF)
+                alpha = savedAlpha
+                _ = SDL_SetRenderTarget(renderer, prev)
+                let savedMat = mat
+                mat = Mat()
+                drawTexturedQuad(scratch, ox, oy, Float(tw), Float(th), 0, 0, 1, 1,
+                                 SDL_FColor(r: 1, g: 1, b: 1, a: aVal))
+                mat = savedMat
+                retireTexture(scratch)
+                return
+            }
+        }
+
         let color = fcolor(rgba)
         var clear = color
         clear.a = 0
@@ -1013,6 +1083,7 @@ func kitHostInit(appName: String = "KitGame") {
         SDL_free(pref)
     }
     k.loadStore()
+    k.ttsWarmup()
 }
 
 // Pump SDL into the ABI event queue; false = quit requested.
