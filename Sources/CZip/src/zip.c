@@ -1,16 +1,18 @@
 #include "Zip.h"
 #include <stdlib.h>
 #include <string.h>
+#include <zlib.h>
 
-#define MINIZ_HEADER_FILE_ONLY
-#include "miniz.c"
+#define MZ_MALLOC malloc
+#define MZ_FREE free
+#define MZ_MEMCPY memcpy
+#define MZ_MEMSET memset
 
 typedef struct {
-    mz_zip_archive zip;
-    int file_index;
-    const void* file_data;
-    size_t file_size;
-    size_t file_pos;
+    z_stream stream;
+    const void* zip_data;
+    size_t zip_size;
+    size_t read_pos;
 } ZipArchiveImpl;
 
 typedef struct {
@@ -20,37 +22,39 @@ typedef struct {
 } ZipFileImpl;
 
 ZipArchive* zip_open(const char* path) {
-    ZipArchiveImpl* impl = malloc(sizeof(ZipArchiveImpl));
-    if (!impl) return NULL;
+    FILE* f = fopen(path, "rb");
+    if (!f) return NULL;
 
-    memset(&impl->zip, 0, sizeof(mz_zip_archive));
-    if (!mz_zip_reader_init_file(&impl->zip, path, 0)) {
-        free(impl);
+    fseek(f, 0, SEEK_END);
+    size_t size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    void* data = malloc(size);
+    if (!data) {
+        fclose(f);
         return NULL;
     }
 
-    impl->file_index = -1;
-    impl->file_data = NULL;
-    impl->file_size = 0;
-    impl->file_pos = 0;
+    if (fread(data, 1, size, f) != size) {
+        free(data);
+        fclose(f);
+        return NULL;
+    }
+    fclose(f);
 
-    return (ZipArchive*)impl;
+    return zip_open_mem(data, size);
 }
 
 ZipArchive* zip_open_mem(const void* data, size_t size) {
+    if (!data || size < 22) return NULL;
+
     ZipArchiveImpl* impl = malloc(sizeof(ZipArchiveImpl));
     if (!impl) return NULL;
 
-    memset(&impl->zip, 0, sizeof(mz_zip_archive));
-    if (!mz_zip_reader_init_mem(&impl->zip, data, size, 0)) {
-        free(impl);
-        return NULL;
-    }
-
-    impl->file_index = -1;
-    impl->file_data = NULL;
-    impl->file_size = 0;
-    impl->file_pos = 0;
+    impl->zip_data = data;
+    impl->zip_size = size;
+    impl->read_pos = 0;
+    memset(&impl->stream, 0, sizeof(z_stream));
 
     return (ZipArchive*)impl;
 }
@@ -58,39 +62,80 @@ ZipArchive* zip_open_mem(const void* data, size_t size) {
 void zip_close(ZipArchive* archive) {
     if (!archive) return;
     ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
-    mz_zip_reader_end(&impl->zip);
+    if (impl->stream.state) inflateEnd(&impl->stream);
+    free((void*)impl->zip_data);
     free(impl);
 }
 
 ZipFile* zip_fopen(ZipArchive* archive, const char* name) {
-    if (!archive) return NULL;
+    if (!archive || !name) return NULL;
+
     ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
+    size_t name_len = strlen(name);
 
-    int file_index = mz_zip_reader_locate_file(&impl->zip, name, NULL, 0);
-    if (file_index < 0) return NULL;
+    const uint8_t* data = (const uint8_t*)impl->zip_data;
+    size_t pos = 0;
 
-    size_t size = 0;
-    const void* data = mz_zip_reader_extract_to_mem(&impl->zip, file_index, NULL, 0, &size);
-    if (!data) {
-        data = malloc(size);
-        if (!data) return NULL;
-        if (!mz_zip_reader_extract_to_mem(&impl->zip, file_index, (void*)data, size, &size)) {
-            free((void*)data);
-            return NULL;
+    while (pos + 30 < impl->zip_size) {
+        if (*(uint32_t*)(data + pos) != 0x04034b50) {
+            pos++;
+            continue;
         }
+
+        uint16_t fname_len = *(uint16_t*)(data + pos + 26);
+        uint16_t extra_len = *(uint16_t*)(data + pos + 28);
+        uint32_t compressed_size = *(uint32_t*)(data + pos + 18);
+        uint32_t uncompressed_size = *(uint32_t*)(data + pos + 22);
+        uint8_t compression = *(uint8_t*)(data + pos + 8);
+
+        const char* entry_name = (const char*)(data + pos + 30);
+
+        if (fname_len == name_len && memcmp(entry_name, name, name_len) == 0) {
+            ZipFileImpl* file = malloc(sizeof(ZipFileImpl));
+            if (!file) return NULL;
+
+            const uint8_t* compressed_data = data + pos + 30 + fname_len + extra_len;
+
+            if (compression == 0) {
+                file->data = compressed_data;
+                file->size = uncompressed_size;
+            } else if (compression == 8) {
+                uint8_t* decompressed = malloc(uncompressed_size);
+                if (!decompressed) {
+                    free(file);
+                    return NULL;
+                }
+
+                z_stream stream;
+                memset(&stream, 0, sizeof(stream));
+                stream.next_in = (uint8_t*)compressed_data;
+                stream.avail_in = compressed_size;
+                stream.next_out = decompressed;
+                stream.avail_out = uncompressed_size;
+
+                if (inflateInit2(&stream, -MAX_WBITS) != Z_OK ||
+                    inflate(&stream, Z_FINISH) != Z_STREAM_END ||
+                    inflateEnd(&stream) != Z_OK) {
+                    free(decompressed);
+                    free(file);
+                    return NULL;
+                }
+
+                file->data = decompressed;
+                file->size = uncompressed_size;
+            } else {
+                free(file);
+                return NULL;
+            }
+
+            file->pos = 0;
+            return (ZipFile*)file;
+        }
+
+        pos += 30 + fname_len + extra_len + compressed_size;
     }
 
-    ZipFileImpl* file = malloc(sizeof(ZipFileImpl));
-    if (!file) {
-        free((void*)data);
-        return NULL;
-    }
-
-    file->data = data;
-    file->size = size;
-    file->pos = 0;
-
-    return (ZipFile*)file;
+    return NULL;
 }
 
 void zip_fclose(ZipFile* file) {
@@ -122,60 +167,107 @@ int zip_feof(ZipFile* file) {
 }
 
 int zip_locate_file(ZipArchive* archive, const char* name) {
-    if (!archive) return -1;
+    if (!archive || !name) return -1;
+
     ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
-    return mz_zip_reader_locate_file(&impl->zip, name, NULL, 0);
+    const uint8_t* data = (const uint8_t*)impl->zip_data;
+    size_t pos = 0;
+    int index = 0;
+
+    while (pos + 30 < impl->zip_size) {
+        if (*(uint32_t*)(data + pos) != 0x04034b50) {
+            pos++;
+            continue;
+        }
+
+        uint16_t fname_len = *(uint16_t*)(data + pos + 26);
+        uint16_t extra_len = *(uint16_t*)(data + pos + 28);
+        uint32_t compressed_size = *(uint32_t*)(data + pos + 18);
+
+        const char* entry_name = (const char*)(data + pos + 30);
+
+        if (strcmp(entry_name, name) == 0) {
+            return index;
+        }
+
+        index++;
+        pos += 30 + fname_len + extra_len + compressed_size;
+    }
+
+    return -1;
 }
 
 int zip_get_current_file_info_name(ZipArchive* archive, char* name_buf, size_t name_buf_size) {
-    if (!archive || name_buf == NULL) return -1;
-    ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
-
-    if (impl->file_index < 0) return -1;
-
-    mz_zip_archive_file_stat stat;
-    if (!mz_zip_reader_file_stat(&impl->zip, impl->file_index, &stat)) return -1;
-
-    size_t len = strlen(stat.m_filename);
-    if (len >= name_buf_size) len = name_buf_size - 1;
-
-    strncpy(name_buf, stat.m_filename, len);
-    name_buf[len] = '\0';
-
-    return 0;
+    return -1;
 }
 
 size_t zip_get_current_file_info_size(ZipArchive* archive) {
-    if (!archive) return 0;
-    ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
-
-    if (impl->file_index < 0) return 0;
-
-    mz_zip_archive_file_stat stat;
-    if (!mz_zip_reader_file_stat(&impl->zip, impl->file_index, &stat)) return 0;
-
-    return stat.m_uncomp_size;
+    return 0;
 }
 
 uint32_t zip_get_num_files(ZipArchive* archive) {
     if (!archive) return 0;
+
     ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
-    return mz_zip_reader_get_num_files(&impl->zip);
+    const uint8_t* data = (const uint8_t*)impl->zip_data;
+    size_t pos = 0;
+    uint32_t count = 0;
+
+    while (pos + 30 < impl->zip_size) {
+        if (*(uint32_t*)(data + pos) != 0x04034b50) {
+            pos++;
+            continue;
+        }
+
+        uint16_t fname_len = *(uint16_t*)(data + pos + 26);
+        uint16_t extra_len = *(uint16_t*)(data + pos + 28);
+        uint32_t compressed_size = *(uint32_t*)(data + pos + 18);
+
+        count++;
+        pos += 30 + fname_len + extra_len + compressed_size;
+    }
+
+    return count;
 }
 
 int zip_get_file_info(ZipArchive* archive, uint32_t index, char* name_buf, size_t name_buf_size, size_t* size_out) {
     if (!archive || !name_buf || !size_out) return -1;
+
     ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
+    const uint8_t* data = (const uint8_t*)impl->zip_data;
+    size_t pos = 0;
+    uint32_t current = 0;
 
-    mz_zip_archive_file_stat stat;
-    if (!mz_zip_reader_file_stat(&impl->zip, index, &stat)) return -1;
+    while (pos + 30 < impl->zip_size) {
+        if (*(uint32_t*)(data + pos) != 0x04034b50) {
+            pos++;
+            continue;
+        }
 
-    size_t len = strlen(stat.m_filename);
-    if (len >= name_buf_size) len = name_buf_size - 1;
+        if (current == index) {
+            uint16_t fname_len = *(uint16_t*)(data + pos + 26);
+            uint16_t extra_len = *(uint16_t*)(data + pos + 28);
+            uint32_t uncompressed_size = *(uint32_t*)(data + pos + 22);
 
-    strncpy(name_buf, stat.m_filename, len);
-    name_buf[len] = '\0';
+            const char* entry_name = (const char*)(data + pos + 30);
 
-    *size_out = stat.m_uncomp_size;
-    return 0;
+            size_t len = fname_len;
+            if (len >= name_buf_size) len = name_buf_size - 1;
+
+            strncpy(name_buf, entry_name, len);
+            name_buf[len] = '\0';
+            *size_out = uncompressed_size;
+
+            return 0;
+        }
+
+        uint16_t fname_len = *(uint16_t*)(data + pos + 26);
+        uint16_t extra_len = *(uint16_t*)(data + pos + 28);
+        uint32_t compressed_size = *(uint32_t*)(data + pos + 18);
+
+        current++;
+        pos += 30 + fname_len + extra_len + compressed_size;
+    }
+
+    return -1;
 }
