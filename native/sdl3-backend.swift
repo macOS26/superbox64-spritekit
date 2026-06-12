@@ -340,29 +340,52 @@ final class Kit {
         return ttsSpawn(text, rate: rate)
     }
 
-    // a throwaway empty utterance at startup warms the speech daemon so the
-    // first real line doesn't pay the cold-start delay
+    // say pays ~400ms of voice setup at launch, so one process always sits
+    // warm with stdin piped; speaking is write + EOF, near-instant, and the
+    // replacement warms while the line plays
+    var ttsWarm: OpaquePointer? = nil
+
     func ttsWarmup() {
-        guard let tool = ttsToolPath(), tool.hasSuffix("/say") else { return }
-        var argv: [UnsafeMutablePointer<CChar>?] = [tool, ""].map { s in s.withCString { SDL_strdup($0) } }
+        guard let tool = ttsToolPath(), tool.hasSuffix("/say"), ttsWarm == nil else { return }
+        var argv: [UnsafeMutablePointer<CChar>?] = [tool].map { s in s.withCString { SDL_strdup($0) } }
         argv.append(nil)
-        let proc = argv.withUnsafeBufferPointer { buf in
-            buf.baseAddress!.withMemoryRebound(to: UnsafePointer<CChar>?.self, capacity: buf.count) {
-                SDL_CreateProcess($0, false)
+        let props = SDL_CreateProperties()
+        argv.withUnsafeBufferPointer { buf in
+            buf.baseAddress!.withMemoryRebound(to: UnsafeRawPointer?.self, capacity: buf.count) { rb in
+                _ = "SDL.process.create.args".withCString {
+                    SDL_SetPointerProperty(props, $0, UnsafeMutableRawPointer(mutating: rb))
+                }
             }
+            _ = "SDL.process.create.stdin_option".withCString {
+                SDL_SetNumberProperty(props, $0, Int64(SDL_PROCESS_STDIO_APP.rawValue))
+            }
+            ttsWarm = SDL_CreateProcessWithProperties(props)
         }
+        SDL_DestroyProperties(props)
         for p in argv where p != nil { SDL_free(p) }
-        if let proc { SDL_DestroyProcess(proc) }
     }
 
     func ttsSpawn(_ text: String, rate: Float) -> Bool {
         guard let tool = ttsToolPath() else { return false }
         let r = rate <= 0 ? 1 : max(0.1, min(rate, 10))
         let wpm = String(Int32(max(60, min(400, 175 * r))))
-        var args: [String]
+
         if tool.hasSuffix("/say") {
-            args = [tool, "-r", wpm, text]
-        } else if tool.hasSuffix("spd-say") {
+            if ttsWarm == nil { ttsWarmup() }
+            guard let warm = ttsWarm, let input = SDL_GetProcessInput(warm) else { return false }
+            let line = "[[rate " + wpm + "]] " + text + "\n"
+            let bytes = Array(line.utf8)
+            _ = bytes.withUnsafeBufferPointer { SDL_WriteIO(input, $0.baseAddress, $0.count) }
+            _ = SDL_CloseIO(input)
+            ttsProcess = warm
+            ttsWarm = nil
+            ttsWarmup()
+            if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 0.4) }
+            return true
+        }
+
+        var args: [String]
+        if tool.hasSuffix("spd-say") {
             args = [tool, "-w", text]
         } else {
             args = [tool, "-s", wpm, text]
