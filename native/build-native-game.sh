@@ -50,7 +50,7 @@ EMB=(-enable-experimental-feature Embedded -wmo -Osize -parse-as-library
      -Xcc -fmodule-map-file="$FW/Sources/KitABI/include/module.modulemap"
      -Xcc -fmodule-map-file="$FW/Sources/CBox2D/include/module.modulemap"
      -Xcc -fmodule-map-file="$PWD/CSDL3/module.modulemap"
-     -Xcc -I"$SYS_INC"
+     -Xcc -I"$SYS_INC" ${EXTRA_XCC:-}
      -I "$FW/Sources/KitABI/include" -I "$FW/Sources/CBox2D/include" -I "$PWD/CSDL3"
      -I "$B/mod")
 
@@ -162,6 +162,7 @@ if [ -f "$PWD/vendor/libSDL3.a" ]; then
 fi
 clang -target arm64-apple-macos14 -o "$OUT" \
   "$B"/mod/*.o "$B"/box2d/*.o \
+  ${EXTRA_OBJS:-} ${EXTRA_LIBS:-} \
   "${SDL_LINK[@]}" \
   "$TC/lib/swift/embedded/arm64-apple-macos/libswiftUnicodeDataTables.a" \
   -dead_strip
