@@ -789,6 +789,14 @@ final class Kit {
     func drawTexturedQuad(_ tex: UnsafeMutablePointer<SDL_Texture>?, _ dx: Float, _ dy: Float, _ dw: Float, _ dh: Float,
                           _ u0: Float, _ v0: Float, _ u1: Float, _ v1: Float, _ color: SDL_FColor) {
         guard let tex else { return }
+        let q0 = mat.apply(dx, dy)
+        let q1 = mat.apply(dx + dw, dy)
+        let q2 = mat.apply(dx + dw, dy + dh)
+        let q3 = mat.apply(dx, dy + dh)
+        if cullsOffscreen(min(min(q0.x, q1.x), min(q2.x, q3.x)),
+                          min(min(q0.y, q1.y), min(q2.y, q3.y)),
+                          max(max(q0.x, q1.x), max(q2.x, q3.x)),
+                          max(max(q0.y, q1.y), max(q2.y, q3.y)), 1) { return }
         if !suppressShadow, (shadowBlur > 0 || shadowDx != 0 || shadowDy != 0), shadowRgba & 0xFF > 0 {
             suppressShadow = true
             if shadowBlur > 0 {
@@ -828,15 +836,11 @@ final class Kit {
             suppressShadow = false
         }
         _ = SDL_SetTextureBlendMode(tex, currentBlend())
-        let p0 = mat.apply(dx, dy)
-        let p1 = mat.apply(dx + dw, dy)
-        let p2 = mat.apply(dx + dw, dy + dh)
-        let p3 = mat.apply(dx, dy + dh)
         let verts = [
-            SDL_Vertex(position: p0, color: color, tex_coord: SDL_FPoint(x: u0, y: v0)),
-            SDL_Vertex(position: p1, color: color, tex_coord: SDL_FPoint(x: u1, y: v0)),
-            SDL_Vertex(position: p2, color: color, tex_coord: SDL_FPoint(x: u1, y: v1)),
-            SDL_Vertex(position: p3, color: color, tex_coord: SDL_FPoint(x: u0, y: v1)),
+            SDL_Vertex(position: q0, color: color, tex_coord: SDL_FPoint(x: u0, y: v0)),
+            SDL_Vertex(position: q1, color: color, tex_coord: SDL_FPoint(x: u1, y: v0)),
+            SDL_Vertex(position: q2, color: color, tex_coord: SDL_FPoint(x: u1, y: v1)),
+            SDL_Vertex(position: q3, color: color, tex_coord: SDL_FPoint(x: u0, y: v1)),
         ]
         let idx: [Int32] = [0, 1, 2, 0, 2, 3]
         SDL_RenderGeometry(renderer, tex, verts, 4, idx, 6)
@@ -879,6 +883,31 @@ final class Kit {
                 max(0, min(1, srgbEncode(-0.01963 * lr - 0.07879 * lg + 1.09842 * lb))))
     }
 
+    // shouldCullNonVisibleNodes: a primitive whose device-space bounds land
+    // entirely outside the active render target is skipped before any vertex
+    // building or SDL submission. Shadowed draws bypass the cull (the offset
+    // shadow can re-enter the frame; its own pass culls itself).
+    var shadowActive: Bool {
+        !suppressShadow && (shadowBlur > 0 || shadowDx != 0 || shadowDy != 0) && shadowRgba & 0xFF > 0
+    }
+
+    func cullsOffscreen(_ minX: Float, _ minY: Float, _ maxX: Float, _ maxY: Float, _ pad: Float) -> Bool {
+        if shadowActive { return false }
+        var tw = Float(screenW)
+        var th = Float(screenH)
+        var i = targets.count - 1
+        while i >= 0 {
+            if let t = targets[i] {
+                tw = Float(t.w)
+                th = Float(t.h)
+                break
+            }
+            i -= 1
+        }
+        if tw <= 0 || th <= 0 { return false }
+        return maxX < -pad || minX > tw + pad || maxY < -pad || minY > th + pad
+    }
+
     // Drawing always targets a texture now, where vertex alpha blends
     // reliably, so translucency is real; additive keeps the premultiplied
     // scale-toward-black so overlaps brighten instead of washing out.
@@ -908,6 +937,7 @@ final class Kit {
             minY = min(minY, p.y); maxY = max(maxY, p.y)
         }
         if maxX - minX < 0.01, maxY - minY < 0.01 { return }
+        if cullsOffscreen(minX, minY, maxX, maxY, max(1, thickness * mat.lengthScale) / 2 + 2) { return }
 
         // A translucent stroke is many overlapping quads and join fans, and
         // every overlap double-blends into blotches. Canvas2D strokes the
@@ -1092,6 +1122,17 @@ final class Kit {
             fillPoly(shifted, rgba: shadowRgba)
             suppressShadow = false
         }
+        var cMinX = pts[0].x
+        var cMaxX = pts[0].x
+        var cMinY = pts[0].y
+        var cMaxY = pts[0].y
+        for p in pts {
+            cMinX = min(cMinX, p.x)
+            cMaxX = max(cMaxX, p.x)
+            cMinY = min(cMinY, p.y)
+            cMaxY = max(cMaxY, p.y)
+        }
+        if cullsOffscreen(cMinX, cMinY, cMaxX, cMaxY, 2) { return }
         let color = fcolor(rgba)
         var verts = [SDL_Vertex]()
         verts.reserveCapacity(pts.count * 2)
