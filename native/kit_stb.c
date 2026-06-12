@@ -267,7 +267,7 @@ const unsigned char* kit_emoji_glyph_png(void* handle, int codepoint, uint32_t* 
             *pngLen = o2 - o1 - 8;
             *ppem = e->sbixPpem;
             *bearingX = originX;
-            *bearingY = originY + (int)kit_png_height(data + 8, *pngLen) + e->sbixDescentPx;
+            *bearingY = originY + (int)(kit_png_height(data + 8, *pngLen) * 79 / 100);
             *advance = e->sbixPpem;
             return data + 8;
         }
