@@ -146,6 +146,7 @@ final class Kit {
         case 3: return SDL_BLENDMODE_ADD
         case 4: return SDL_BLENDMODE_MUL
         case 5: return blendScreen
+        case 6: return blendScreen
         default: return SDL_BLENDMODE_BLEND
         }
     }
@@ -1792,6 +1793,122 @@ func img_height(_ img: Int32) -> Int32 {
     let k = Kit.shared
     guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)] else { return 0 }
     return rec.h
+}
+
+@_cdecl("img_polygon_from_alpha")
+func img_polygon_from_alpha(_ img: Int32, _ alphaThreshold: Float,
+                             _ outXY: UnsafeMutablePointer<Float>?, _ cap: Int32) -> Int32 {
+    let k = Kit.shared
+    guard img > 0, Int(img) < k.images.count,
+          let rec = k.images[Int(img)], let tex = rec.tex,
+          let outXY, cap >= 4 else { return 0 }
+    let iw = rec.w, ih = rec.h
+    guard iw > 0, ih > 0 else { return 0 }
+
+    guard let tmp = SDL_CreateTexture(k.renderer, k.targetFormat,
+                                      SDL_TEXTUREACCESS_TARGET, iw, ih) else { return 0 }
+    _ = SDL_SetTextureBlendMode(tmp, SDL_BLENDMODE_NONE)
+    let prevTarget = SDL_GetRenderTarget(k.renderer)
+    _ = SDL_SetRenderTarget(k.renderer, tmp)
+    _ = SDL_SetRenderDrawColorFloat(k.renderer, 0, 0, 0, 0)
+    _ = SDL_RenderClear(k.renderer)
+    _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE)
+    _ = SDL_RenderTexture(k.renderer, tex, nil, nil)
+    _ = SDL_SetRenderTarget(k.renderer, prevTarget)
+    _ = SDL_SetTextureBlendMode(tex, k.currentBlend())
+
+    var readRect = SDL_Rect(x: 0, y: 0, w: iw, h: ih)
+    _ = SDL_SetRenderTarget(k.renderer, tmp)
+    guard let rawSurf = SDL_RenderReadPixels(k.renderer, &readRect) else {
+        _ = SDL_SetRenderTarget(k.renderer, prevTarget)
+        SDL_DestroyTexture(tmp)
+        return 0
+    }
+    _ = SDL_SetRenderTarget(k.renderer, prevTarget)
+    SDL_DestroyTexture(tmp)
+
+    let surf: UnsafeMutablePointer<SDL_Surface>
+    if rawSurf.pointee.format != SDL_PIXELFORMAT_ABGR8888,
+       let conv = SDL_ConvertSurface(rawSurf, SDL_PIXELFORMAT_ABGR8888) {
+        SDL_DestroySurface(rawSurf)
+        surf = conv
+    } else {
+        surf = rawSurf
+    }
+    guard let pixBase = surf.pointee.pixels else { SDL_DestroySurface(surf); return 0 }
+    let px = pixBase.assumingMemoryBound(to: UInt8.self)
+    let pitch = surf.pointee.pitch
+    let thresh = UInt8(max(0, min(255, Int(alphaThreshold * 255))))
+
+    struct RD { var xl: Int32; var xr: Int32 }
+    var rows = [RD](repeating: RD(xl: iw, xr: -1), count: Int(ih))
+    for y in 0..<Int(ih) {
+        let rowBase = y * Int(pitch)
+        for x in 0..<Int(iw) {
+            if px[rowBase + x * 4 + 3] > thresh {
+                if Int32(x) < rows[y].xl { rows[y].xl = Int32(x) }
+                if Int32(x) > rows[y].xr { rows[y].xr = Int32(x) }
+            }
+        }
+    }
+    SDL_DestroySurface(surf)
+
+    var poly = [(Float, Float)]()
+    poly.reserveCapacity(Int(ih) * 2 + 4)
+    for y in 0..<Int(ih) where rows[y].xr >= 0 {
+        poly.append((Float(rows[y].xl), Float(y)))
+    }
+    var y2 = Int(ih) - 1
+    while y2 >= 0 {
+        if rows[y2].xr >= 0 { poly.append((Float(rows[y2].xr), Float(y2))) }
+        y2 -= 1
+    }
+    guard poly.count >= 3 else { return 0 }
+
+    var keep = [Bool](repeating: true, count: poly.count)
+    var stack = [(Int, Int)]()
+    stack.reserveCapacity(64)
+    stack.append((0, poly.count - 1))
+    while !stack.isEmpty {
+        let (lo, hi) = stack.removeLast()
+        guard hi - lo >= 2 else { continue }
+        let (ax, ay) = poly[lo]
+        let (bx, by) = poly[hi]
+        let dx = bx - ax, dy = by - ay
+        let len2 = dx * dx + dy * dy
+        var maxD: Float = 0
+        var maxI = lo + 1
+        for i in (lo + 1)..<hi {
+            let d: Float
+            if len2 < 0.0001 {
+                let ex = poly[i].0 - ax, ey = poly[i].1 - ay
+                d = ex * ex + ey * ey
+            } else {
+                let t = max(0, min(1, ((poly[i].0 - ax) * dx + (poly[i].1 - ay) * dy) / len2))
+                let qx = ax + t * dx, qy = ay + t * dy
+                let ex = poly[i].0 - qx, ey = poly[i].1 - qy
+                d = ex * ex + ey * ey
+            }
+            if d > maxD { maxD = d; maxI = i }
+        }
+        if maxD > 4 {
+            stack.append((lo, maxI))
+            stack.append((maxI, hi))
+        } else {
+            for i in (lo + 1)..<hi { keep[i] = false }
+        }
+    }
+
+    var written = 0
+    let maxPts = Int(cap) / 2
+    for i in 0..<poly.count {
+        if keep[i], written < maxPts {
+            outXY[written * 2] = poly[i].0
+            outXY[written * 2 + 1] = poly[i].1
+            written += 1
+        }
+    }
+    return Int32(written * 2)
 }
 
 @_cdecl("gfx_draw_image")
