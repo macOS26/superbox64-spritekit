@@ -211,8 +211,15 @@ open class SKNode {
         if zRotation != 0 { gfx_rotate(Float(zRotation * 180.0 / Double.pi)) }
         if xScale != 1 || yScale != 1 { gfx_scale(Float(xScale), Float(yScale)) }
         draw(alpha: eff)
+        // Hidden children no-op in their own renderTree anyway; dropping them
+        // BEFORE the z-sort keeps the per-frame sort at the visible count (a 3D
+        // scene pools hundreds of hidden billboards under one layer).
         if children.count > 1 {
-            for c in children.sorted(by: { $0.zPosition < $1.zPosition }) { c.renderTree(parentAlpha: eff) }
+            var vis: [SKNode] = []
+            vis.reserveCapacity(children.count)
+            for c in children where !c.isHidden && c.alpha > 0 { vis.append(c) }
+            if vis.count > 1 { vis.sort { $0.zPosition < $1.zPosition } }
+            for c in vis { c.renderTree(parentAlpha: eff) }
         } else {
             for c in children { c.renderTree(parentAlpha: eff) }
         }

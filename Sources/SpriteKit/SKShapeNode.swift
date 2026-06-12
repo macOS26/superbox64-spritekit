@@ -188,8 +188,16 @@ public final class SKShapeNode: SKNode {
             if hasStroke { gfx_stroke_circle(0, 0, Float(r), Float(lineWidth), strokeColor.rgba) }
         case .path:
             guard let p = path else { return }
-            for (sub, closed) in p.resolvedWithFlags where sub.count >= 2 {
-                var xy = [Float]()
+            // One scratch buffer reused across subpaths — a cast-floor path holds
+            // thousands of rect subpaths, so a fresh array per subpath dominated.
+            var xy = [Float]()
+            let subCount = p.subpaths.count
+            let total = subCount + (p.current.isEmpty ? 0 : 1)
+            for i in 0..<total {
+                let sub = i < subCount ? p.subpaths[i] : p.current
+                let closed = i < subCount ? (i < p.closedFlags.count ? p.closedFlags[i] : true) : false
+                if sub.count < 2 { continue }
+                xy.removeAll(keepingCapacity: true)
                 xy.reserveCapacity(sub.count * 2)
                 for pt in sub {
                     xy.append(Float(pt.x))

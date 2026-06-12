@@ -73,10 +73,11 @@ open class SKScene: SKNode {
     // this equals renderTree minus that one subtree.
     func renderWorld(skipping skip: SKNode?, parentAlpha: CGFloat) {
         let eff = parentAlpha * alpha
-        let ordered = children.count > 1
-            ? children.sorted(by: { $0.zPosition < $1.zPosition })
-            : children
-        for c in ordered where c !== skip { c.renderTree(parentAlpha: eff) }
+        var vis: [SKNode] = []
+        vis.reserveCapacity(children.count)
+        for c in children where c !== skip && !c.isHidden && c.alpha > 0 { vis.append(c) }
+        if vis.count > 1 { vis.sort { $0.zPosition < $1.zPosition } }
+        for c in vis { c.renderTree(parentAlpha: eff) }
     }
 }
 
