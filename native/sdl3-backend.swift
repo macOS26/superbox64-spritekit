@@ -32,6 +32,39 @@ struct Mat {
 @_silgen_name("kit_asset_data")
 func kit_asset_data(_ name: UnsafePointer<CChar>?, _ len: UnsafeMutablePointer<UInt32>?) -> UnsafePointer<UInt8>?
 
+@_silgen_name("kit_png_decode")
+func kit_png_decode(_ bytes: UnsafePointer<UInt8>?, _ len: Int32, _ w: UnsafeMutablePointer<Int32>?, _ h: UnsafeMutablePointer<Int32>?) -> UnsafeMutablePointer<UInt8>?
+
+@_silgen_name("kit_stb_free")
+func kit_stb_free(_ p: UnsafeMutableRawPointer?)
+
+@_silgen_name("kit_font_init")
+func kit_font_init(_ ttf: UnsafePointer<UInt8>?, _ len: Int32) -> UnsafeMutableRawPointer?
+
+@_silgen_name("kit_font_scale_for_px")
+func kit_font_scale_for_px(_ font: UnsafeMutableRawPointer?, _ px: Float) -> Float
+
+@_silgen_name("kit_font_vmetrics")
+func kit_font_vmetrics(_ font: UnsafeMutableRawPointer?, _ ascent: UnsafeMutablePointer<Int32>?, _ descent: UnsafeMutablePointer<Int32>?, _ lineGap: UnsafeMutablePointer<Int32>?)
+
+@_silgen_name("kit_font_hmetrics")
+func kit_font_hmetrics(_ font: UnsafeMutableRawPointer?, _ codepoint: Int32, _ advance: UnsafeMutablePointer<Int32>?, _ lsb: UnsafeMutablePointer<Int32>?)
+
+@_silgen_name("kit_font_kern")
+func kit_font_kern(_ font: UnsafeMutableRawPointer?, _ cp1: Int32, _ cp2: Int32) -> Int32
+
+@_silgen_name("kit_font_glyph_bitmap")
+func kit_font_glyph_bitmap(_ font: UnsafeMutableRawPointer?, _ scale: Float, _ codepoint: Int32, _ w: UnsafeMutablePointer<Int32>?, _ h: UnsafeMutablePointer<Int32>?, _ xoff: UnsafeMutablePointer<Int32>?, _ yoff: UnsafeMutablePointer<Int32>?) -> UnsafeMutablePointer<UInt8>?
+
+@_silgen_name("kit_font_glyph_index")
+func kit_font_glyph_index(_ font: UnsafeMutableRawPointer?, _ codepoint: Int32) -> Int32
+
+@_silgen_name("kit_emoji_init")
+func kit_emoji_init(_ ttf: UnsafePointer<UInt8>?, _ len: Int32) -> UnsafeMutableRawPointer?
+
+@_silgen_name("kit_emoji_glyph_png")
+func kit_emoji_glyph_png(_ handle: UnsafeMutableRawPointer?, _ codepoint: Int32, _ pngLen: UnsafeMutablePointer<UInt32>?, _ ppem: UnsafeMutablePointer<Int32>?, _ bearingX: UnsafeMutablePointer<Int32>?, _ bearingY: UnsafeMutablePointer<Int32>?, _ advance: UnsafeMutablePointer<Int32>?) -> UnsafePointer<UInt8>?
+
 final class Kit {
     static let shared = Kit()
     var window: OpaquePointer? = nil
@@ -87,6 +120,279 @@ final class Kit {
     var assetDir = "assets/sfx"
     var storePath = ".native-store.tsv"
     var fullscreen = false
+
+    // host-pluggable asset source (WasmCart serves cart zip entries here);
+    // falls back to baked-in kit_asset_data, then plain files on disk
+    var assetProvider: ((String) -> [UInt8]?)? = nil
+    var baseScale: Float = 1
+    var textBaseline: Int32 = 2
+
+    // the game's fixed logical canvas, the same per-game value the web host
+    // page passes as WASMWEB.logicalWidth/Height; carts carry it in their
+    // manifest.json and the host sets it at insert
+    var logicalW: Float = LOGICAL_W
+    var logicalH: Float = LOGICAL_H
+
+    // persistent screen target, the SDL stand-in for the web canvas: frames
+    // that repaint nothing (static title screens) keep showing the last
+    // composite instead of flipping to an undefined backbuffer
+    var screenTex: UnsafeMutablePointer<SDL_Texture>? = nil
+    var screenW: Int32 = 0
+    var screenH: Int32 = 0
+
+    func ensureScreenTarget() {
+        var pw: Int32 = 0
+        var ph: Int32 = 0
+        _ = SDL_GetWindowSizeInPixels(window, &pw, &ph)
+        if screenTex == nil || pw != screenW || ph != screenH {
+            if let old = screenTex { SDL_DestroyTexture(old) }
+            screenTex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, pw, ph)
+            screenW = pw
+            screenH = ph
+        }
+        _ = SDL_SetRenderTarget(renderer, screenTex)
+    }
+
+    struct ImgRec {
+        var tex: UnsafeMutablePointer<SDL_Texture>?
+        var w: Int32
+        var h: Int32
+    }
+    var images: [ImgRec?] = [nil]
+    var freeImageSlots: [Int] = []
+    var imageNames: [String: Int32] = [:]
+
+    var fontInfos: [UnsafeMutableRawPointer?] = [nil]
+    var fontNames: [String: Int32] = [:]
+    var defaultFont: Int32 = -1
+
+    var emojiFont: UnsafeMutableRawPointer? = nil
+
+    struct EmojiGlyph {
+        var tex: UnsafeMutablePointer<SDL_Texture>?
+        var w: Int32
+        var h: Int32
+        var ppem: Int32
+        var bearingX: Int32
+        var bearingY: Int32
+        var advance: Int32
+    }
+    var emojiCache: [Int: EmojiGlyph] = [:]
+
+    func setEmojiFont(_ ttf: UnsafePointer<UInt8>?, _ len: Int) {
+        emojiFont = kit_emoji_init(ttf, Int32(len))
+    }
+
+    func emojiGlyph(_ cp: Int32) -> EmojiGlyph? {
+        guard let emojiFont else { return nil }
+        if let g = emojiCache[Int(cp)] { return g }
+        var pngLen: UInt32 = 0
+        var ppem: Int32 = 0
+        var bearingX: Int32 = 0
+        var bearingY: Int32 = 0
+        var advance: Int32 = 0
+        guard let png = kit_emoji_glyph_png(emojiFont, cp, &pngLen, &ppem, &bearingX, &bearingY, &advance) else { return nil }
+        var w: Int32 = 0
+        var h: Int32 = 0
+        guard let pixels = kit_png_decode(png, Int32(pngLen), &w, &h) else { return nil }
+        let tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, w, h)
+        var rect = SDL_Rect(x: 0, y: 0, w: w, h: h)
+        _ = SDL_UpdateTexture(tex, &rect, pixels, w * 4)
+        kit_stb_free(pixels)
+        _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND)
+        let g = EmojiGlyph(tex: tex, w: w, h: h, ppem: ppem, bearingX: bearingX, bearingY: bearingY, advance: advance)
+        emojiCache[Int(cp)] = g
+        return g
+    }
+
+    struct Glyph {
+        var tex: UnsafeMutablePointer<SDL_Texture>?
+        var w: Int32
+        var h: Int32
+        var xoff: Int32
+        var yoff: Int32
+    }
+    var glyphCache: [Int: Glyph] = [:]
+
+    struct OffTarget {
+        var tex: UnsafeMutablePointer<SDL_Texture>?
+        var w: Int32
+        var h: Int32
+        var savedMat: Mat
+        var savedStack: [Mat]
+        var savedAlpha: Float
+        var prevTarget: UnsafeMutablePointer<SDL_Texture>?
+    }
+    var targets: [OffTarget?] = []
+
+    var engVolumes: [Int32: Float] = [:]
+    var engPlayers: [Int32: (sound: Int32, loops: Int32, voice: Int32)] = [:]
+    var nextEngId: Int32 = 1
+
+    func assetBytes(_ name: String) -> [UInt8]? {
+        if let provider = assetProvider {
+            if let d = provider(name) { return d }
+        }
+        var memLen: UInt32 = 0
+        if let mem = name.withCString({ kit_asset_data($0, &memLen) }), memLen > 0 {
+            var out = [UInt8]()
+            out.reserveCapacity(Int(memLen))
+            for i in 0..<Int(memLen) { out.append(mem[i]) }
+            return out
+        }
+        for path in [name, "assets/" + name] {
+            var size = 0
+            if let data = path.withCString({ SDL_LoadFile($0, &size) }), size > 0 {
+                let bytes = UnsafeRawPointer(data).bindMemory(to: UInt8.self, capacity: size)
+                var out = [UInt8]()
+                out.reserveCapacity(size)
+                for i in 0..<size { out.append(bytes[i]) }
+                SDL_free(data)
+                return out
+            }
+        }
+        return nil
+    }
+
+    func baseName(_ name: String) -> String {
+        var bytes = Array(name.utf8)
+        var lastSlash = -1
+        for i in 0..<bytes.count where bytes[i] == 47 { lastSlash = i }
+        if lastSlash >= 0 { bytes.removeFirst(lastSlash + 1) }
+        bytes.append(0)
+        return bytes.withUnsafeBufferPointer { String(cString: $0.baseAddress!) }
+    }
+
+    func registerImage(_ rec: ImgRec) -> Int32 {
+        if let slot = freeImageSlots.popLast() {
+            images[slot] = rec
+            return Int32(slot)
+        }
+        images.append(rec)
+        return Int32(images.count - 1)
+    }
+
+    func imageByName(_ name: String) -> Int32 {
+        if let id = imageNames[name] { return id }
+        var data = assetBytes(name)
+        if data == nil { data = assetBytes("images/" + name) }
+        if data == nil { data = assetBytes("images/" + name + ".png") }
+        if data == nil { data = assetBytes(baseName(name)) }
+        guard let data else { return 0 }
+        var w: Int32 = 0
+        var h: Int32 = 0
+        guard let pixels = data.withUnsafeBufferPointer({ kit_png_decode($0.baseAddress, Int32(data.count), &w, &h) }) else { return 0 }
+        let tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, w, h)
+        var rect = SDL_Rect(x: 0, y: 0, w: w, h: h)
+        _ = SDL_UpdateTexture(tex, &rect, pixels, w * 4)
+        kit_stb_free(pixels)
+        _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND)
+        let id = registerImage(ImgRec(tex: tex, w: w, h: h))
+        imageNames[name] = id
+        return id
+    }
+
+    func fontByName(_ name: String) -> Int32 {
+        if let id = fontNames[name] { return id }
+        var data = assetBytes(name)
+        if data == nil { data = assetBytes("fonts/" + name) }
+        if data == nil { data = assetBytes("fonts/" + name + ".ttf") }
+        if data == nil { data = assetBytes(baseName(name)) }
+        guard let data else { return 0 }
+        let buf = UnsafeMutablePointer<UInt8>.allocate(capacity: data.count)
+        for i in 0..<data.count { buf[i] = data[i] }
+        guard let info = kit_font_init(buf, Int32(data.count)) else {
+            buf.deallocate()
+            return 0
+        }
+        let id = Int32(fontInfos.count)
+        fontInfos.append(info)
+        fontNames[name] = id
+        return id
+    }
+
+    func resolveFont(_ font: Int32) -> UnsafeMutableRawPointer? {
+        if font > 0, Int(font) < fontInfos.count { return fontInfos[Int(font)] }
+        if defaultFont < 0 {
+            defaultFont = 0
+            for candidate in ["JetBrainsMono-Bold.ttf", "Menlo-Regular.ttf", "Menlo-Bold.ttf"] {
+                let id = fontByName(candidate)
+                if id > 0 {
+                    defaultFont = id
+                    break
+                }
+            }
+            if defaultFont == 0, fontInfos.count > 1 { defaultFont = 1 }
+        }
+        if defaultFont > 0, Int(defaultFont) < fontInfos.count { return fontInfos[Int(defaultFont)] }
+        return nil
+    }
+
+    func decodeUTF8(_ p: UnsafePointer<CChar>?, _ len: Int32) -> [Int32] {
+        var cps = [Int32]()
+        guard let p else { return cps }
+        var i = 0
+        let n = Int(len)
+        while i < n {
+            let b0 = UInt32(UInt8(bitPattern: p[i]))
+            var cp: UInt32 = 0
+            var extra = 0
+            if b0 < 0x80 { cp = b0 } else if b0 < 0xE0 { cp = b0 & 0x1F; extra = 1 } else if b0 < 0xF0 { cp = b0 & 0x0F; extra = 2 } else { cp = b0 & 0x07; extra = 3 }
+            if i + extra >= n { break }
+            for j in 1...max(1, extra) where extra > 0 {
+                cp = (cp << 6) | (UInt32(UInt8(bitPattern: p[i + j])) & 0x3F)
+            }
+            cps.append(Int32(bitPattern: cp))
+            i += 1 + extra
+        }
+        return cps
+    }
+
+    func glyph(_ font: Int32, _ info: UnsafeMutableRawPointer, _ cp: Int32, _ sizePx: Int32) -> Glyph? {
+        let key = (Int(font) << 44) | (Int(cp) << 12) | Int(sizePx & 0xFFF)
+        if let g = glyphCache[key] { return g }
+        let scale = kit_font_scale_for_px(info, Float(sizePx))
+        var w: Int32 = 0
+        var h: Int32 = 0
+        var xoff: Int32 = 0
+        var yoff: Int32 = 0
+        guard let bitmap = kit_font_glyph_bitmap(info, scale, cp, &w, &h, &xoff, &yoff) else {
+            let g = Glyph(tex: nil, w: 0, h: 0, xoff: 0, yoff: 0)
+            glyphCache[key] = g
+            return g
+        }
+        var g = Glyph(tex: nil, w: w, h: h, xoff: xoff, yoff: yoff)
+        if w > 0, h > 0 {
+            var rgba = [UInt8](repeating: 255, count: Int(w * h * 4))
+            for i in 0..<Int(w * h) { rgba[i * 4 + 3] = bitmap[i] }
+            let tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, w, h)
+            var rect = SDL_Rect(x: 0, y: 0, w: w, h: h)
+            _ = rgba.withUnsafeBufferPointer { SDL_UpdateTexture(tex, &rect, $0.baseAddress, w * 4) }
+            _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND)
+            g.tex = tex
+        }
+        kit_stb_free(bitmap)
+        glyphCache[key] = g
+        return g
+    }
+
+    func drawTexturedQuad(_ tex: UnsafeMutablePointer<SDL_Texture>?, _ dx: Float, _ dy: Float, _ dw: Float, _ dh: Float,
+                          _ u0: Float, _ v0: Float, _ u1: Float, _ v1: Float, _ color: SDL_FColor) {
+        guard let tex else { return }
+        _ = SDL_SetTextureBlendMode(tex, additive ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND)
+        let p0 = mat.apply(dx, dy)
+        let p1 = mat.apply(dx + dw, dy)
+        let p2 = mat.apply(dx + dw, dy + dh)
+        let p3 = mat.apply(dx, dy + dh)
+        let verts = [
+            SDL_Vertex(position: p0, color: color, tex_coord: SDL_FPoint(x: u0, y: v0)),
+            SDL_Vertex(position: p1, color: color, tex_coord: SDL_FPoint(x: u1, y: v0)),
+            SDL_Vertex(position: p2, color: color, tex_coord: SDL_FPoint(x: u1, y: v1)),
+            SDL_Vertex(position: p3, color: color, tex_coord: SDL_FPoint(x: u0, y: v1)),
+        ]
+        let idx: [Int32] = [0, 1, 2, 0, 2, 3]
+        SDL_RenderGeometry(renderer, tex, verts, 4, idx, 6)
+    }
 
     // RenderGeometry ignores vertex alpha against the backbuffer in practice,
     // so transparency is baked by scaling the color toward black - exact on
@@ -440,12 +746,13 @@ func sfKey(_ scancode: UInt32) -> Int32 {
 }
 
 func toLogical(_ window: OpaquePointer?, _ x: Float, _ y: Float) -> (Int32, Int32) {
+    let k = Kit.shared
     var w: Int32 = 0
     var h: Int32 = 0
     _ = SDL_GetWindowSize(window, &w, &h)
-    let sc = min(Float(w) / LOGICAL_W, Float(h) / LOGICAL_H)
-    let ox = (Float(w) - LOGICAL_W * sc) / 2
-    let oy = (Float(h) - LOGICAL_H * sc) / 2
+    let sc = min(Float(w) / k.logicalW, Float(h) / k.logicalH)
+    let ox = (Float(w) - k.logicalW * sc) / 2
+    let oy = (Float(h) - k.logicalH * sc) / 2
     return (Int32((x - ox) / sc), Int32((y - oy) / sc))
 }
 
@@ -513,8 +820,17 @@ func kitHostPump() -> Bool {
 }
 
 func kitHostPresent() {
-    Kit.shared.reapVoices()
-    _ = SDL_RenderPresent(Kit.shared.renderer)
+    let k = Kit.shared
+    k.reapVoices()
+    if let screen = k.screenTex {
+        _ = SDL_SetRenderTarget(k.renderer, nil)
+        _ = SDL_SetTextureBlendMode(screen, SDL_BLENDMODE_NONE)
+        _ = SDL_RenderTexture(k.renderer, screen, nil, nil)
+        _ = SDL_RenderPresent(k.renderer)
+        _ = SDL_SetRenderTarget(k.renderer, screen)
+    } else {
+        _ = SDL_RenderPresent(k.renderer)
+    }
 }
 
 // MARK: - the KitABI env surface, linked directly (no wasm in between)
@@ -527,13 +843,20 @@ func js_log(_ p: UnsafePointer<CChar>?, _ len: Int32) {
 @_cdecl("gfx_clear")
 func gfx_clear(_ rgba: UInt32) {
     let k = Kit.shared
-    var pw: Int32 = 0
-    var ph: Int32 = 0
-    _ = SDL_GetRenderOutputSize(k.renderer, &pw, &ph)
-    let sc = min(Float(pw) / LOGICAL_W, Float(ph) / LOGICAL_H)
+    if k.targets.contains(where: { $0 != nil }) {
+        let c = k.fcolor(rgba)
+        _ = SDL_SetRenderDrawColorFloat(k.renderer, c.r, c.g, c.b, 1)
+        _ = SDL_RenderClear(k.renderer)
+        return
+    }
+    k.ensureScreenTarget()
+    let pw = k.screenW
+    let ph = k.screenH
+    let sc = min(Float(pw) / k.logicalW, Float(ph) / k.logicalH)
+    k.baseScale = sc
     k.mat = Mat(a: sc, b: 0, c: 0, d: sc,
-                e: (Float(pw) - LOGICAL_W * sc) / 2,
-                f: (Float(ph) - LOGICAL_H * sc) / 2)
+                e: (Float(pw) - k.logicalW * sc) / 2,
+                f: (Float(ph) - k.logicalH * sc) / 2)
     k.stack = []
     k.alpha = 1
         k.additive = false
@@ -678,3 +1001,444 @@ func store_set(_ key: UnsafePointer<CChar>?, _ klen: Int32,
 
 @_cdecl("gp_connected")
 func gp_connected(_ pad: Int32) -> Int32 { 0 }
+
+// MARK: - images, offscreen targets, text (the texture half of the ABI)
+
+@_cdecl("img_by_name")
+func img_by_name(_ name: UnsafePointer<CChar>?, _ len: Int32) -> Int32 {
+    let k = Kit.shared
+    return k.imageByName(k.cString(name, len))
+}
+
+@_cdecl("img_width")
+func img_width(_ img: Int32) -> Int32 {
+    let k = Kit.shared
+    guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)] else { return 0 }
+    return rec.w
+}
+
+@_cdecl("img_height")
+func img_height(_ img: Int32) -> Int32 {
+    let k = Kit.shared
+    guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)] else { return 0 }
+    return rec.h
+}
+
+@_cdecl("gfx_draw_image")
+func gfx_draw_image(_ img: Int32, _ sx: Float, _ sy: Float, _ sw: Float, _ sh: Float,
+                    _ dx: Float, _ dy: Float, _ dw: Float, _ dh: Float, _ rgba: UInt32) {
+    let k = Kit.shared
+    guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)], rec.tex != nil else { return }
+    let a = Float(rgba & 0xFF) / 255 * k.alpha
+    let color = SDL_FColor(r: 1, g: 1, b: 1, a: a)
+    var u0: Float = 0
+    var v0: Float = 0
+    var u1: Float = 1
+    var v1: Float = 1
+    if sw >= 0, sh >= 0, rec.w > 0, rec.h > 0 {
+        u0 = sx / Float(rec.w)
+        v0 = sy / Float(rec.h)
+        u1 = (sx + sw) / Float(rec.w)
+        v1 = (sy + sh) / Float(rec.h)
+    }
+    k.drawTexturedQuad(rec.tex, dx, dy, dw, dh, u0, v0, u1, v1, color)
+}
+
+@_cdecl("gfx_free_image")
+func gfx_free_image(_ img: Int32) {
+    let k = Kit.shared
+    guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)] else { return }
+    if let tex = rec.tex { SDL_DestroyTexture(tex) }
+    k.images[Int(img)] = nil
+    k.freeImageSlots.append(Int(img))
+}
+
+@_cdecl("gfx_upload_pixels")
+func gfx_upload_pixels(_ img: Int32, _ w: Int32, _ h: Int32, _ rgba: UnsafePointer<UInt8>?, _ len: Int32) -> Int32 {
+    let k = Kit.shared
+    guard let rgba, w > 0, h > 0, len >= w * h * 4 else { return img }
+    let tex = SDL_CreateTexture(k.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, w, h)
+    var rect = SDL_Rect(x: 0, y: 0, w: w, h: h)
+    _ = SDL_UpdateTexture(tex, &rect, rgba, w * 4)
+    _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND)
+    if img > 0, Int(img) < k.images.count {
+        if let old = k.images[Int(img)]?.tex { SDL_DestroyTexture(old) }
+        k.images[Int(img)] = Kit.ImgRec(tex: tex, w: w, h: h)
+        return img
+    }
+    return k.registerImage(Kit.ImgRec(tex: tex, w: w, h: h))
+}
+
+@_cdecl("gfx_offscreen_begin")
+func gfx_offscreen_begin(_ w: Int32, _ h: Int32) -> Int32 {
+    let k = Kit.shared
+    let dpr = max(1, k.baseScale)
+    let tw = Int32(Float(w) * dpr + 0.5)
+    let th = Int32(Float(h) * dpr + 0.5)
+    guard tw > 0, th > 0,
+          let tex = SDL_CreateTexture(k.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, tw, th) else { return 0 }
+    _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND)
+    let prev = SDL_GetRenderTarget(k.renderer)
+    _ = SDL_SetRenderTarget(k.renderer, tex)
+    _ = SDL_SetRenderDrawColorFloat(k.renderer, 0, 0, 0, 0)
+    _ = SDL_RenderClear(k.renderer)
+    k.targets.append(Kit.OffTarget(tex: tex, w: tw, h: th,
+                                   savedMat: k.mat, savedStack: k.stack, savedAlpha: k.alpha,
+                                   prevTarget: prev))
+    k.mat = Mat(a: dpr, b: 0, c: 0, d: dpr, e: 0, f: 0)
+    k.stack = []
+    k.alpha = 1
+    return Int32(k.targets.count)
+}
+
+@_cdecl("gfx_offscreen_end_to_image")
+func gfx_offscreen_end_to_image(_ handle: Int32) -> Int32 {
+    let k = Kit.shared
+    guard handle >= 1, Int(handle) <= k.targets.count, let t = k.targets[Int(handle) - 1] else { return 0 }
+    _ = SDL_SetRenderTarget(k.renderer, t.prevTarget)
+    k.mat = t.savedMat
+    k.stack = t.savedStack
+    k.alpha = t.savedAlpha
+    k.targets[Int(handle) - 1] = nil
+    while let last = k.targets.last, last == nil { k.targets.removeLast() }
+    return k.registerImage(Kit.ImgRec(tex: t.tex, w: t.w, h: t.h))
+}
+
+@_cdecl("gfx_offscreen_end_discard")
+func gfx_offscreen_end_discard(_ handle: Int32) {
+    let k = Kit.shared
+    guard handle >= 1, Int(handle) <= k.targets.count, let t = k.targets[Int(handle) - 1] else { return }
+    _ = SDL_SetRenderTarget(k.renderer, t.prevTarget)
+    k.mat = t.savedMat
+    k.stack = t.savedStack
+    k.alpha = t.savedAlpha
+    if let tex = t.tex { SDL_DestroyTexture(tex) }
+    k.targets[Int(handle) - 1] = nil
+    while let last = k.targets.last, last == nil { k.targets.removeLast() }
+}
+
+@_cdecl("font_by_name")
+func font_by_name(_ name: UnsafePointer<CChar>?, _ len: Int32) -> Int32 {
+    let k = Kit.shared
+    return k.fontByName(k.cString(name, len))
+}
+
+@_cdecl("txt_width")
+func txt_width(_ font: Int32, _ utf8: UnsafePointer<CChar>?, _ len: Int32, _ sizePx: Int32, _ spacing: Float) -> Int32 {
+    let k = Kit.shared
+    guard let info = k.resolveFont(font) else { return 0 }
+    let cps = k.decodeUTF8(utf8, len)
+    if cps.isEmpty { return 0 }
+    let scale = kit_font_scale_for_px(info, Float(sizePx))
+    var w: Float = 0
+    for i in 0..<cps.count {
+        let cp = cps[i]
+        if cp == 0xFE0F || cp == 0x200D { continue }
+        if kit_font_glyph_index(info, cp) == 0, let eg = k.emojiGlyph(cp) {
+            w += Float(eg.advance) * Float(sizePx) / Float(eg.ppem)
+        } else {
+            var advance: Int32 = 0
+            var lsb: Int32 = 0
+            kit_font_hmetrics(info, cp, &advance, &lsb)
+            w += Float(advance) * scale
+            if i + 1 < cps.count {
+                w += Float(kit_font_kern(info, cp, cps[i + 1])) * scale
+            }
+        }
+    }
+    w += spacing * Float(cps.count - 1)
+    return Int32(SDL_ceilf(w))
+}
+
+@_cdecl("gfx_set_text_baseline")
+func gfx_set_text_baseline(_ mode: Int32) {
+    Kit.shared.textBaseline = mode
+}
+
+@_cdecl("gfx_draw_text")
+func gfx_draw_text(_ font: Int32, _ utf8: UnsafePointer<CChar>?, _ len: Int32,
+                   _ x: Float, _ y: Float, _ sizePx: Int32, _ rgba: UInt32, _ spacing: Float) {
+    let k = Kit.shared
+    guard let info = k.resolveFont(font) else { return }
+    let cps = k.decodeUTF8(utf8, len)
+    if cps.isEmpty { return }
+    let scale = kit_font_scale_for_px(info, Float(sizePx))
+    var ascent: Int32 = 0
+    var descent: Int32 = 0
+    var lineGap: Int32 = 0
+    kit_font_vmetrics(info, &ascent, &descent, &lineGap)
+    let ascentPx = Float(ascent) * scale
+    let descentPx = Float(descent) * scale
+    var baselineY = y
+    switch k.textBaseline {
+    case 0: baselineY = y
+    case 1: baselineY = y + (ascentPx + descentPx) / 2
+    case 3: baselineY = y + descentPx
+    default: baselineY = y + ascentPx
+    }
+    let a = Float(rgba & 0xFF) / 255 * k.alpha
+    let color = SDL_FColor(r: Float((rgba >> 24) & 0xFF) / 255,
+                           g: Float((rgba >> 16) & 0xFF) / 255,
+                           b: Float((rgba >> 8) & 0xFF) / 255,
+                           a: a)
+    let dpr = max(1, k.baseScale)
+    let rasterPx = Int32(Float(sizePx) * dpr + 0.5)
+    var pen = x
+    for i in 0..<cps.count {
+        let cp = cps[i]
+        if cp == 0xFE0F || cp == 0x200D { continue }
+        if kit_font_glyph_index(info, cp) == 0, let eg = k.emojiGlyph(cp), let tex = eg.tex {
+            let escale = Float(sizePx) / Float(eg.ppem)
+            k.drawTexturedQuad(tex,
+                               pen + Float(eg.bearingX) * escale, baselineY - Float(eg.bearingY) * escale,
+                               Float(eg.w) * escale, Float(eg.h) * escale,
+                               0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: a))
+            pen += Float(eg.advance) * escale + spacing
+            continue
+        }
+        let fid = font > 0 ? font : k.defaultFont
+        if let g = k.glyph(fid, info, cp, rasterPx), let tex = g.tex {
+            k.drawTexturedQuad(tex,
+                               pen + Float(g.xoff) / dpr, baselineY + Float(g.yoff) / dpr,
+                               Float(g.w) / dpr, Float(g.h) / dpr,
+                               0, 0, 1, 1, color)
+        }
+        var advance: Int32 = 0
+        var lsb: Int32 = 0
+        kit_font_hmetrics(info, cp, &advance, &lsb)
+        pen += Float(advance) * scale + spacing
+        if i + 1 < cps.count {
+            pen += Float(kit_font_kern(info, cp, cps[i + 1])) * scale
+        }
+    }
+}
+
+// MARK: - shadows, filters, composite (approximations where SDL has no blur)
+
+@_cdecl("gfx_draw_shadow_image")
+func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h: Float, _ blur: Float, _ rgba: UInt32) {
+    let k = Kit.shared
+    guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)], let tex = rec.tex else { return }
+    let a = Float(rgba & 0xFF) / 255 * k.alpha
+    _ = SDL_SetTextureColorModFloat(tex, Float((rgba >> 24) & 0xFF) / 255,
+                                    Float((rgba >> 16) & 0xFF) / 255,
+                                    Float((rgba >> 8) & 0xFF) / 255)
+    let r = max(1, blur / 3)
+    let offsets: [(Float, Float)] = [(0, 0), (r, 0), (-r, 0), (0, r), (0, -r)]
+    for (ox, oy) in offsets {
+        let color = SDL_FColor(r: 1, g: 1, b: 1, a: a / Float(offsets.count))
+        k.drawTexturedQuad(tex, x + ox, y + oy, w, h, 0, 0, 1, 1, color)
+    }
+    _ = SDL_SetTextureColorModFloat(tex, 1, 1, 1)
+}
+
+@_cdecl("gfx_set_shadow")
+func gfx_set_shadow(_ blurRadius: Float, _ dx: Float, _ dy: Float, _ rgba: UInt32) {}
+
+@_cdecl("gfx_clear_shadow")
+func gfx_clear_shadow() {}
+
+@_cdecl("gfx_set_filter")
+func gfx_set_filter(_ utf8: UnsafePointer<CChar>?, _ len: Int32) {}
+
+@_cdecl("gfx_clear_filter")
+func gfx_clear_filter() {}
+
+@_cdecl("gfx_set_composite")
+func gfx_set_composite(_ mode: Int32) {
+    Kit.shared.additive = mode == 1
+}
+
+@_cdecl("gfx_snap_translation")
+func gfx_snap_translation() {
+    let k = Kit.shared
+    k.mat.e = SDL_roundf(k.mat.e)
+    k.mat.f = SDL_roundf(k.mat.f)
+}
+
+@_cdecl("gfx_set_line_style")
+func gfx_set_line_style(_ join: Int32, _ cap: Int32, _ miterLimit: Float) {}
+
+// MARK: - assets
+
+@_cdecl("asset_exists")
+func asset_exists(_ name: UnsafePointer<CChar>?, _ len: Int32) -> Int32 {
+    let k = Kit.shared
+    return k.assetBytes(k.cString(name, len)) != nil ? 1 : 0
+}
+
+@_cdecl("asset_text")
+func asset_text(_ name: UnsafePointer<CChar>?, _ len: Int32, _ buf: UnsafeMutablePointer<CChar>?, _ cap: Int32) -> Int32 {
+    let k = Kit.shared
+    guard let data = k.assetBytes(k.cString(name, len)) else { return -1 }
+    if let buf {
+        let n = min(Int(cap), data.count)
+        for i in 0..<n { buf[i] = CChar(bitPattern: data[i]) }
+    }
+    return Int32(data.count)
+}
+
+// MARK: - sound extensions
+
+@_cdecl("snd_create_pcm")
+func snd_create_pcm(_ samples: UnsafePointer<Float>?, _ frameCount: Int32, _ sampleRate: Int32) -> Int32 {
+    let k = Kit.shared
+    guard let samples, frameCount > 0 else { return 0 }
+    let id = Int32(k.soundSpecs.count)
+    var spec = SDL_AudioSpec()
+    spec.format = SDL_AUDIO_F32LE
+    spec.channels = 1
+    spec.freq = sampleRate > 0 ? sampleRate : 44100
+    let byteLen = Int(frameCount) * 4
+    let buf = UnsafeMutablePointer<UInt8>.allocate(capacity: byteLen)
+    let src = UnsafeRawPointer(samples)
+    let dst = UnsafeMutableRawPointer(buf)
+    dst.copyMemory(from: src, byteCount: byteLen)
+    k.soundSpecs.append(spec)
+    k.soundBufs.append(buf)
+    k.soundLens.append(UInt32(byteLen))
+    return id
+}
+
+@_cdecl("snd_status")
+func snd_status(_ voice: Int32) -> Int32 {
+    let k = Kit.shared
+    for v in k.voiceIds where v == voice { return 1 }
+    return 0
+}
+
+@_cdecl("snd_pause_all")
+func snd_pause_all() {
+    let k = Kit.shared
+    if k.audioDevice != 0 { _ = SDL_PauseAudioDevice(k.audioDevice) }
+}
+
+@_cdecl("snd_resume_all")
+func snd_resume_all() {
+    let k = Kit.shared
+    if k.audioDevice != 0 { _ = SDL_ResumeAudioDevice(k.audioDevice) }
+}
+
+@_cdecl("snd_set_rate")
+func snd_set_rate(_ voice: Int32, _ rate: Float) {
+    let k = Kit.shared
+    for i in 0..<k.voiceIds.count where k.voiceIds[i] == voice {
+        _ = SDL_SetAudioStreamFrequencyRatio(k.voiceStreams[i], max(0.0625, min(16, rate)))
+        return
+    }
+}
+
+// MARK: - AVAudioEngine shim mapped onto voices
+
+@_cdecl("eng_player_create")
+func eng_player_create() -> Int32 {
+    let k = Kit.shared
+    let id = k.nextEngId
+    k.nextEngId += 1
+    k.engPlayers[id] = (sound: 0, loops: 0, voice: 0)
+    k.engVolumes[id] = 1
+    return id
+}
+
+@_cdecl("eng_player_release")
+func eng_player_release(_ id: Int32) {
+    let k = Kit.shared
+    if let p = k.engPlayers[id], p.voice != 0 { k.stopVoice(p.voice) }
+    k.engPlayers[id] = nil
+    k.engVolumes[id] = nil
+}
+
+@_cdecl("eng_mixer_create")
+func eng_mixer_create() -> Int32 {
+    let k = Kit.shared
+    let id = k.nextEngId
+    k.nextEngId += 1
+    k.engVolumes[id] = 1
+    return id
+}
+
+@_cdecl("eng_node_set_volume")
+func eng_node_set_volume(_ id: Int32, _ v: Float) {
+    let k = Kit.shared
+    k.engVolumes[id] = v
+    if let p = k.engPlayers[id], p.voice != 0 { k.setVoiceVolume(p.voice, v * 100) }
+}
+
+@_cdecl("eng_node_set_pan")
+func eng_node_set_pan(_ id: Int32, _ p: Float) {
+    let k = Kit.shared
+    if let player = k.engPlayers[id], player.voice != 0 { k.setVoicePan(player.voice, p) }
+}
+
+@_cdecl("eng_connect")
+func eng_connect(_ src: Int32, _ dst: Int32) {}
+
+@_cdecl("eng_player_schedule_buffer")
+func eng_player_schedule_buffer(_ player: Int32, _ sound: Int32, _ loops: Int32) -> Int32 {
+    let k = Kit.shared
+    guard var p = k.engPlayers[player] else { return 0 }
+    p.sound = sound
+    p.loops = loops
+    k.engPlayers[player] = p
+    return 1
+}
+
+@_cdecl("eng_player_play")
+func eng_player_play(_ id: Int32) {
+    let k = Kit.shared
+    guard var p = k.engPlayers[id], p.sound > 0 else { return }
+    if p.voice != 0 { k.stopVoice(p.voice) }
+    let vol = k.engVolumes[id] ?? 1
+    p.voice = k.play(p.sound, volume: vol * 100, loop: p.loops != 0)
+    k.engPlayers[id] = p
+}
+
+@_cdecl("eng_player_stop")
+func eng_player_stop(_ id: Int32) {
+    let k = Kit.shared
+    guard var p = k.engPlayers[id] else { return }
+    if p.voice != 0 { k.stopVoice(p.voice) }
+    p.voice = 0
+    k.engPlayers[id] = p
+}
+
+@_cdecl("eng_start")
+func eng_start() {}
+
+@_cdecl("eng_stop")
+func eng_stop() {}
+
+// MARK: - window
+
+@_cdecl("win_width")
+func win_width() -> Int32 { Int32(Kit.shared.logicalW) }
+
+@_cdecl("win_height")
+func win_height() -> Int32 { Int32(Kit.shared.logicalH) }
+
+@_cdecl("win_set_title")
+func win_set_title(_ s: UnsafePointer<CChar>?, _ len: Int32) {
+    let k = Kit.shared
+    _ = k.cString(s, len).withCString { SDL_SetWindowTitle(k.window, $0) }
+}
+
+@_cdecl("win_request_fullscreen")
+func win_request_fullscreen() {
+    let k = Kit.shared
+    _ = SDL_SetWindowFullscreen(k.window, true)
+    k.fullscreen = true
+}
+
+@_cdecl("win_exit_fullscreen")
+func win_exit_fullscreen() {
+    let k = Kit.shared
+    _ = SDL_SetWindowFullscreen(k.window, false)
+    k.fullscreen = false
+}
+
+@_cdecl("win_download")
+func win_download(_ name: UnsafePointer<CChar>?, _ nlen: Int32, _ data: UnsafePointer<CChar>?, _ dlen: Int32) {
+    let k = Kit.shared
+    guard let data, dlen > 0 else { return }
+    _ = k.cString(name, nlen).withCString { SDL_SaveFile($0, data, Int(dlen)) }
+}

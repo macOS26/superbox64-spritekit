@@ -130,6 +130,17 @@ implemented = {
     "gfx_fill_poly", "gfx_fill_circle", "gfx_stroke_circle", "gfx_fill_rect",
     "gfx_stroke_rect", "gfx_set_blend", "evt_poll", "snd_by_name", "snd_play", "snd_stop",
     "snd_set_volume", "snd_set_pan", "store_get", "store_set", "gp_connected",
+    "img_by_name", "img_width", "img_height", "gfx_draw_image", "gfx_free_image",
+    "gfx_upload_pixels", "gfx_offscreen_begin", "gfx_offscreen_end_to_image",
+    "gfx_offscreen_end_discard", "font_by_name", "txt_width", "gfx_set_text_baseline",
+    "gfx_draw_text", "gfx_draw_shadow_image", "gfx_set_shadow", "gfx_clear_shadow",
+    "gfx_set_filter", "gfx_clear_filter", "gfx_set_composite", "gfx_snap_translation",
+    "gfx_set_line_style", "asset_exists", "asset_text", "snd_create_pcm", "snd_status",
+    "snd_pause_all", "snd_resume_all", "snd_set_rate", "eng_player_create",
+    "eng_player_release", "eng_mixer_create", "eng_node_set_volume", "eng_node_set_pan",
+    "eng_connect", "eng_player_schedule_buffer", "eng_player_play", "eng_player_stop",
+    "eng_start", "eng_stop", "win_width", "win_height", "win_set_title",
+    "win_request_fullscreen", "win_exit_fullscreen", "win_download",
 }
 lines = ['#include "KitABI.h"', "#include <stdlib.h>",
          "double _swift_stdlib_strtod_clocale(const char *str, char **end) { return strtod(str, end); }"]
@@ -148,6 +159,7 @@ print(f"  {len(lines) - 3} stubbed")
 PYEOF
 clang -c -O2 -I "$FW/Sources/KitABI/include" -target arm64-apple-macos14 "$B/stubs.c" -o "$B/mod/stubs.o"
 clang -c -O2 -I "$FW/Sources/KitABI/include" -target arm64-apple-macos14 "$FW/Sources/KitABI/shim.c" -o "$B/mod/shim.o"
+clang -c -O2 -target arm64-apple-macos14 "$PWD/kit_stb.c" -o "$B/mod/kit_stb.o"
 
 echo "→ link"
 SDL_LINK=(-L "$SYS_LIB" -lSDL3)
