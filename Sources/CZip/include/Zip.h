@@ -24,6 +24,9 @@ int zip_locate_file(ZipArchive* archive, const char* name);
 int zip_get_current_file_info_name(ZipArchive* archive, char* name_buf, size_t name_buf_size);
 size_t zip_get_current_file_info_size(ZipArchive* archive);
 
+uint32_t zip_get_num_files(ZipArchive* archive);
+int zip_get_file_info(ZipArchive* archive, uint32_t index, char* name_buf, size_t name_buf_size, size_t* size_out);
+
 #ifdef __cplusplus
 }
 #endif

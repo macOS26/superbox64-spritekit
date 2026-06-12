@@ -156,3 +156,26 @@ size_t zip_get_current_file_info_size(ZipArchive* archive) {
 
     return stat.m_uncomp_size;
 }
+
+uint32_t zip_get_num_files(ZipArchive* archive) {
+    if (!archive) return 0;
+    ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
+    return mz_zip_reader_get_num_files(&impl->zip);
+}
+
+int zip_get_file_info(ZipArchive* archive, uint32_t index, char* name_buf, size_t name_buf_size, size_t* size_out) {
+    if (!archive || !name_buf || !size_out) return -1;
+    ZipArchiveImpl* impl = (ZipArchiveImpl*)archive;
+
+    mz_zip_archive_file_stat stat;
+    if (!mz_zip_reader_file_stat(&impl->zip, index, &stat)) return -1;
+
+    size_t len = strlen(stat.m_filename);
+    if (len >= name_buf_size) len = name_buf_size - 1;
+
+    strncpy(name_buf, stat.m_filename, len);
+    name_buf[len] = '\0';
+
+    *size_out = stat.m_uncomp_size;
+    return 0;
+}
