@@ -119,6 +119,11 @@ final class Kit {
     var sfKeyHeld: [Bool] = Array(repeating: false, count: 128)
 
     var ttsPreferredVoice = ""
+    var shadowBlur: Float = 0
+    var shadowDx: Float = 0
+    var shadowDy: Float = 0
+    var shadowRgba: UInt32 = 0
+    var suppressShadow = false
     var whiteTex: UnsafeMutablePointer<SDL_Texture>? = nil
 
     // Canvas2D globalCompositeOperation table; destination-in/out and screen
@@ -304,6 +309,7 @@ final class Kit {
         var savedAlpha: Float
         var prevTarget: UnsafeMutablePointer<SDL_Texture>?
         var blur: Float = 0
+        var brightness: Float = 1
     }
     var targets: [OffTarget?] = []
 
@@ -777,6 +783,44 @@ final class Kit {
     func drawTexturedQuad(_ tex: UnsafeMutablePointer<SDL_Texture>?, _ dx: Float, _ dy: Float, _ dw: Float, _ dh: Float,
                           _ u0: Float, _ v0: Float, _ u1: Float, _ v1: Float, _ color: SDL_FColor) {
         guard let tex else { return }
+        if !suppressShadow, (shadowBlur > 0 || shadowDx != 0 || shadowDy != 0), shadowRgba & 0xFF > 0 {
+            suppressShadow = true
+            if shadowBlur > 0 {
+                let texel = max(4, shadowBlur)
+                let margin: Float = 2
+                let tw = Int32(SDL_ceilf(dw / texel) + margin * 2)
+                let th = Int32(SDL_ceilf(dh / texel) + margin * 2)
+                if tw > 0, th > 0, let small = acquireTarget(tw, th) {
+                    _ = SDL_SetTextureBlendMode(small, SDL_BLENDMODE_BLEND)
+                    let prev = SDL_GetRenderTarget(renderer)
+                    _ = SDL_SetRenderTarget(renderer, small)
+                    _ = SDL_SetRenderDrawColorFloat(renderer, 0, 0, 0, 0)
+                    _ = SDL_RenderClear(renderer)
+                    let savedMat = mat
+                    mat = Mat()
+                    let (sr, sg, sb) = gameColor(shadowRgba)
+                    _ = SDL_SetTextureColorModFloat(tex, sr, sg, sb)
+                    drawTexturedQuad(tex, margin, margin, Float(tw) - margin * 2, Float(th) - margin * 2,
+                                     u0, v0, u1, v1, SDL_FColor(r: 1, g: 1, b: 1, a: 1))
+                    _ = SDL_SetTextureColorModFloat(tex, 1, 1, 1)
+                    mat = savedMat
+                    _ = SDL_SetRenderTarget(renderer, prev)
+                    let sa = Float(shadowRgba & 0xFF) / 255 * alpha
+                    drawTexturedQuad(small, dx + shadowDx - margin * texel, dy + shadowDy - margin * texel,
+                                     dw + 2 * margin * texel, dh + 2 * margin * texel,
+                                     0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: sa))
+                    recycleTarget(small, tw, th)
+                }
+            } else {
+                let sa = Float(shadowRgba & 0xFF) / 255 * alpha
+                let (sr, sg, sb) = gameColor(shadowRgba)
+                _ = SDL_SetTextureColorModFloat(tex, sr, sg, sb)
+                drawTexturedQuad(tex, dx + shadowDx, dy + shadowDy, dw, dh, u0, v0, u1, v1,
+                                 SDL_FColor(r: 1, g: 1, b: 1, a: sa))
+                _ = SDL_SetTextureColorModFloat(tex, 1, 1, 1)
+            }
+            suppressShadow = false
+        }
         _ = SDL_SetTextureBlendMode(tex, currentBlend())
         let p0 = mat.apply(dx, dy)
         let p1 = mat.apply(dx + dw, dy)
@@ -843,6 +887,14 @@ final class Kit {
 
     func strokePoly(_ pts: [SDL_FPoint], closed: Bool, thickness: Float, rgba: UInt32) {
         if pts.count < 2 { return }
+        if !suppressShadow, (shadowBlur > 0 || shadowDx != 0 || shadowDy != 0), shadowRgba & 0xFF > 0 {
+            suppressShadow = true
+            let sdx = mat.a * shadowDx
+            let sdy = mat.d * shadowDy
+            let shifted = pts.map { SDL_FPoint(x: $0.x + sdx, y: $0.y + sdy) }
+            strokePoly(shifted, closed: closed, thickness: thickness, rgba: shadowRgba)
+            suppressShadow = false
+        }
         // degenerate paths (pathless container shapes) must not leave a dot
         var minX = pts[0].x, maxX = pts[0].x, minY = pts[0].y, maxY = pts[0].y
         for p in pts {
@@ -1026,6 +1078,14 @@ final class Kit {
 
     func fillPoly(_ pts: [SDL_FPoint], rgba: UInt32) {
         if pts.count < 3 { return }
+        if !suppressShadow, (shadowBlur > 0 || shadowDx != 0 || shadowDy != 0), shadowRgba & 0xFF > 0 {
+            suppressShadow = true
+            let sdx = mat.a * shadowDx
+            let sdy = mat.d * shadowDy
+            let shifted = pts.map { SDL_FPoint(x: $0.x + sdx, y: $0.y + sdy) }
+            fillPoly(shifted, rgba: shadowRgba)
+            suppressShadow = false
+        }
         let color = fcolor(rgba)
         var verts = [SDL_Vertex]()
         verts.reserveCapacity(pts.count * 2)
@@ -1525,6 +1585,10 @@ func gfx_clear(_ rgba: UInt32) {
     k.alpha = 1
     k.additive = false
     k.composite = 0
+    k.shadowBlur = 0
+    k.shadowDx = 0
+    k.shadowDy = 0
+    k.shadowRgba = 0
     let c = k.fcolor(rgba)
     _ = SDL_SetRenderDrawColorFloat(k.renderer, c.r, c.g, c.b, 1)
     _ = SDL_RenderClear(k.renderer)
@@ -1812,6 +1876,9 @@ func gfx_offscreen_end_to_image(_ handle: Int32) -> Int32 {
         k.retireTexture(t.tex)
         tex = blurred
     }
+    if t.brightness != 1, let texRef = tex {
+        _ = SDL_SetTextureColorModFloat(texRef, t.brightness, t.brightness, t.brightness)
+    }
     return k.registerImage(Kit.ImgRec(tex: tex, w: t.w, h: t.h))
 }
 
@@ -1984,49 +2051,61 @@ func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h
 }
 
 @_cdecl("gfx_set_shadow")
-func gfx_set_shadow(_ blurRadius: Float, _ dx: Float, _ dy: Float, _ rgba: UInt32) {}
+func gfx_set_shadow(_ blurRadius: Float, _ dx: Float, _ dy: Float, _ rgba: UInt32) {
+    let k = Kit.shared
+    k.shadowBlur = blurRadius
+    k.shadowDx = dx
+    k.shadowDy = dy
+    k.shadowRgba = rgba
+}
 
 @_cdecl("gfx_clear_shadow")
-func gfx_clear_shadow() {}
+func gfx_clear_shadow() {
+    let k = Kit.shared
+    k.shadowBlur = 0
+    k.shadowDx = 0
+    k.shadowDy = 0
+    k.shadowRgba = 0
+}
 
 @_cdecl("gfx_set_filter")
 func gfx_set_filter(_ utf8: UnsafePointer<CChar>?, _ len: Int32) {
     let k = Kit.shared
     let s = k.cString(utf8, len)
-    var blur: Float = 0
     let bytes = Array(s.utf8)
-    let pat = Array("blur(".utf8)
-    var i = 0
-    while i + pat.count < bytes.count {
-        var match = true
-        for j in 0..<pat.count where bytes[i + j] != pat[j] { match = false; break }
-        if match {
-            var p = i + pat.count
-            var v: Float = 0
-            var frac: Float = 0
-            while p < bytes.count, bytes[p] >= 48, bytes[p] <= 57 {
-                v = v * 10 + Float(bytes[p] - 48)
-                p += 1
-            }
-            if p < bytes.count, bytes[p] == 46 {
-                p += 1
-                var div: Float = 10
-                while p < bytes.count, bytes[p] >= 48, bytes[p] <= 57 {
-                    frac += Float(bytes[p] - 48) / div
-                    div *= 10
-                    p += 1
-                }
-            }
-            blur = v + frac
-            break
+
+    func parseNum(_ start: Int) -> Float {
+        var p = start
+        var v: Float = 0
+        var frac: Float = 0
+        while p < bytes.count, bytes[p] >= 48, bytes[p] <= 57 { v = v * 10 + Float(bytes[p] - 48); p += 1 }
+        if p < bytes.count, bytes[p] == 46 {
+            p += 1
+            var div: Float = 10
+            while p < bytes.count, bytes[p] >= 48, bytes[p] <= 57 { frac += Float(bytes[p] - 48) / div; div *= 10; p += 1 }
         }
-        i += 1
+        return v + frac
     }
-    if blur > 0 {
-        for i in stride(from: k.targets.count - 1, through: 0, by: -1) where k.targets[i] != nil {
-            k.targets[i]!.blur = max(k.targets[i]!.blur, blur)
-            break
+
+    func findPattern(_ pat: [UInt8]) -> Int? {
+        var i = 0
+        while i + pat.count <= bytes.count {
+            var match = true
+            for j in 0..<pat.count where bytes[i + j] != pat[j] { match = false; break }
+            if match { return i + pat.count }
+            i += 1
         }
+        return nil
+    }
+
+    var blur: Float = 0
+    var brightness: Float = 1
+    if let p = findPattern(Array("blur(".utf8)) { blur = parseNum(p) }
+    if let p = findPattern(Array("brightness(".utf8)) { brightness = parseNum(p) }
+    for i in stride(from: k.targets.count - 1, through: 0, by: -1) where k.targets[i] != nil {
+        if blur > 0 { k.targets[i]!.blur = max(k.targets[i]!.blur, blur) }
+        if brightness != 1 { k.targets[i]!.brightness = brightness }
+        break
     }
 }
 
