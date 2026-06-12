@@ -1255,18 +1255,37 @@ func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h
     let k = Kit.shared
     guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)], let tex = rec.tex else { return }
     let a = Float(rgba & 0xFF) / 255 * k.alpha
+
+    // a real soft shadow without a blur shader: downsample the silhouette
+    // into a tiny render target, then bilinear-upscale it back out; the
+    // texel-wide alpha edge stretches into a smooth falloff
+    let texel = max(4, blur)
+    let margin: Float = 2
+    let tw = Int32(SDL_ceilf(w / texel) + margin * 2)
+    let th = Int32(SDL_ceilf(h / texel) + margin * 2)
+    guard tw > 0, th > 0,
+          let small = SDL_CreateTexture(k.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, tw, th) else { return }
+    _ = SDL_SetTextureBlendMode(small, SDL_BLENDMODE_BLEND)
+
+    let prev = SDL_GetRenderTarget(k.renderer)
+    _ = SDL_SetRenderTarget(k.renderer, small)
+    _ = SDL_SetRenderDrawColorFloat(k.renderer, 0, 0, 0, 0)
+    _ = SDL_RenderClear(k.renderer)
+    let savedMat = k.mat
+    k.mat = Mat()
     _ = SDL_SetTextureColorModFloat(tex, Float((rgba >> 24) & 0xFF) / 255,
                                     Float((rgba >> 16) & 0xFF) / 255,
                                     Float((rgba >> 8) & 0xFF) / 255)
-    let layers = 4
-    let spread = max(2, blur)
-    for i in 1...layers {
-        let inflate = spread * Float(i) / Float(layers)
-        let la = a * 0.45 / Float(i)
-        k.drawTexturedQuad(tex, x - inflate, y - inflate, w + 2 * inflate, h + 2 * inflate,
-                           0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: la))
-    }
+    k.drawTexturedQuad(tex, margin, margin, Float(tw) - margin * 2, Float(th) - margin * 2,
+                       0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: 1))
     _ = SDL_SetTextureColorModFloat(tex, 1, 1, 1)
+    k.mat = savedMat
+    _ = SDL_SetRenderTarget(k.renderer, prev)
+
+    k.drawTexturedQuad(small, x - margin * texel, y - margin * texel,
+                       w + 2 * margin * texel, h + 2 * margin * texel,
+                       0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: a))
+    k.retireTexture(small)
 }
 
 @_cdecl("gfx_set_shadow")

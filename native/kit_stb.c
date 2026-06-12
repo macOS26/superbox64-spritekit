@@ -65,6 +65,9 @@ typedef struct {
     const unsigned char* cbdt;
     const unsigned char* strike;
     int ppem;
+    const unsigned char* sbixStrike;
+    int sbixPpem;
+    int numGlyphs;
 } KitEmoji;
 
 static uint16_t kit_rd16(const unsigned char* p) { return (uint16_t)((p[0] << 8) | p[1]); }
@@ -140,36 +143,94 @@ static int kit_cmap_lookup(const KitEmoji* e, uint32_t cp) {
     return 0;
 }
 
+/* Table offsets in the sfnt directory are file-relative even inside a TTC,  */
+/* so the directory moves to the collection's first font but data stays      */
+/* rooted at the file start (Apple Color Emoji ships as a .ttc).             */
+static const unsigned char* kit_font_dir(const unsigned char* file) {
+    if (file[0] == 't' && file[1] == 't' && file[2] == 'c' && file[3] == 'f') {
+        return file + kit_rd32(file + 12);
+    }
+    return file;
+}
+
+static const unsigned char* kit_find_table2(const unsigned char* file, const unsigned char* dir, const char tag[4]) {
+    uint16_t numTables = kit_rd16(dir + 4);
+    for (uint16_t i = 0; i < numTables; i++) {
+        const unsigned char* rec = dir + 12 + 16 * i;
+        if (rec[0] == tag[0] && rec[1] == tag[1] && rec[2] == tag[2] && rec[3] == tag[3]) {
+            return file + kit_rd32(rec + 8);
+        }
+    }
+    return 0;
+}
+
 void* kit_emoji_init(const unsigned char* ttf, int len) {
     KitEmoji* e = malloc(sizeof(KitEmoji));
     if (!e) return 0;
-    e->cmap = kit_pick_cmap(ttf, &e->cmapFormat);
+    const unsigned char* dir = kit_font_dir(ttf);
+
+    const unsigned char* cmapTable = kit_find_table2(ttf, dir, "cmap");
+    e->cmap = 0;
+    e->cmapFormat = 0;
+    if (cmapTable) {
+        uint16_t numTables = kit_rd16(cmapTable + 2);
+        for (uint16_t i = 0; i < numTables; i++) {
+            const unsigned char* rec = cmapTable + 4 + 8 * i;
+            const unsigned char* sub = cmapTable + kit_rd32(rec + 4);
+            uint16_t fmt = kit_rd16(sub);
+            if (fmt == 12 && e->cmapFormat != 12) { e->cmap = sub; e->cmapFormat = 12; }
+            if (fmt == 4 && e->cmapFormat == 0) { e->cmap = sub; e->cmapFormat = 4; }
+        }
+    }
     if (!e->cmap) {
         free(e);
         return 0;
     }
-    e->cblc = kit_find_table(ttf, "CBLC");
-    e->cbdt = kit_find_table(ttf, "CBDT");
-    if (!e->cblc || !e->cbdt) {
-        free(e);
-        return 0;
-    }
-    uint32_t numSizes = kit_rd32(e->cblc + 4);
+
+    const unsigned char* maxp = kit_find_table2(ttf, dir, "maxp");
+    e->numGlyphs = maxp ? kit_rd16(maxp + 4) : 0;
+
+    e->cblc = kit_find_table2(ttf, dir, "CBLC");
+    e->cbdt = kit_find_table2(ttf, dir, "CBDT");
     e->strike = 0;
     e->ppem = 0;
-    for (uint32_t i = 0; i < numSizes; i++) {
-        const unsigned char* s = e->cblc + 8 + 48 * i;
-        int ppem = s[44];
-        if (ppem > e->ppem) {
-            e->ppem = ppem;
-            e->strike = s;
+    if (e->cblc && e->cbdt) {
+        uint32_t numSizes = kit_rd32(e->cblc + 4);
+        for (uint32_t i = 0; i < numSizes; i++) {
+            const unsigned char* s = e->cblc + 8 + 48 * i;
+            int ppem = s[44];
+            if (ppem > e->ppem) {
+                e->ppem = ppem;
+                e->strike = s;
+            }
         }
     }
-    if (!e->strike) {
+
+    const unsigned char* sbix = kit_find_table2(ttf, dir, "sbix");
+    e->sbixStrike = 0;
+    e->sbixPpem = 0;
+    if (sbix && e->numGlyphs > 0) {
+        uint32_t numStrikes = kit_rd32(sbix + 4);
+        for (uint32_t i = 0; i < numStrikes; i++) {
+            const unsigned char* s = sbix + kit_rd32(sbix + 8 + 4 * i);
+            int ppem = kit_rd16(s);
+            if (ppem > e->sbixPpem) {
+                e->sbixPpem = ppem;
+                e->sbixStrike = s;
+            }
+        }
+    }
+
+    if (!e->strike && !e->sbixStrike) {
         free(e);
         return 0;
     }
     return e;
+}
+
+static uint32_t kit_png_height(const unsigned char* png, uint32_t len) {
+    if (len < 24) return 0;
+    return kit_rd32(png + 20);
 }
 
 const unsigned char* kit_emoji_glyph_png(void* handle, int codepoint, uint32_t* pngLen,
@@ -178,6 +239,31 @@ const unsigned char* kit_emoji_glyph_png(void* handle, int codepoint, uint32_t* 
     if (!e) return 0;
     int glyph = kit_cmap_lookup(e, (uint32_t)codepoint);
     if (glyph == 0) return 0;
+
+    if (e->sbixStrike) {
+        for (int hop = 0; hop < 4; hop++) {
+            if (glyph >= e->numGlyphs) return 0;
+            const unsigned char* offsets = e->sbixStrike + 4;
+            uint32_t o1 = kit_rd32(offsets + 4 * glyph);
+            uint32_t o2 = kit_rd32(offsets + 4 * (glyph + 1));
+            if (o2 <= o1 + 8) return 0;
+            const unsigned char* data = e->sbixStrike + o1;
+            int16_t originX = (int16_t)kit_rd16(data);
+            int16_t originY = (int16_t)kit_rd16(data + 2);
+            if (data[4] == 'd' && data[5] == 'u' && data[6] == 'p' && data[7] == 'e') {
+                glyph = kit_rd16(data + 8);
+                continue;
+            }
+            if (data[4] != 'p' || data[5] != 'n' || data[6] != 'g' || data[7] != ' ') return 0;
+            *pngLen = o2 - o1 - 8;
+            *ppem = e->sbixPpem;
+            *bearingX = originX;
+            *bearingY = originY + (int)kit_png_height(data + 8, *pngLen);
+            *advance = e->sbixPpem;
+            return data + 8;
+        }
+        return 0;
+    }
 
     const unsigned char* s = e->strike;
     uint32_t arrayOff = kit_rd32(s);
