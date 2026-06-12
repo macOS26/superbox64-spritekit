@@ -361,6 +361,14 @@ final class Kit {
 
     // queue advance + synth harvesting, called once per frame
     func ttsReap() {
+        if let w = ttsWarm {
+            var wcode: Int32 = 0
+            if SDL_WaitProcess(w, false, &wcode) {
+                SDL_DestroyProcess(w)
+                ttsWarm = nil
+                ttsWarmup()
+            }
+        }
         if let p = ttsSynth {
             var code: Int32 = 0
             if SDL_WaitProcess(p, false, &code) {
@@ -402,6 +410,30 @@ final class Kit {
                 _ = ttsSpeak(text, rate: rate)
             }
         }
+    }
+
+    // a full but silent utterance at startup loads the daemon's voice end to
+    // end (synthesis + audio path at zero volume), so the first real line
+    // speaks without the cold-start lag
+    func ttsPrime() {
+        guard let tool = ttsToolPath() else { return }
+        var args: [String]
+        if tool.hasSuffix("/say") {
+            args = [tool, "[[volm 0]] ok"]
+        } else if tool.hasSuffix("spd-say") {
+            return
+        } else {
+            args = [tool, "-a", "0", "ok"]
+        }
+        var argv: [UnsafeMutablePointer<CChar>?] = args.map { s in s.withCString { SDL_strdup($0) } }
+        argv.append(nil)
+        let proc = argv.withUnsafeBufferPointer { buf in
+            buf.baseAddress!.withMemoryRebound(to: UnsafePointer<CChar>?.self, capacity: buf.count) {
+                SDL_CreateProcess($0, false)
+            }
+        }
+        for p in argv where p != nil { SDL_free(p) }
+        if let proc { SDL_DestroyProcess(proc) }
     }
 
     // say pays ~400ms of voice setup at launch, so one process always sits
@@ -1211,6 +1243,7 @@ func kitHostInit(appName: String = "KitGame") {
         SDL_free(pref)
     }
     k.loadStore()
+    k.ttsPrime()
     k.ttsWarmup()
 }
 
