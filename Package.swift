@@ -26,6 +26,8 @@ let package = Package(
         .library(name: "AVFoundation",   targets: ["AVFoundation"]),
         .library(name: "AudioToolbox",   targets: ["AudioToolbox"]),
         .library(name: "CBox2D",         targets: ["CBox2D"]),
+        .library(name: "CSDL3",          targets: ["CSDL3"]),
+        .library(name: "CWamr",          targets: ["CWamr"]),
         .library(name: "Combine",        targets: ["Combine"]),
         .library(name: "SwiftUI",        targets: ["SwiftUI"]),
     ],
@@ -44,6 +46,18 @@ let package = Package(
                 .define("NDEBUG"),
                 .unsafeFlags(["-ffunction-sections", "-fdata-sections"]),
             ]
+        ),
+        .target(
+            name: "CSDL3",
+            path: "Sources/CSDL3",
+            sources: ["src"],
+            publicHeadersPath: "include"
+        ),
+        .target(
+            name: "CWamr",
+            path: "Sources/CWamr",
+            sources: ["src"],
+            publicHeadersPath: "include"
         ),
         .target(name: "KitABI"),
         .target(name: "SpriteKit",      dependencies: ["KitABI", "CBox2D"],

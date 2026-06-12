@@ -1,0 +1,4 @@
+module CWamr {
+    header "WAMR.h"
+    export *
+}
