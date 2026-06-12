@@ -100,7 +100,37 @@ final class Kit {
     var voicePans: [Float] = []
     var nextVoice: Int32 = 1
     var additive = false
+    var composite: Int32 = 0
+    var deadTextures: [UnsafeMutablePointer<SDL_Texture>] = []
     var whiteTex: UnsafeMutablePointer<SDL_Texture>? = nil
+
+    // Canvas2D globalCompositeOperation table; destination-in/out and screen
+    // have no SDL preset and compose from blend factors
+    lazy var blendDestIn: SDL_BlendMode = SDL_ComposeCustomBlendMode(
+        SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+        SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDOPERATION_ADD)
+    lazy var blendDestOut: SDL_BlendMode = SDL_ComposeCustomBlendMode(
+        SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+        SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD)
+    lazy var blendScreen: SDL_BlendMode = SDL_ComposeCustomBlendMode(
+        SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_BLENDOPERATION_ADD,
+        SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD)
+
+    func currentBlend() -> SDL_BlendMode {
+        if additive { return SDL_BLENDMODE_ADD }
+        switch composite {
+        case 1: return blendDestIn
+        case 2: return blendDestOut
+        case 3: return SDL_BLENDMODE_ADD
+        case 4: return SDL_BLENDMODE_MUL
+        case 5: return blendScreen
+        default: return SDL_BLENDMODE_BLEND
+        }
+    }
+
+    func retireTexture(_ tex: UnsafeMutablePointer<SDL_Texture>?) {
+        if let tex { deadTextures.append(tex) }
+    }
 
     // 1x1 white texture: RenderGeometry honors TEXTURE blend modes, the
     // reliable route to alpha and additive (matchstick crossings brighten)
@@ -112,7 +142,7 @@ final class Kit {
             var rect = SDL_Rect(x: 0, y: 0, w: 1, h: 1)
             _ = SDL_UpdateTexture(whiteTex, &rect, &px, 4)
         }
-        _ = SDL_SetTextureBlendMode(whiteTex, additive ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND)
+        _ = SDL_SetTextureBlendMode(whiteTex, currentBlend())
         return whiteTex
     }
     var storeKeys: [String] = []
@@ -379,7 +409,7 @@ final class Kit {
     func drawTexturedQuad(_ tex: UnsafeMutablePointer<SDL_Texture>?, _ dx: Float, _ dy: Float, _ dw: Float, _ dh: Float,
                           _ u0: Float, _ v0: Float, _ u1: Float, _ v1: Float, _ color: SDL_FColor) {
         guard let tex else { return }
-        _ = SDL_SetTextureBlendMode(tex, additive ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND)
+        _ = SDL_SetTextureBlendMode(tex, currentBlend())
         let p0 = mat.apply(dx, dy)
         let p1 = mat.apply(dx + dw, dy)
         let p2 = mat.apply(dx + dw, dy + dh)
@@ -394,17 +424,18 @@ final class Kit {
         SDL_RenderGeometry(renderer, tex, verts, 4, idx, 6)
     }
 
-    // RenderGeometry ignores vertex alpha against the backbuffer in practice,
-    // so transparency is baked by scaling the color toward black - exact on
-    // this game's black background.
+    // Drawing always targets a texture now, where vertex alpha blends
+    // reliably, so translucency is real; additive keeps the premultiplied
+    // scale-toward-black so overlaps brighten instead of washing out.
     func fcolor(_ rgba: UInt32) -> SDL_FColor {
         let a = Float(rgba & 0xFF) / 255 * alpha
-        return SDL_FColor(
-            r: Float((rgba >> 24) & 0xFF) / 255 * a,
-            g: Float((rgba >> 16) & 0xFF) / 255 * a,
-            b: Float((rgba >> 8) & 0xFF) / 255 * a,
-            a: 1
-        )
+        let r = Float((rgba >> 24) & 0xFF) / 255
+        let g = Float((rgba >> 16) & 0xFF) / 255
+        let b = Float((rgba >> 8) & 0xFF) / 255
+        if additive {
+            return SDL_FColor(r: r * a, g: g * a, b: b * a, a: 1)
+        }
+        return SDL_FColor(r: r, g: g, b: b, a: a)
     }
 
     func strokePoly(_ pts: [SDL_FPoint], closed: Bool, thickness: Float, rgba: UInt32) {
@@ -777,8 +808,8 @@ func kitHostInit(appName: String = "KitGame") {
 }
 
 // Pump SDL into the ABI event queue; false = quit requested.
-// A console host (WasmCart) reserves ESC for eject; when set, ESC never
-// reaches the game and lands in kitEscapePressed instead.
+// A console host (WasmCart) reserves CTRL+ESC for eject; plain ESC still
+// reaches the game, the chord lands in kitEscapePressed instead.
 nonisolated(unsafe) var kitEscapeReserved = false
 nonisolated(unsafe) var kitEscapePressed = false
 nonisolated(unsafe) var kitDroppedFile: String? = nil
@@ -798,7 +829,8 @@ func kitHostPump() -> Bool {
             k.fullscreen = !k.fullscreen
             _ = SDL_SetWindowFullscreen(k.window, k.fullscreen)
         } else if kitEscapeReserved, e.type == SDL_EVENT_KEY_DOWN.rawValue,
-                  e.key.scancode == SDL_SCANCODE_ESCAPE, !e.key.`repeat` {
+                  e.key.scancode == SDL_SCANCODE_ESCAPE, !e.key.`repeat`,
+                  (UInt32(e.key.mod) & SDL_KMOD_CTRL) != 0 {
             kitEscapePressed = true
         } else if e.type == SDL_EVENT_KEY_DOWN.rawValue || e.type == SDL_EVENT_KEY_UP.rawValue {
             let sf = sfKey(e.key.scancode.rawValue)
@@ -831,6 +863,8 @@ func kitHostPresent() {
     } else {
         _ = SDL_RenderPresent(k.renderer)
     }
+    for tex in k.deadTextures { SDL_DestroyTexture(tex) }
+    k.deadTextures.removeAll(keepingCapacity: true)
 }
 
 // MARK: - the KitABI env surface, linked directly (no wasm in between)
@@ -859,7 +893,8 @@ func gfx_clear(_ rgba: UInt32) {
                 f: (Float(ph) - k.logicalH * sc) / 2)
     k.stack = []
     k.alpha = 1
-        k.additive = false
+    k.additive = false
+    k.composite = 0
     let c = k.fcolor(rgba)
     _ = SDL_SetRenderDrawColorFloat(k.renderer, c.r, c.g, c.b, 1)
     _ = SDL_RenderClear(k.renderer)
@@ -1048,7 +1083,7 @@ func gfx_draw_image(_ img: Int32, _ sx: Float, _ sy: Float, _ sw: Float, _ sh: F
 func gfx_free_image(_ img: Int32) {
     let k = Kit.shared
     guard img > 0, Int(img) < k.images.count, let rec = k.images[Int(img)] else { return }
-    if let tex = rec.tex { SDL_DestroyTexture(tex) }
+    k.retireTexture(rec.tex)
     k.images[Int(img)] = nil
     k.freeImageSlots.append(Int(img))
 }
@@ -1062,7 +1097,7 @@ func gfx_upload_pixels(_ img: Int32, _ w: Int32, _ h: Int32, _ rgba: UnsafePoint
     _ = SDL_UpdateTexture(tex, &rect, rgba, w * 4)
     _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND)
     if img > 0, Int(img) < k.images.count {
-        if let old = k.images[Int(img)]?.tex { SDL_DestroyTexture(old) }
+        k.retireTexture(k.images[Int(img)]?.tex)
         k.images[Int(img)] = Kit.ImgRec(tex: tex, w: w, h: h)
         return img
     }
@@ -1112,7 +1147,7 @@ func gfx_offscreen_end_discard(_ handle: Int32) {
     k.mat = t.savedMat
     k.stack = t.savedStack
     k.alpha = t.savedAlpha
-    if let tex = t.tex { SDL_DestroyTexture(tex) }
+    k.retireTexture(t.tex)
     k.targets[Int(handle) - 1] = nil
     while let last = k.targets.last, last == nil { k.targets.removeLast() }
 }
@@ -1223,11 +1258,13 @@ func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h
     _ = SDL_SetTextureColorModFloat(tex, Float((rgba >> 24) & 0xFF) / 255,
                                     Float((rgba >> 16) & 0xFF) / 255,
                                     Float((rgba >> 8) & 0xFF) / 255)
-    let r = max(1, blur / 3)
-    let offsets: [(Float, Float)] = [(0, 0), (r, 0), (-r, 0), (0, r), (0, -r)]
-    for (ox, oy) in offsets {
-        let color = SDL_FColor(r: 1, g: 1, b: 1, a: a / Float(offsets.count))
-        k.drawTexturedQuad(tex, x + ox, y + oy, w, h, 0, 0, 1, 1, color)
+    let layers = 4
+    let spread = max(2, blur)
+    for i in 1...layers {
+        let inflate = spread * Float(i) / Float(layers)
+        let la = a * 0.45 / Float(i)
+        k.drawTexturedQuad(tex, x - inflate, y - inflate, w + 2 * inflate, h + 2 * inflate,
+                           0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: la))
     }
     _ = SDL_SetTextureColorModFloat(tex, 1, 1, 1)
 }
@@ -1246,7 +1283,7 @@ func gfx_clear_filter() {}
 
 @_cdecl("gfx_set_composite")
 func gfx_set_composite(_ mode: Int32) {
-    Kit.shared.additive = mode == 1
+    Kit.shared.composite = mode
 }
 
 @_cdecl("gfx_snap_translation")
