@@ -40,6 +40,22 @@ final class Kit {
     var stack: [Mat] = []
     var alpha: Float = 1
     var events: [(Int32, Int32, Int32, Int32, Int32)] = []
+    var evtMutex: OpaquePointer? = nil
+
+    func pushEvent(_ e: (Int32, Int32, Int32, Int32, Int32)) {
+        if evtMutex == nil { evtMutex = SDL_CreateMutex() }
+        SDL_LockMutex(evtMutex)
+        events.append(e)
+        SDL_UnlockMutex(evtMutex)
+    }
+
+    func popEvent() -> (Int32, Int32, Int32, Int32, Int32)? {
+        if evtMutex == nil { evtMutex = SDL_CreateMutex() }
+        SDL_LockMutex(evtMutex)
+        let e = events.isEmpty ? nil : events.removeFirst()
+        SDL_UnlockMutex(evtMutex)
+        return e
+    }
     var soundSpecs: [SDL_AudioSpec] = [SDL_AudioSpec()]
     var soundBufs: [UnsafeMutablePointer<UInt8>?] = [nil]
     var soundLens: [UInt32] = [0]
@@ -439,6 +455,11 @@ func kitHostInit(appName: String = "KitGame") {
 }
 
 // Pump SDL into the ABI event queue; false = quit requested.
+// A console host (WasmCart) reserves ESC for eject; when set, ESC never
+// reaches the game and lands in kitEscapePressed instead.
+nonisolated(unsafe) var kitEscapeReserved = false
+nonisolated(unsafe) var kitEscapePressed = false
+
 func kitHostPump() -> Bool {
     let k = Kit.shared
     var alive = true
@@ -449,20 +470,23 @@ func kitHostPump() -> Bool {
         } else if e.type == SDL_EVENT_KEY_DOWN.rawValue, e.key.scancode == SDL_SCANCODE_F, !e.key.`repeat` {
             k.fullscreen = !k.fullscreen
             _ = SDL_SetWindowFullscreen(k.window, k.fullscreen)
+        } else if kitEscapeReserved, e.type == SDL_EVENT_KEY_DOWN.rawValue,
+                  e.key.scancode == SDL_SCANCODE_ESCAPE, !e.key.`repeat` {
+            kitEscapePressed = true
         } else if e.type == SDL_EVENT_KEY_DOWN.rawValue || e.type == SDL_EVENT_KEY_UP.rawValue {
             let sf = sfKey(e.key.scancode.rawValue)
             if sf >= 0, !e.key.`repeat` {
                 let t: Int32 = e.type == SDL_EVENT_KEY_DOWN.rawValue ? 5 : 6
                 let shift: Int32 = (UInt32(e.key.mod) & SDL_KMOD_SHIFT) != 0 ? 1 : 0
-                k.events.append((t, sf, shift, 0, 0))
+                k.pushEvent((t, sf, shift, 0, 0))
             }
         } else if e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue || e.type == SDL_EVENT_MOUSE_BUTTON_UP.rawValue {
             let t: Int32 = e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue ? 9 : 10
             let (lx, ly) = toLogical(k.window, e.button.x, e.button.y)
-            k.events.append((t, 0, lx, ly, 0))
+            k.pushEvent((t, 0, lx, ly, 0))
         } else if e.type == SDL_EVENT_MOUSE_MOTION.rawValue {
             let (lx, ly) = toLogical(k.window, e.motion.x, e.motion.y)
-            k.events.append((11, lx, ly, 0, 0))
+            k.pushEvent((11, lx, ly, 0, 0))
         }
     }
     return alive
@@ -578,8 +602,7 @@ func evt_poll(_ type: UnsafeMutablePointer<Int32>?, _ a: UnsafeMutablePointer<In
               _ b: UnsafeMutablePointer<Int32>?, _ c: UnsafeMutablePointer<Int32>?,
               _ d: UnsafeMutablePointer<Int32>?) -> Int32 {
     let k = Kit.shared
-    if k.events.isEmpty { return 0 }
-    let e = k.events.removeFirst()
+    guard let e = k.popEvent() else { return 0 }
     type?.pointee = e.0
     a?.pointee = e.1
     b?.pointee = e.2
