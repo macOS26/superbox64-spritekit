@@ -155,7 +155,7 @@ public final class SKView {
             switch type {
             case 5:  s.keyDown(Int(a))
             case 6:  s.keyUp(Int(a))
-            case 9:  a == 1 ? s.rightMouseDown(at: scenePoint(b, c, s)) : s.mouseDown(at: scenePoint(b, c, s))
+            case 9:  a == 1 ? s.rightMouseDown(at: scenePoint(b, c, s)) : s.mouseDown(at: scenePoint(b, c, s), clickCount: max(1, Int(d)))
             case 10: a == 1 ? s.rightMouseUp(at: scenePoint(b, c, s))   : s.mouseUp(at: scenePoint(b, c, s))
             case 11: s.mouseMoved(to: scenePoint(a, b, s))
             case 19: s.touchBegan(finger: Int(a), at: scenePoint(b, c, s))

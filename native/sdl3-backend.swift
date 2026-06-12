@@ -1249,7 +1249,7 @@ func kitHostPump() -> Bool {
         } else if e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue || e.type == SDL_EVENT_MOUSE_BUTTON_UP.rawValue {
             let t: Int32 = e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue ? 9 : 10
             let (lx, ly) = toLogical(k.window, e.button.x, e.button.y)
-            k.pushEvent((t, 0, lx, ly, 0))
+            k.pushEvent((t, 0, lx, ly, Int32(e.button.clicks)))
         } else if e.type == SDL_EVENT_MOUSE_MOTION.rawValue {
             let (lx, ly) = toLogical(k.window, e.motion.x, e.motion.y)
             k.pushEvent((11, lx, ly, 0, 0))

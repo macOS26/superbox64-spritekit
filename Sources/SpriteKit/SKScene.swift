@@ -50,7 +50,7 @@ open class SKScene: SKNode {
     // input hooks the demo/game can override
     open func keyDown(_ key: Int) { keyDown(with: NSEvent(keyCode: UInt16(truncatingIfNeeded: sfToMacKeyCode(key)))) }
     open func keyUp(_ key: Int) { keyUp(with: NSEvent(keyCode: UInt16(truncatingIfNeeded: sfToMacKeyCode(key)))) }
-    open func mouseDown(at p: CGPoint) { mouseDown(with: NSEvent(location: p)) }
+    open func mouseDown(at p: CGPoint, clickCount: Int = 1) { mouseDown(with: NSEvent(location: p, clickCount: clickCount)) }
     open func mouseUp(at p: CGPoint) { mouseUp(with: NSEvent(location: p)) }
     open func mouseMoved(to p: CGPoint) { mouseDragged(with: NSEvent(location: p)) }
     open func rightMouseDown(at p: CGPoint) { rightMouseDown(with: NSEvent(location: p)) }
@@ -128,15 +128,17 @@ public struct NSEvent {
     public var isARepeat: Bool
     public var deltaX: CGFloat
     public var deltaY: CGFloat
+    public var clickCount: Int
     private let point: CGPoint
     public init(keyCode: UInt16 = 0, location: CGPoint = .zero, modifierFlags: ModifierFlags = [],
-                isARepeat: Bool = false, deltaX: CGFloat = 0, deltaY: CGFloat = 0) {
+                isARepeat: Bool = false, deltaX: CGFloat = 0, deltaY: CGFloat = 0, clickCount: Int = 1) {
         self.keyCode = keyCode
         self.point = location
         self.modifierFlags = modifierFlags
         self.isARepeat = isARepeat
         self.deltaX = deltaX
         self.deltaY = deltaY
+        self.clickCount = clickCount
     }
     public func location(in node: SKNode) -> CGPoint { point }
 }
