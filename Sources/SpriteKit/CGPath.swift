@@ -98,23 +98,24 @@ public final class CGMutablePath {
         let pi = CGFloat(3.141592653589793)
         while da > pi { da -= 2 * pi }
         while da < -pi { da += 2 * pi }
-        let steps = 6
+        let steps = max(6, min(24, Int(r / 2)))
         for i in 1...steps {
             let a = a1 + da * CGFloat(i) / CGFloat(steps)
             current.append(CGPoint(x: cx + cos(a) * r, y: cy + sin(a) * r))
         }
     }
     // Rounded rectangle as a single closed polygon: four quarter-arcs whose
-    // endpoints the fill/stroke poly connects with the straight edges. Coarse
-    // (few segments per corner) since the radii are small; clamps the radius to
-    // half the shorter side and falls back to a plain rect at radius 0.
+    // endpoints the fill/stroke poly connects with the straight edges. Segment
+    // count follows the radius so big corners stay round at device scale;
+    // clamps the radius to half the shorter side and falls back to a plain
+    // rect at radius 0.
     public func addRoundedRect(in r: CGRect, cornerRadius cr: CGFloat) {
         let rad = max(0, min(cr, min(r.width, r.height) / 2))
         if rad <= 0 {
             addRect(r)
             return
         }
-        let seg = 4
+        let seg = max(4, min(24, Int(rad / 2)))
         var pts: [CGPoint] = []
         func corner(_ cx: CGFloat, _ cy: CGFloat, from: Double, to: Double) {
             for i in 0...seg {

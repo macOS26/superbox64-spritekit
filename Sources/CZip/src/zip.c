@@ -67,9 +67,9 @@ static const uint8_t* central_entry_at(const ZipArchiveImpl* impl, uint32_t inde
 static const uint8_t* central_entry_by_name(const ZipArchiveImpl* impl, const char* name, int* index_out) {
     const uint8_t* data = (const uint8_t*)impl->zip_data;
     const uint8_t* end = data + impl->zip_size;
-    const uint8_t* entry = data + impl->cd_offset;
     size_t name_len = strlen(name);
 
+    const uint8_t* entry = data + impl->cd_offset;
     for (uint32_t i = 0; i < impl->cd_count; i++) {
         if (entry + 46 > end) return NULL;
         if (read_u32(entry) != 0x02014b50) return NULL;
@@ -77,6 +77,22 @@ static const uint8_t* central_entry_by_name(const ZipArchiveImpl* impl, const ch
         if (fname_len == name_len && memcmp(entry + 46, name, name_len) == 0) {
             if (index_out) *index_out = (int)i;
             return entry;
+        }
+        entry = central_entry_next(impl, entry);
+    }
+
+    entry = data + impl->cd_offset;
+    for (uint32_t i = 0; i < impl->cd_count; i++) {
+        if (entry + 46 > end) return NULL;
+        if (read_u32(entry) != 0x02014b50) return NULL;
+        uint16_t fname_len = read_u16(entry + 28);
+        if (fname_len > name_len) {
+            const uint8_t* tail = entry + 46 + fname_len - name_len;
+            if (tail[-1] == '/' && memcmp(tail, name, name_len) == 0 &&
+                memcmp(entry + 46, "__MACOSX/", 9) != 0) {
+                if (index_out) *index_out = (int)i;
+                return entry;
+            }
         }
         entry = central_entry_next(impl, entry);
     }
