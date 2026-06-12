@@ -174,7 +174,7 @@ if [ -n "${SDL_STATIC_A:-}" ] && [ -f "$SDL_STATIC_A" ]; then
             -framework Cocoa -framework QuartzCore -framework Metal
             -framework IOKit -framework CoreVideo -framework CoreAudio
             -framework AudioToolbox -framework Carbon
-            -framework UniformTypeIdentifiers
+            -framework UniformTypeIdentifiers -framework GameController -framework CoreHaptics -framework ForceFeedback
             -liconv)
 elif [ -f "$PWD/vendor/libSDL3.a" ]; then
   # static minimal SDL3 baked in: single-file binary, only used subsystems
@@ -182,7 +182,7 @@ elif [ -f "$PWD/vendor/libSDL3.a" ]; then
             -framework Cocoa -framework QuartzCore -framework Metal
             -framework IOKit -framework CoreVideo -framework CoreAudio
             -framework AudioToolbox -framework Carbon
-            -framework UniformTypeIdentifiers
+            -framework UniformTypeIdentifiers -framework GameController -framework CoreHaptics -framework ForceFeedback
             -liconv)
 fi
 clang -target arm64-apple-macos14 -o "$OUT" \

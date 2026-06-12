@@ -1447,7 +1447,8 @@ func toLogical(_ window: OpaquePointer?, _ x: Float, _ y: Float) -> (Int32, Int3
 // MARK: - host lifecycle (called by main)
 
 func kitHostInit(appName: String = "KitGame") {
-    guard SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD) else { fatalError("SDL_Init failed") }
+    guard SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) else { fatalError("SDL_Init failed") }
+    _ = SDL_Init(SDL_INIT_GAMEPAD)
     let k = Kit.shared
     k.window = appName.withCString {
         SDL_CreateWindow($0, 1920, 1080, windowResizable | windowHighPixelDensity)
