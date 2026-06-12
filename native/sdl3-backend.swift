@@ -285,6 +285,71 @@ final class Kit {
     var engPlayers: [Int32: (sound: Int32, loops: Int32, voice: Int32)] = [:]
     var nextEngId: Int32 = 1
 
+    // text-to-speech through the platform speech CLI; game audio ducks while
+    // the process lives, the same treatment the web runtime gives utterances
+    var ttsProcess: OpaquePointer? = nil
+    var ttsTool: String? = nil
+
+    func ttsToolPath() -> String? {
+        if let ttsTool { return ttsTool.isEmpty ? nil : ttsTool }
+        var found = ""
+        for candidate in ["/usr/bin/say", "/usr/bin/espeak", "/usr/bin/espeak-ng", "/usr/bin/spd-say"] {
+            var info = SDL_PathInfo()
+            if candidate.withCString({ SDL_GetPathInfo($0, &info) }) {
+                found = candidate
+                break
+            }
+        }
+        ttsTool = found
+        return found.isEmpty ? nil : found
+    }
+
+    func ttsStop() {
+        if let p = ttsProcess {
+            _ = SDL_KillProcess(p, false)
+            SDL_DestroyProcess(p)
+            ttsProcess = nil
+        }
+        if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 1) }
+    }
+
+    func ttsReap() {
+        guard let p = ttsProcess else { return }
+        var code: Int32 = 0
+        if SDL_WaitProcess(p, false, &code) {
+            SDL_DestroyProcess(p)
+            ttsProcess = nil
+            if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 1) }
+        }
+    }
+
+    func ttsSpeak(_ text: String, rate: Float) -> Bool {
+        guard let tool = ttsToolPath() else { return false }
+        ttsStop()
+        let r = rate <= 0 ? 1 : max(0.1, min(rate, 10))
+        let wpm = String(Int32(max(60, min(400, 175 * r))))
+        var args: [String]
+        if tool.hasSuffix("/say") {
+            args = [tool, "-r", wpm, text]
+        } else if tool.hasSuffix("spd-say") {
+            args = [tool, "-w", text]
+        } else {
+            args = [tool, "-s", wpm, text]
+        }
+        var argv: [UnsafeMutablePointer<CChar>?] = args.map { s in s.withCString { SDL_strdup($0) } }
+        argv.append(nil)
+        let proc = argv.withUnsafeBufferPointer { buf in
+            buf.baseAddress!.withMemoryRebound(to: UnsafePointer<CChar>?.self, capacity: buf.count) {
+                SDL_CreateProcess($0, false)
+            }
+        }
+        for p in argv where p != nil { SDL_free(p) }
+        guard let proc else { return false }
+        ttsProcess = proc
+        if audioDevice != 0 { _ = SDL_SetAudioDeviceGain(audioDevice, 0.4) }
+        return true
+    }
+
     func assetBytes(_ name: String) -> [UInt8]? {
         if let provider = assetProvider {
             if let d = provider(name) { return d }
@@ -997,6 +1062,7 @@ func kitHostPump() -> Bool {
 func kitHostPresent() {
     let k = Kit.shared
     k.reapVoices()
+    k.ttsReap()
     if let screen = k.screenTex {
         _ = SDL_SetRenderTarget(k.renderer, nil)
         _ = SDL_SetTextureBlendMode(screen, SDL_BLENDMODE_NONE)
@@ -1704,3 +1770,25 @@ func win_download(_ name: UnsafePointer<CChar>?, _ nlen: Int32, _ data: UnsafePo
     guard let data, dlen > 0 else { return }
     _ = k.cString(name, nlen).withCString { SDL_SaveFile($0, data, Int(dlen)) }
 }
+
+// MARK: - text to speech
+
+@_cdecl("tts_speak")
+func tts_speak(_ utf8: UnsafePointer<CChar>?, _ len: Int32, _ rate: Float, _ pitch: Float, _ volume: Float) -> Int32 {
+    let k = Kit.shared
+    return k.ttsSpeak(k.cString(utf8, len), rate: rate) ? 1 : 0
+}
+
+@_cdecl("tts_cancel")
+func tts_cancel() {
+    Kit.shared.ttsStop()
+}
+
+@_cdecl("tts_set_preferred_voices")
+func tts_set_preferred_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {}
+
+@_cdecl("tts_set_robotic_voices")
+func tts_set_robotic_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {}
+
+@_cdecl("tts_set_female_voices")
+func tts_set_female_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {}
