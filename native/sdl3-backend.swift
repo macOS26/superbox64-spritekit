@@ -548,7 +548,9 @@ final class Kit {
     // replacement warms while the line plays
     func ttsWarmup() {
         guard let tool = ttsToolPath(), tool.hasSuffix("/say"), ttsWarm == nil else { return }
-        var argv: [UnsafeMutablePointer<CChar>?] = [tool].map { s in s.withCString { SDL_strdup($0) } }
+        var args = [tool]
+        if !ttsPreferredVoice.isEmpty { args += ["-v", ttsPreferredVoice] }
+        var argv: [UnsafeMutablePointer<CChar>?] = args.map { s in s.withCString { SDL_strdup($0) } }
         argv.append(nil)
         let props = SDL_CreateProperties()
         argv.withUnsafeBufferPointer { buf in
@@ -573,8 +575,7 @@ final class Kit {
         if tool.hasSuffix("/say") {
             if ttsWarm == nil { ttsWarmup() }
             guard let warm = ttsWarm, let input = SDL_GetProcessInput(warm) else { return false }
-            let voiceCmd = ttsPreferredVoice.isEmpty ? "" : ("[[voice " + ttsPreferredVoice + "]] ")
-            let line = voiceCmd + "[[rate " + wpm + "]] " + text + "\n"
+            let line = "[[rate " + wpm + "]] " + text + "\n"
             let bytes = Array(line.utf8)
             _ = bytes.withUnsafeBufferPointer { SDL_WriteIO(input, $0.baseAddress, $0.count) }
             _ = SDL_CloseIO(input)
@@ -2457,7 +2458,14 @@ func tts_set_preferred_voices(_ csv: UnsafePointer<CChar>?, _ len: Int32) {
         if b == 44 { break }
         first.append(Character(UnicodeScalar(b)))
     }
+    guard first != k.ttsPreferredVoice else { return }
     k.ttsPreferredVoice = first
+    if let warm = k.ttsWarm {
+        if let input = SDL_GetProcessInput(warm) { _ = SDL_CloseIO(input) }
+        SDL_DestroyProcess(warm)
+        k.ttsWarm = nil
+    }
+    k.ttsWarmup()
 }
 
 @_cdecl("tts_set_robotic_voices")
