@@ -81,7 +81,7 @@ mkdir -p "$B/src/game"
 for f in "$GAME_SRC"/*.swift; do
   sed -e 's/@MainActor//g' "$f" > "$B/src/game/$(basename "$f")"
 done
-cp sdl3-backend.swift "$B/src/game/"
+cp sdl3-backend.swift kit-shader.swift "$B/src/game/"
 cp "$GAME_MAIN" "$B/src/game/native-main.swift"
 xcrun --toolchain swift swiftc "${EMB[@]}" -module-name GameNative \
   -c "$B/src/game"/*.swift -o "$B/mod/game.o"
@@ -147,6 +147,10 @@ implemented = {
     "key_pressed", "mouse_x", "mouse_y", "mouse_button",
     "gfx_warp_draw", "gfx_3d_draw_billboard",
     "img_polygon_from_alpha",
+    "gfx_shader_compile", "gfx_shader_release", "gfx_shader_set_uniform_f",
+    "gfx_shader_set_uniform_v2", "gfx_shader_set_uniform_v3",
+    "gfx_shader_set_uniform_v4", "gfx_shader_set_uniform_t",
+    "gfx_shader_draw", "gfx_lighting_draw",
 }
 lines = ['#include "KitABI.h"', "#include <stdlib.h>",
          "double _swift_stdlib_strtod_clocale(const char *str, char **end) { return strtod(str, end); }"]

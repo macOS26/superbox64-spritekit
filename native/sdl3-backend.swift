@@ -119,6 +119,10 @@ final class Kit {
     var sfKeyHeld: [Bool] = Array(repeating: false, count: 128)
 
     var ttsPreferredVoice = ""
+    var shaderProgs: [ShProgram?] = [nil]
+    var cpuPixels: [Int32: (w: Int32, h: Int32, px: [UInt8])] = [:]
+    var lightingShaderId: Int32 = -1
+    var lightingState: Int32 = 0
     var shadowBlur: Float = 0
     var shadowDx: Float = 0
     var shadowDy: Float = 0
@@ -1941,6 +1945,7 @@ func gfx_free_image(_ img: Int32) {
     k.retireTexture(rec.tex)
     k.images[Int(img)] = nil
     k.freeImageSlots.append(Int(img))
+    k.cpuPixels.removeValue(forKey: img)
 }
 
 @_cdecl("gfx_upload_pixels")
@@ -1954,6 +1959,7 @@ func gfx_upload_pixels(_ img: Int32, _ w: Int32, _ h: Int32, _ rgba: UnsafePoint
     if img > 0, Int(img) < k.images.count {
         k.retireTexture(k.images[Int(img)]?.tex)
         k.images[Int(img)] = Kit.ImgRec(tex: tex, w: w, h: h)
+        k.cpuPixels.removeValue(forKey: img)
         return img
     }
     return k.registerImage(Kit.ImgRec(tex: tex, w: w, h: h))
