@@ -67,7 +67,7 @@ public final class NSBezierPath {
 // NSScreen / NSWindow stubs so module-level references compile. Games that
 // query window size should read SKScene.size instead.
 public final class NSScreen {
-    nonisolated(unsafe) public static let main: NSScreen? = NSScreen()
+    public static let main: NSScreen? = NSScreen()
     public var frame: CGRect = .zero
     public var backingScaleFactor: CGFloat = 1
 }

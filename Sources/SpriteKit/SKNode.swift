@@ -58,8 +58,15 @@ open class SKNode {
         // Embedded, parent is unowned(unsafe), so a destroyed parent must
         // clear the back-pointers or a later removeFromParent walks freed
         // memory. The body's node pointer dangles the same way.
+        #if hasFeature(Embedded)
         for c in children { c.parent = nil }
         physicsBody?.node = nil
+        #else
+        MainActor.assumeIsolated {
+            for c in children { c.parent = nil }
+            physicsBody?.node = nil
+        }
+        #endif
     }
 
     open func removeFromParent() {

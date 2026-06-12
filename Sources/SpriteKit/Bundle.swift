@@ -18,7 +18,7 @@ public struct URL {
 }
 
 public final class Bundle {
-    public nonisolated(unsafe) static let main = Bundle()
+    public static let main = Bundle()
     public init() {}
     public func url(forResource name: String?, withExtension ext: String?) -> URL? {
         guard let name else { return nil }
