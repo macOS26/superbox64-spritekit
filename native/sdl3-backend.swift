@@ -454,7 +454,7 @@ func toLogical(_ window: OpaquePointer?, _ x: Float, _ y: Float) -> (Int32, Int3
 func kitHostInit(appName: String = "KitGame") {
     guard SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) else { fatalError("SDL_Init failed") }
     let k = Kit.shared
-    let ok = "AsteroidZ - Embedded Swift DIRECT native (no wasm)".withCString {
+    let ok = appName.withCString {
         SDL_CreateWindowAndRenderer($0, 1920, 1080,
                                     windowResizable | windowHighPixelDensity,
                                     &k.window, &k.renderer)
