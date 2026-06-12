@@ -134,6 +134,40 @@ final class Kit {
         if let tex { deadTextures.append(tex) }
     }
 
+    // scratch render-target pool: per-frame helpers (translucent strokes,
+    // shadow and blur downsamples) reuse targets by size instead of paying
+    // texture creation every frame; recycled textures rejoin the pool after
+    // present so queued draws that sample them stay valid
+    var targetPool: [Int: [UnsafeMutablePointer<SDL_Texture>]] = [:]
+    var poolPending: [(Int, UnsafeMutablePointer<SDL_Texture>)] = []
+
+    func acquireTarget(_ w: Int32, _ h: Int32) -> UnsafeMutablePointer<SDL_Texture>? {
+        let key = Int(w) << 16 | Int(h)
+        if var list = targetPool[key], !list.isEmpty {
+            let tex = list.removeLast()
+            targetPool[key] = list
+            return tex
+        }
+        return SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, w, h)
+    }
+
+    func recycleTarget(_ tex: UnsafeMutablePointer<SDL_Texture>?, _ w: Int32, _ h: Int32) {
+        if let tex { poolPending.append((Int(w) << 16 | Int(h), tex)) }
+    }
+
+    func flushTargetPool() {
+        for (key, tex) in poolPending {
+            var list = targetPool[key] ?? []
+            if list.count < 6 {
+                list.append(tex)
+                targetPool[key] = list
+            } else {
+                SDL_DestroyTexture(tex)
+            }
+        }
+        poolPending.removeAll(keepingCapacity: true)
+    }
+
     // 1x1 white texture: RenderGeometry honors TEXTURE blend modes, the
     // reliable route to alpha and additive (matchstick crossings brighten)
     func geometryTexture() -> UnsafeMutablePointer<SDL_Texture>? {
@@ -265,7 +299,7 @@ final class Kit {
         let f = max(2, blurLogical * max(1, baseScale) / 2)
         let sw = max(1, Int32(Float(w) / f))
         let sh = max(1, Int32(Float(h) / f))
-        guard let small = SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, sw, sh),
+        guard let small = acquireTarget(sw, sh),
               let out = SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, w, h) else { return nil }
         let prev = SDL_GetRenderTarget(renderer)
         _ = SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE)
@@ -279,7 +313,7 @@ final class Kit {
         _ = SDL_RenderTexture(renderer, small, nil, nil)
         _ = SDL_SetRenderTarget(renderer, prev)
         _ = SDL_SetTextureBlendMode(out, SDL_BLENDMODE_BLEND)
-        retireTexture(small)
+        recycleTarget(small, sw, sh)
         return out
     }
 
@@ -758,8 +792,7 @@ final class Kit {
             let oy = minY - pad
             let tw = Int32(SDL_ceilf(maxX - minX + pad * 2))
             let th = Int32(SDL_ceilf(maxY - minY + pad * 2))
-            if tw > 0, th > 0,
-               let scratch = SDL_CreateTexture(renderer, targetFormat, SDL_TEXTUREACCESS_TARGET, tw, th) {
+            if tw > 0, th > 0, let scratch = acquireTarget(tw, th) {
                 _ = SDL_SetTextureBlendMode(scratch, SDL_BLENDMODE_BLEND)
                 let prev = SDL_GetRenderTarget(renderer)
                 _ = SDL_SetRenderTarget(renderer, scratch)
@@ -780,7 +813,7 @@ final class Kit {
                 drawTexturedQuad(scratch, ox, oy, Float(tw), Float(th), 0, 0, 1, 1,
                                  SDL_FColor(r: 1, g: 1, b: 1, a: aVal))
                 mat = savedMat
-                retireTexture(scratch)
+                recycleTarget(scratch, tw, th)
                 return
             }
         }
@@ -1306,6 +1339,7 @@ func kitHostPresent() {
     }
     for tex in k.deadTextures { SDL_DestroyTexture(tex) }
     k.deadTextures.removeAll(keepingCapacity: true)
+    k.flushTargetPool()
 }
 
 // MARK: - the KitABI env surface, linked directly (no wasm in between)
@@ -1730,8 +1764,7 @@ func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h
     let margin: Float = 2
     let tw = Int32(SDL_ceilf(w / texel) + margin * 2)
     let th = Int32(SDL_ceilf(h / texel) + margin * 2)
-    guard tw > 0, th > 0,
-          let small = SDL_CreateTexture(k.renderer, k.targetFormat, SDL_TEXTUREACCESS_TARGET, tw, th) else { return }
+    guard tw > 0, th > 0, let small = k.acquireTarget(tw, th) else { return }
     _ = SDL_SetTextureBlendMode(small, SDL_BLENDMODE_BLEND)
 
     let prev = SDL_GetRenderTarget(k.renderer)
@@ -1751,7 +1784,7 @@ func gfx_draw_shadow_image(_ img: Int32, _ x: Float, _ y: Float, _ w: Float, _ h
     k.drawTexturedQuad(small, x - margin * texel, y - margin * texel,
                        w + 2 * margin * texel, h + 2 * margin * texel,
                        0, 0, 1, 1, SDL_FColor(r: 1, g: 1, b: 1, a: a))
-    k.retireTexture(small)
+    k.recycleTarget(small, tw, th)
 }
 
 @_cdecl("gfx_set_shadow")
