@@ -67,6 +67,7 @@ typedef struct {
     int ppem;
     const unsigned char* sbixStrike;
     int sbixPpem;
+    int sbixDescentPx;
     int numGlyphs;
 } KitEmoji;
 
@@ -209,6 +210,7 @@ void* kit_emoji_init(const unsigned char* ttf, int len) {
     const unsigned char* sbix = kit_find_table2(ttf, dir, "sbix");
     e->sbixStrike = 0;
     e->sbixPpem = 0;
+    e->sbixDescentPx = 0;
     if (sbix && e->numGlyphs > 0) {
         uint32_t numStrikes = kit_rd32(sbix + 4);
         for (uint32_t i = 0; i < numStrikes; i++) {
@@ -218,6 +220,13 @@ void* kit_emoji_init(const unsigned char* ttf, int len) {
                 e->sbixPpem = ppem;
                 e->sbixStrike = s;
             }
+        }
+        const unsigned char* head = kit_find_table2(ttf, dir, "head");
+        const unsigned char* hhea = kit_find_table2(ttf, dir, "hhea");
+        if (head && hhea && e->sbixPpem > 0) {
+            int upem = kit_rd16(head + 18);
+            int16_t desc = (int16_t)kit_rd16(hhea + 6);
+            if (upem > 0) e->sbixDescentPx = (int)((long)e->sbixPpem * desc / upem);
         }
     }
 
@@ -258,7 +267,7 @@ const unsigned char* kit_emoji_glyph_png(void* handle, int codepoint, uint32_t* 
             *pngLen = o2 - o1 - 8;
             *ppem = e->sbixPpem;
             *bearingX = originX;
-            *bearingY = originY + (int)kit_png_height(data + 8, *pngLen);
+            *bearingY = originY + (int)kit_png_height(data + 8, *pngLen) + e->sbixDescentPx;
             *advance = e->sbixPpem;
             return data + 8;
         }
