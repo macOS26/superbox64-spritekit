@@ -65,11 +65,11 @@ public final class Timer {
 // MARK: - RunLoop (Apple games add timers to it; scheduledTimer already runs them)
 
 public final class RunLoop {
-    public static let current = RunLoop()
-    public static let main = RunLoop()
+    public nonisolated(unsafe) static let current = RunLoop()
+    public nonisolated(unsafe) static let main = RunLoop()
     public struct Mode {
-        public static let common = Mode()
-        public static let `default` = Mode()
+        public nonisolated(unsafe) static let common = Mode()
+        public nonisolated(unsafe) static let `default` = Mode()
     }
     public func add(_ timer: Timer, forMode mode: Mode) {}
 }
@@ -86,7 +86,7 @@ public struct DispatchTime {
 }
 
 public final class DispatchQueue {
-    public static let main = DispatchQueue()
+    public nonisolated(unsafe) static let main = DispatchQueue()
 
     @usableFromInline nonisolated(unsafe) static var pending: [(remaining: Double, work: () -> Void)] = []
 
@@ -125,7 +125,7 @@ public struct Notification {
 }
 
 public final class NotificationCenter {
-    public static let `default` = NotificationCenter()
+    public nonisolated(unsafe) static let `default` = NotificationCenter()
     public final class ObserverToken {}
 
     private var observers: [(name: Notification.Name?, token: ObserverToken, block: (Notification) -> Void)] = []

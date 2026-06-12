@@ -22,7 +22,7 @@ nonisolated(unsafe) var _avMasterVolume: Float = 1.0
 // the single main thread, so the work runs inline (a deferred main-queue hop
 // would never drain here). The macOS build supplies its own version that hops to
 // the main queue, since its AVFoundation completions fire off-thread.
-@MainActor public func runOnMain(_ work: @escaping @MainActor () -> Void) { work() }
+public func runOnMain(_ work: @escaping () -> Void) { work() }
 
 // Hands the game's voice-name preference lists to the runtime, which owns voice
 // selection on the web (priority order, robotic-excluded, female-last). The

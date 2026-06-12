@@ -166,6 +166,12 @@ int zip_feof(ZipFile* file) {
     return impl->pos >= impl->size;
 }
 
+size_t zip_fget_size(ZipFile* file) {
+    if (!file) return 0;
+    ZipFileImpl* impl = (ZipFileImpl*)file;
+    return impl->size;
+}
+
 int zip_locate_file(ZipArchive* archive, const char* name) {
     if (!archive || !name) return -1;
 

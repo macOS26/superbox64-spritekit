@@ -19,6 +19,7 @@ ZipFile* zip_fopen(ZipArchive* archive, const char* name);
 void zip_fclose(ZipFile* file);
 size_t zip_fread(void* buf, size_t size, ZipFile* file);
 int zip_feof(ZipFile* file);
+size_t zip_fget_size(ZipFile* file);
 
 int zip_locate_file(ZipArchive* archive, const char* name);
 int zip_get_current_file_info_name(ZipArchive* archive, char* name_buf, size_t name_buf_size);

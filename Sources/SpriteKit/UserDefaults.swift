@@ -6,7 +6,7 @@
 // compiles on Apple compiles here unchanged. ICU-free by construction: literal
 // bool matching and plain Int/Double parsing only, never localized/lowercased.
 public final class UserDefaults {
-    public static let standard = UserDefaults()
+    public nonisolated(unsafe) static let standard = UserDefaults()
 
     // MARK: - Reads
     public func string(forKey key: String) -> String? { LocalStore.string(forKey: key) }
