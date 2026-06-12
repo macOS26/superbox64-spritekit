@@ -438,6 +438,15 @@ final class Kit {
         c <= 0.04045 ? c / 12.92 : SDL_powf((c + 0.055) / 1.055, 2.4)
     }
 
+    // sign-preserving so out-of-gamut linear values survive as extended sRGB
+    func srgbEncode(_ c: Float) -> Float {
+        let v = SDL_fabsf(c)
+        let e = v <= 0.0031308 ? v * 12.92 : 1.055 * SDL_powf(v, 1 / 2.4) - 0.055
+        return c < 0 ? -e : e
+    }
+
+    // SDL render colors are sRGB-encoded regardless of the output colorspace,
+    // so the converted color re-encodes after the P3 -> linear sRGB matrix
     func gameColor(_ rgba: UInt32) -> (r: Float, g: Float, b: Float) {
         let r = Float((rgba >> 24) & 0xFF) / 255
         let g = Float((rgba >> 16) & 0xFF) / 255
@@ -446,9 +455,9 @@ final class Kit {
         let lr = srgbLinearize(r)
         let lg = srgbLinearize(g)
         let lb = srgbLinearize(b)
-        return (1.22494 * lr - 0.22494 * lg,
-                -0.04206 * lr + 1.04206 * lg,
-                -0.01963 * lr - 0.07879 * lg + 1.09842 * lb)
+        return (srgbEncode(1.22494 * lr - 0.22494 * lg),
+                srgbEncode(-0.04206 * lr + 1.04206 * lg),
+                srgbEncode(-0.01963 * lr - 0.07879 * lg + 1.09842 * lb))
     }
 
     // Drawing always targets a texture now, where vertex alpha blends
