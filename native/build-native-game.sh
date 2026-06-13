@@ -196,5 +196,5 @@ clang -target arm64-apple-macos14 -o "$OUT" \
   "$TC/lib/swift/embedded/arm64-apple-macos/libswiftUnicodeDataTables.a" \
   -dead_strip
 
-strip "$OUT" 2>/dev/null || true
+[ -n "${NO_STRIP:-}" ] || strip "$OUT" 2>/dev/null || true
 echo "✓ $OUT ($(stat -f%z "$OUT") bytes, stripped) - native, no wasm, same game source"
