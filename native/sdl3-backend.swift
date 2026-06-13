@@ -118,6 +118,30 @@ final class Kit {
     var mouseHeld: [Bool] = [false, false, false]
     var sfKeyHeld: [Bool] = Array(repeating: false, count: 128)
 
+    // Auto-hide the pointer when it sits still over our window (SDL_HideCursor is
+    // the one cross-platform path: it covers every SDL video backend). Any mouse
+    // activity re-shows it; the OS draws its own cursor while the pointer is off
+    // our window, so we only hide while it actually has mouse focus here.
+    var lastMouseActivityMs: UInt64 = 0
+    var cursorHidden = false
+    let cursorIdleHideMs: UInt64 = 2000
+    func noteMouseActivity() {
+        lastMouseActivityMs = SDL_GetTicks()
+        if cursorHidden {
+            _ = SDL_ShowCursor()
+            cursorHidden = false
+        }
+    }
+    func tickCursorIdle() {
+        if lastMouseActivityMs == 0 { lastMouseActivityMs = SDL_GetTicks() }
+        guard !cursorHidden else { return }
+        guard SDL_GetMouseFocus() == window else { return }
+        if SDL_GetTicks() &- lastMouseActivityMs >= cursorIdleHideMs {
+            _ = SDL_HideCursor()
+            cursorHidden = true
+        }
+    }
+
     var ttsPreferredVoice = ""
     var shaderProgs: [ShProgram?] = [nil]
     var cpuPixels: [Int32: (w: Int32, h: Int32, px: [UInt8])] = [:]
@@ -1572,6 +1596,7 @@ func kitHostPump() -> Bool {
             }
             if sf >= 0, sf < 128 { k.sfKeyHeld[Int(sf)] = isDown }
         } else if e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue || e.type == SDL_EVENT_MOUSE_BUTTON_UP.rawValue {
+            k.noteMouseActivity()
             let t: Int32 = e.type == SDL_EVENT_MOUSE_BUTTON_DOWN.rawValue ? 9 : 10
             let (lx, ly) = toLogical(k.window, e.button.x, e.button.y)
             k.pushEvent((t, 0, lx, ly, Int32(e.button.clicks)))
@@ -1579,12 +1604,14 @@ func kitHostPump() -> Bool {
             let btn = Int(e.button.button) - 1
             if btn >= 0, btn < 3 { k.mouseHeld[btn] = isDown }
         } else if e.type == SDL_EVENT_MOUSE_MOTION.rawValue {
+            k.noteMouseActivity()
             let (lx, ly) = toLogical(k.window, e.motion.x, e.motion.y)
             k.pushEvent((11, lx, ly, 0, 0))
             k.mouseLogX = lx
             k.mouseLogY = ly
         }
     }
+    k.tickCursorIdle()
     return alive
 }
 
